@@ -1,41 +1,69 @@
 """
 API-based scraper for PSA Squash Tour rankings.
 
-Fetches ranking data from the PSA backend API and parses it
-into a clean, structured dataset using shared parsing utilities.
+Fetches ranking data directly from the PSA backend API.
+Includes optional proxy support via environment variables.
 """
 
+import os
 import requests
 import pandas as pd
-from parser import parse_api_player
 
-# PSA API endpoint for men's rankings
+from parser import parse_api_player
+from exporter import export_to_csv
+
+# PSA API endpoint
 URL = "https://psa-api.ptsportsuite.com/rankedplayers/male"
 
-# Headers to mimic a browser request
+# Request headers
 headers = {
     "User-Agent": "Mozilla/5.0",
     "Accept": "application/json"
 }
 
+# --------------------------------------------------
+# Optional proxy support (OFF by default)
+# --------------------------------------------------
+# Enable by setting HTTP_PROXY or HTTPS_PROXY
+# Example:
+# export HTTPS_PROXY="http://127.0.0.1:8080"
+
+PROXY_URL = os.getenv("HTTP_PROXY") or os.getenv("HTTPS_PROXY")
+
+proxies = None
+if PROXY_URL:
+    proxies = {
+        "http": PROXY_URL,
+        "https": PROXY_URL,
+    }
+
+# --------------------------------------------------
 # Make request
-response = requests.get(URL, headers=headers)
+# --------------------------------------------------
+response = requests.get(
+    URL,
+    headers=headers,
+    proxies=proxies,
+    timeout=10
+)
+
 response.raise_for_status()
 
-# Parse JSON response
+# --------------------------------------------------
+# Parse response
+# --------------------------------------------------
 raw_data = response.json()
 
-# Use parser to extract required fields
 players = []
 for player in raw_data:
     players.append(parse_api_player(player))
 
-# Convert to DataFrame
 df = pd.DataFrame(players)
 
-# Save output
-df.to_csv("psa_rankings_api.csv", index=False)
+# --------------------------------------------------
+# Export output
+# --------------------------------------------------
+export_to_csv(df, "data/psa_rankings_api.csv")
 
-print("Saved psa_rankings_api.csv")
 print("Total players:", len(df))
 print(df.head())
