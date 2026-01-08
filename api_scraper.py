@@ -2,23 +2,37 @@
 API-based scraper for PSA Squash Tour rankings.
 
 Fetches ranking data directly from the PSA backend API.
-Includes optional proxy support via environment variables.
+Includes:
+- User-Agent rotation (to avoid static fingerprints)
+- Optional proxy support via environment variables
 """
 
 import os
+import random
 import requests
 import pandas as pd
 
 from parser import parse_api_player
 from exporter import export_to_csv
 
+# --------------------------------------------------
 # PSA API endpoint
+# --------------------------------------------------
 URL = "https://psa-api.ptsportsuite.com/rankedplayers/male"
 
-# Request headers
+# --------------------------------------------------
+# User-Agent rotation
+# --------------------------------------------------
+USER_AGENTS = [
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "Mozilla/5.0 (X11; Linux x86_64)",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)",
+]
+
 headers = {
-    "User-Agent": "Mozilla/5.0",
-    "Accept": "application/json"
+    "User-Agent": random.choice(USER_AGENTS),
+    "Accept": "application/json",
 }
 
 # --------------------------------------------------
