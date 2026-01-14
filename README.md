@@ -91,10 +91,11 @@ psa-squash-rankings-scraper/
 ├── logger.py                # Centralized logging configuration
 ├── run_scraper.py           # Main entry point
 ├── validator.py             # Data validation tool
-├── test_parser.py           # Parser unit tests
-├── test_checkpoints.py      # Checkpoint system tests
-├── test_api_scraper.py      # API scraper tests
-├── test_html_scraper.py     # HTML scraper tests
+├── tests/                   # Test suite
+│   ├── test_parser.py       # Parser unit tests
+│   ├── test_checkpoints.py  # Checkpoint system tests
+│   ├── test_api_scraper.py  # API scraper tests
+│   └── test_html_scraper.py # HTML scraper tests
 ├── requirements.txt         # Python dependencies
 ├── README.md                # This file
 ├── checkpoints/             # Checkpoint files (auto-created)
