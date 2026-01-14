@@ -201,7 +201,7 @@ pytest -k "checkpoint" -v
 
 ### Test Coverage
 
-The project includes 53+ unit tests covering:
+The project includes tests covering:
 - Data parser validation (6 tests)
 - Checkpoint system (10 tests)
 - API scraping (14 tests)
