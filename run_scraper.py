@@ -1,47 +1,124 @@
 """
-Unified runner with fallback logic.
-
-Attempts to fetch PSA rankings using the API scraper first.
-Falls back to HTML scraper if the API is unavailable.
+Main scraper runner.
 """
-
 import sys
+import argparse
+import logging
+from api_scraper import get_rankings
+from html_scraper import scrape_rankings_html
+from exporter import export_to_csv
+from logger import get_logger
 
-def run_api():
-    try:
-        import api_scraper
-        return True
-    except Exception as e:
-        print("API scraper failed:")
-        print(e)
-        return False
+logger = get_logger(__name__)
 
-def run_html():
-    try:
-        import html_scraper
-        return True
-    except Exception as e:
-        print("HTML scraper failed:")
-        print(e)
-        return False
+def main():
+    """
+    Main entry point with command-line argument support.
+    Tries API with pagination for both genders, falls back to HTML if needed.
+    """
+    parser = argparse.ArgumentParser(description='PSA Squash Rankings Scraper')
+    parser.add_argument(
+        '--gender',
+        choices=['male', 'female', 'both'],
+        default='both',
+        help='Gender to scrape (default: both)'
+    )
+    parser.add_argument(
+        '--page-size',
+        type=int,
+        default=100,
+        help='Number of results per page (default: 100)'
+    )
+    parser.add_argument(
+        '--max-pages',
+        type=int,
+        default=None,
+        help='Maximum number of pages to fetch (default: all)'
+    )
+    parser.add_argument(
+        '--no-resume',
+        action='store_true',
+        help='Start fresh, ignore checkpoints'
+    )
+    parser.add_argument(
+        '--log-level',
+        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
+        default='INFO',
+        help='Set logging level (default: INFO)'
+    )
 
+    args = parser.parse_args()
+
+    logging.getLogger().setLevel(getattr(logging, args.log_level))
+    for handler in logging.getLogger().handlers:
+        if isinstance(handler, logging.StreamHandler):
+            handler.setLevel(getattr(logging, args.log_level))
+
+    logger.info("=" * 60)
+    logger.info("PSA Squash Rankings Scraper - Starting")
+    logger.info("=" * 60)
+    logger.info(f"Configuration: gender={args.gender}, page_size={args.page_size}, "
+                f"max_pages={args.max_pages}, resume={not args.no_resume}")
+
+    if args.gender == 'both':
+        genders = ['male', 'female']
+    else:
+        genders = [args.gender]
+
+    success_count = 0
+    failure_count = 0
+
+    for gender in genders:
+        logger.info("")
+        logger.info("=" * 60)
+        logger.info(f"Processing {gender.capitalize()} Rankings")
+        logger.info("=" * 60)
+
+        try:
+            df = get_rankings(
+                gender=gender,
+                page_size=args.page_size,
+                max_pages=args.max_pages,
+                resume=not args.no_resume
+            )
+
+            output_file = f"psa_rankings_{gender}.csv"
+            export_to_csv(df, output_file)
+
+            logger.info(f"Successfully scraped {len(df)} {gender} players")
+            logger.info(f"Data exported to: {output_file}")
+            success_count += 1
+
+        except Exception as e:
+            logger.error(f"API failed for {gender}: {e}")
+            logger.info(f"Attempting HTML fallback for {gender}...")
+
+            try:
+                df_fallback = scrape_rankings_html()
+                fallback_file = f"psa_rankings_{gender}_fallback.csv"
+                export_to_csv(df_fallback, fallback_file)
+                logger.info(f"Fallback successful: {fallback_file}")
+                success_count += 1
+
+            except Exception as html_err:
+                logger.error(f"Critical Error: Both sources failed for {gender}")
+                logger.exception(f"Error details: {html_err}")
+                failure_count += 1
+
+    logger.info("")
+    logger.info("=" * 60)
+    logger.info("Scraping complete!")
+    logger.info("=" * 60)
+    logger.info(f"Summary: {success_count} successful, {failure_count} failed")
+
+    sys.exit(0 if failure_count == 0 else 1)
 
 if __name__ == "__main__":
-    print("Running PSA rankings scraper...")
-
-    api_success = run_api()
-
-    if api_success:
-        print("Successfully retrieved data via API.")
-        sys.exit(0)
-
-    print("Falling back to HTML scraper...")
-    html_success = run_html()
-
-    if html_success:
-        print("Retrieved data via HTML scraper (limited).")
-        sys.exit(0)
-
-    raise RuntimeError(
-        "All data sources failed. Unable to retrieve PSA rankings."
-    )
+    try:
+        main()
+    except KeyboardInterrupt:
+        logger.warning("\nScraping interrupted by user")
+        sys.exit(130)
+    except Exception as e:
+        logger.exception(f"Fatal error: {e}")
+        sys.exit(1)
