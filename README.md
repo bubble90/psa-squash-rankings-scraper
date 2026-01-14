@@ -202,7 +202,7 @@ pytest -k "checkpoint" -v
 ### Test Coverage
 
 The project includes tests covering:
-- Data parser validation (6 tests)
+- Data parser validation (3 tests)
 - Checkpoint system (10 tests)
 - API scraping (14 tests)
 - HTML scraping (15 tests)
