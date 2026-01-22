@@ -1,0 +1,22 @@
+[project]
+name = "psa-squash-rankings-scraper"
+version = "1.0.0"
+description = "A robust Python-based web scraper for PSA Squash Tour rankings"
+readme = "README.md"
+requires-python = ">=3.8"
+
+
+dependencies = [
+    "requests>=2.31.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=4.9.0",
+    "pandas>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-mock>=3.12.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.8.0",
+]
