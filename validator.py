@@ -10,6 +10,8 @@ from logger import get_logger
 
 logger = get_logger(__name__)
 
+OUTPUT_DIR = Path("output")
+
 def validate_scraped_data(gender='male'):
     """
     Validate scraped data for a specific gender.
@@ -19,8 +21,8 @@ def validate_scraped_data(gender='male'):
     """
     logger.info(f"Starting validation for {gender} rankings")
 
-    API_FILE = f"psa_rankings_{gender}.csv"
-    HTML_FILE = f"psa_rankings_{gender}_fallback.csv"
+    API_FILE = OUTPUT_DIR / f"psa_rankings_{gender}.csv"
+    HTML_FILE = OUTPUT_DIR / f"psa_rankings_{gender}_fallback.csv"
 
     api_exists = Path(API_FILE).exists()
     html_exists = Path(HTML_FILE).exists()
