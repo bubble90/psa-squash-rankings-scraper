@@ -96,9 +96,11 @@ psa-squash-rankings-scraper/
 ├── test_api_scraper.py      # API scraper tests
 ├── test_html_scraper.py     # HTML scraper tests
 ├── requirements.txt         # Python dependencies
+├── .gitignore               # Git ignore rules
 ├── README.md                # This file
 ├── checkpoints/             # Checkpoint files (auto-created)
-└── logs/                    # Log files (auto-created)
+├── logs/                    # Log files (auto-created)
+└── output/                  # Scraped CSV files (auto-created)
 ```
 
 ## How It Works
@@ -158,11 +160,12 @@ If scraping is interrupted, simply re-run the script to resume from the last che
 
 ### CSV Files
 
-Successfully scraped data is exported to:
-- `psa_rankings_male.csv`
-- `psa_rankings_female.csv`
-- `psa_rankings_male_fallback.csv` (if API fails)
-- `psa_rankings_female_fallback.csv` (if API fails)
+Successfully scraped data is exported to the output/ directory:
+- `output/psa_rankings_male.csv`
+- `output/psa_rankings_female.csv`
+- `output/psa_rankings_male_fallback.csv` (if API fails)
+- `output/psa_rankings_female_fallback.csv` (if API fails)
+
 
 ### CSV Format
 
