@@ -10,12 +10,14 @@ A robust Python-based web scraper for fetching professional squash player rankin
 - **User Agent Rotation**: Systematic rotation to avoid rate limiting
 - **Proxy Support**: Configurable HTTP/HTTPS proxy via environment variables
 - **Error Handling**: Graceful fallback and detailed error reporting
+- **Organized Output**: All scraped data saved to dedicated output/ directory
+- **Modern Tooling**: Uses uv for fast dependency management and ruff for linting
 - **Extensive Test Coverage**: Unit tests with mocking
 
 ## Requirements
 
 - Python 3.8+
-- See `requirements.txt` for dependencies
+- uv (recommended) or pip
 
 ## Installation
 
@@ -26,18 +28,36 @@ git clone https://github.com/yourusername/psa-squash-rankings-scraper.git
 cd psa-squash-rankings-scraper
 ```
 
-### 2. Create virtual environment (recommended)
-
-```bash
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
 
 ### 3. Install dependencies
 
+#### Using uv (recommended)
+
 ```bash
-pip install -r requirements.txt
+# Install uv if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install dependencies
+uv sync
+
+# Install with dev dependencies
+uv sync --extra dev
 ```
+
+#### Using pip (alternative)
+
+```bash
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -e .
+
+# Install with dev dependencies
+pip install -e ".[dev]"
+```
+
 
 ## Usage
 
@@ -91,14 +111,16 @@ psa-squash-rankings-scraper/
 ├── logger.py                # Centralized logging configuration
 ├── run_scraper.py           # Main entry point
 ├── validator.py             # Data validation tool
+├── pyproject.toml           # Project configuration and dependencies
+├── .gitignore               # Git ignore rules
+├── README.md                # This file
 ├── tests/                   # Test suite
 │   ├── test_parser.py       # Parser unit tests
 │   ├── test_checkpoints.py  # Checkpoint system tests
 │   ├── test_api_scraper.py  # API scraper tests
 │   └── test_html_scraper.py # HTML scraper tests
-├── requirements.txt         # Python dependencies
-├── .gitignore               # Git ignore rules
-├── README.md                # This file
+├── .vscode/
+│   └── extensions.json      # Recommended VS Code extensions
 ├── checkpoints/             # Checkpoint files (auto-created)
 ├── logs/                    # Log files (auto-created)
 └── output/                  # Scraped CSV files (auto-created)
@@ -185,22 +207,36 @@ Timestamped log files are created in the `logs/` directory:
 logs/psa_scraper_20260112_143025.log
 ```
 
-## Testing
+## Development
 
-### Run All Tests
+### Code Quality
+This project uses Ruff for linting and formatting:
+
+```bash
+# Check code
+uv run ruff check .
+
+# Format code
+uv run ruff format .
+
+# Fix auto-fixable issues
+uv run ruff check --fix .
+```
+
+### Testing
 
 ```bash
 # Run all tests
-pytest -v
+uv run pytest
 
 # Run specific test file
-pytest test_parser.py -v
+uv run pytest test_parser.py -v
 
 # Run with coverage
-pytest --cov=. --cov-report=html -v
+uv run pytest --cov=. --cov-report=html
 
 # Run tests matching pattern
-pytest -k "checkpoint" -v
+uv run pytest -k "checkpoint" -v
 ```
 
 ### Test Coverage
@@ -217,9 +253,18 @@ The project includes tests covering:
 View coverage report:
 
 ```bash
-pytest --cov=. --cov-report=html
+uv run pytest --cov=. --cov-report=html
 open htmlcov/index.html
 ```
+
+### VS Code Setup
+The project includes recommended VS Code extensions in .vscode/extensions.json:
+
+- Ruff (astral-sh.ruff) - Fast Python linter and formatter
+- Python (ms-python.python) - Python language support
+
+VS Code will prompt you to install these when you open the project.
+
 
 ## Configuration
 
@@ -259,6 +304,18 @@ The validator compares API and HTML scraper outputs and displays:
 - Data consistency checks
 
 ## Troubleshooting
+
+### Issue: "command not found: uv"
+
+**Solution:**
+
+```bash
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Or use pip as alternative
+pip install -e ".[dev]"
+```
 
 ### Issue: "command not found: pytest"
 
@@ -336,7 +393,10 @@ export_to_csv(top_10, "top_10_female.csv")
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+2. Create your feature branch (git checkout -b feature/AmazingFeature)
+3. Install dev dependencies (uv sync --extra dev)
+4. Make your changes and add tests
+5. Run tests and linting (uv run pytest && uv run ruff check .)
+6. Commit your changes (git commit -m 'Add some AmazingFeature')
+7. Push to the branch (git push origin feature/AmazingFeature)
+8. Open a Pull Request
