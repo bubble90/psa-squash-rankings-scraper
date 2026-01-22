@@ -1,12 +1,13 @@
 """
 Test suite for HTML scraper functionality in PSA Squash scraper.
 """
+
 import pytest
 from unittest.mock import Mock, patch
 from html_scraper import scrape_rankings_html
 
 
-@patch('html_scraper.requests.get')
+@patch("html_scraper.requests.get")
 def test_scrape_rankings_html_success(mock_get):
     """Test HTML scraper with valid table."""
     mock_response = Mock()
@@ -43,7 +44,7 @@ def test_scrape_rankings_html_success(mock_get):
     assert df.iloc[1]["player"] == "Paul Coll"
 
 
-@patch('html_scraper.requests.get')
+@patch("html_scraper.requests.get")
 def test_scrape_rankings_html_removes_commas(mock_get):
     """Test that commas are removed from points."""
     mock_response = Mock()
@@ -70,7 +71,7 @@ def test_scrape_rankings_html_removes_commas(mock_get):
     assert "," not in df.iloc[0]["points"]
 
 
-@patch('html_scraper.requests.get')
+@patch("html_scraper.requests.get")
 def test_scrape_rankings_html_no_table(mock_get):
     """Test HTML scraper when table is not found."""
     mock_response = Mock()
@@ -82,7 +83,7 @@ def test_scrape_rankings_html_no_table(mock_get):
         scrape_rankings_html()
 
 
-@patch('html_scraper.requests.get')
+@patch("html_scraper.requests.get")
 def test_scrape_rankings_html_empty_table(mock_get):
     """Test HTML scraper with empty table."""
     mock_response = Mock()
@@ -102,7 +103,7 @@ def test_scrape_rankings_html_empty_table(mock_get):
     assert len(df) == 0
 
 
-@patch('html_scraper.requests.get')
+@patch("html_scraper.requests.get")
 def test_scrape_rankings_html_skips_incomplete_rows(mock_get):
     """Test that rows with insufficient cells are skipped."""
     mock_response = Mock()
@@ -140,7 +141,7 @@ def test_scrape_rankings_html_skips_incomplete_rows(mock_get):
     assert df.iloc[1]["player"] == "Paul Coll"
 
 
-@patch('html_scraper.requests.get')
+@patch("html_scraper.requests.get")
 def test_scrape_rankings_html_strips_whitespace(mock_get):
     """Test that whitespace is stripped from cell text."""
     mock_response = Mock()
@@ -171,7 +172,7 @@ def test_scrape_rankings_html_strips_whitespace(mock_get):
     assert df.iloc[0]["points"] == "20000"
 
 
-@patch('html_scraper.requests.get')
+@patch("html_scraper.requests.get")
 def test_scrape_rankings_html_network_error(mock_get):
     """Test HTML scraper handles network errors."""
     mock_get.side_effect = Exception("Network error")
@@ -180,29 +181,33 @@ def test_scrape_rankings_html_network_error(mock_get):
         scrape_rankings_html()
 
 
-@patch('html_scraper.requests.get')
+@patch("html_scraper.requests.get")
 def test_scrape_rankings_html_timeout(mock_get):
     """Test HTML scraper handles timeout errors."""
     import requests
+
     mock_get.side_effect = requests.exceptions.Timeout("Request timeout")
 
     with pytest.raises(requests.exceptions.Timeout):
         scrape_rankings_html()
 
 
-@patch('html_scraper.requests.get')
+@patch("html_scraper.requests.get")
 def test_scrape_rankings_html_http_error(mock_get):
     """Test HTML scraper handles HTTP errors."""
     import requests
+
     mock_response = Mock()
-    mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError("404 Not Found")
+    mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
+        "404 Not Found"
+    )
     mock_get.return_value = mock_response
 
     with pytest.raises(requests.exceptions.HTTPError):
         scrape_rankings_html()
 
 
-@patch('html_scraper.requests.get')
+@patch("html_scraper.requests.get")
 def test_scrape_rankings_html_correct_url(mock_get):
     """Test that the correct URL is called."""
     mock_response = Mock()
@@ -230,7 +235,7 @@ def test_scrape_rankings_html_correct_url(mock_get):
     assert called_url == "https://www.psasquashtour.com/rankings/"
 
 
-@patch('html_scraper.requests.get')
+@patch("html_scraper.requests.get")
 def test_scrape_rankings_html_user_agent_present(mock_get):
     """Test that User-Agent header is set."""
     mock_response = Mock()
@@ -258,7 +263,7 @@ def test_scrape_rankings_html_user_agent_present(mock_get):
     assert "Mozilla" in called_headers["User-Agent"]
 
 
-@patch('html_scraper.requests.get')
+@patch("html_scraper.requests.get")
 def test_scrape_rankings_html_timeout_parameter(mock_get):
     """Test that timeout parameter is set."""
     mock_response = Mock()
@@ -285,7 +290,7 @@ def test_scrape_rankings_html_timeout_parameter(mock_get):
     assert called_timeout == 15
 
 
-@patch('html_scraper.requests.get')
+@patch("html_scraper.requests.get")
 def test_scrape_rankings_html_large_dataset(mock_get):
     """Test HTML scraper with many rows."""
     rows_html = ""
@@ -295,7 +300,7 @@ def test_scrape_rankings_html_large_dataset(mock_get):
             <td>{i}</td>
             <td>Player {i}</td>
             <td>10</td>
-            <td>{10000 - i*10}</td>
+            <td>{10000 - i * 10}</td>
         </tr>
         """
 
@@ -319,7 +324,7 @@ def test_scrape_rankings_html_large_dataset(mock_get):
     assert df.iloc[99]["player"] == "Player 100"
 
 
-@patch('html_scraper.requests.get')
+@patch("html_scraper.requests.get")
 def test_scrape_rankings_html_special_characters(mock_get):
     """Test HTML scraper handles special characters in player names."""
     mock_response = Mock()

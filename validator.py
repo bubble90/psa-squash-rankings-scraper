@@ -3,6 +3,7 @@ Validator for PSA Squash rankings scrapers.
 
 Compares HTML and API scraper outputs to validate completeness.
 """
+
 import pandas as pd
 from pandas.errors import EmptyDataError
 from pathlib import Path
@@ -12,7 +13,8 @@ logger = get_logger(__name__)
 
 OUTPUT_DIR = Path("output")
 
-def validate_scraped_data(gender='male'):
+
+def validate_scraped_data(gender="male"):
     """
     Validate scraped data for a specific gender.
 
@@ -52,7 +54,9 @@ def validate_scraped_data(gender='male'):
         except Exception as e:
             logger.error(f"Failed to load HTML file: {e}")
     else:
-        logger.info(f"HTML fallback file not found: {HTML_FILE} (this is normal if API scraping succeeded)")
+        logger.info(
+            f"HTML fallback file not found: {HTML_FILE} (this is normal if API scraping succeeded)"
+        )
 
     logger.info("-" * 60)
     logger.info(f"HTML scraper rows: {len(html_df)}")
@@ -97,13 +101,13 @@ if __name__ == "__main__":
     logger.info("PSA Rankings Data Validator")
     logger.info("=" * 60)
 
-    gender = sys.argv[1] if len(sys.argv) > 1 else 'both'
+    gender = sys.argv[1] if len(sys.argv) > 1 else "both"
 
-    if gender == 'both':
-        validate_scraped_data('male')
+    if gender == "both":
+        validate_scraped_data("male")
         print()
-        validate_scraped_data('female')
-    elif gender in ['male', 'female']:
+        validate_scraped_data("female")
+    elif gender in ["male", "female"]:
         validate_scraped_data(gender)
     else:
         logger.error(f"Invalid gender: {gender}. Use 'male', 'female', or 'both'")

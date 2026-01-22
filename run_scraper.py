@@ -1,6 +1,7 @@
 """
 Main scraper runner.
 """
+
 import sys
 import argparse
 import logging
@@ -11,40 +12,39 @@ from logger import get_logger
 
 logger = get_logger(__name__)
 
+
 def main():
     """
     Main entry point with command-line argument support.
     Tries API with pagination for both genders, falls back to HTML if needed.
     """
-    parser = argparse.ArgumentParser(description='PSA Squash Rankings Scraper')
+    parser = argparse.ArgumentParser(description="PSA Squash Rankings Scraper")
     parser.add_argument(
-        '--gender',
-        choices=['male', 'female', 'both'],
-        default='both',
-        help='Gender to scrape (default: both)'
+        "--gender",
+        choices=["male", "female", "both"],
+        default="both",
+        help="Gender to scrape (default: both)",
     )
     parser.add_argument(
-        '--page-size',
+        "--page-size",
         type=int,
         default=100,
-        help='Number of results per page (default: 100)'
+        help="Number of results per page (default: 100)",
     )
     parser.add_argument(
-        '--max-pages',
+        "--max-pages",
         type=int,
         default=None,
-        help='Maximum number of pages to fetch (default: all)'
+        help="Maximum number of pages to fetch (default: all)",
     )
     parser.add_argument(
-        '--no-resume',
-        action='store_true',
-        help='Start fresh, ignore checkpoints'
+        "--no-resume", action="store_true", help="Start fresh, ignore checkpoints"
     )
     parser.add_argument(
-        '--log-level',
-        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
-        default='INFO',
-        help='Set logging level (default: INFO)'
+        "--log-level",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        default="INFO",
+        help="Set logging level (default: INFO)",
     )
 
     args = parser.parse_args()
@@ -57,11 +57,13 @@ def main():
     logger.info("=" * 60)
     logger.info("PSA Squash Rankings Scraper - Starting")
     logger.info("=" * 60)
-    logger.info(f"Configuration: gender={args.gender}, page_size={args.page_size}, "
-                f"max_pages={args.max_pages}, resume={not args.no_resume}")
+    logger.info(
+        f"Configuration: gender={args.gender}, page_size={args.page_size}, "
+        f"max_pages={args.max_pages}, resume={not args.no_resume}"
+    )
 
-    if args.gender == 'both':
-        genders = ['male', 'female']
+    if args.gender == "both":
+        genders = ["male", "female"]
     else:
         genders = [args.gender]
 
@@ -79,7 +81,7 @@ def main():
                 gender=gender,
                 page_size=args.page_size,
                 max_pages=args.max_pages,
-                resume=not args.no_resume
+                resume=not args.no_resume,
             )
 
             output_file = f"psa_rankings_{gender}.csv"
@@ -112,6 +114,7 @@ def main():
     logger.info(f"Summary: {success_count} successful, {failure_count} failed")
 
     sys.exit(0 if failure_count == 0 else 1)
+
 
 if __name__ == "__main__":
     try:

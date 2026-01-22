@@ -1,6 +1,7 @@
 """
 HTML-based scraper for PSA Squash Tour rankings.
 """
+
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -51,12 +52,14 @@ def scrape_rankings_html():
             logger.warning(f"Skipping row with insufficient cells: {len(cells)}")
             continue
 
-        data.append({
-            "rank": cells[0].get_text(strip=True),
-            "player": cells[1].get_text(strip=True),
-            "tournaments": cells[2].get_text(strip=True),
-            "points": cells[3].get_text(strip=True).replace(",", ""),
-        })
+        data.append(
+            {
+                "rank": cells[0].get_text(strip=True),
+                "player": cells[1].get_text(strip=True),
+                "tournaments": cells[2].get_text(strip=True),
+                "points": cells[3].get_text(strip=True).replace(",", ""),
+            }
+        )
 
     logger.info(f"Successfully scraped {len(data)} players from HTML")
     return pd.DataFrame(data)

@@ -4,6 +4,7 @@ Shared parsing utilities for PSA Squash rankings scrapers.
 Includes schema validation to detect API changes early
 and prevent silent data corruption.
 """
+
 from logger import get_logger
 
 logger = get_logger(__name__)
@@ -14,6 +15,7 @@ REQUIRED_API_FIELDS = {
     "Tournaments",
     "Total Points",
 }
+
 
 def validate_api_schema(player: dict):
     """
@@ -31,7 +33,9 @@ def validate_api_schema(player: dict):
             f"API schema validation failed. Missing fields: {missing_fields}"
         )
 
-    logger.debug(f"Schema validation passed for player: {player.get('Name', 'Unknown')}")
+    logger.debug(
+        f"Schema validation passed for player: {player.get('Name', 'Unknown')}"
+    )
 
 
 def parse_api_player(player: dict):
