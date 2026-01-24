@@ -115,7 +115,7 @@ psa-squash-rankings-scraper/
 ├── .gitignore               # Git ignore rules
 ├── README.md                # This file
 ├── tests/                   # Test suite
-    |── conftest.py          # Test configuration
+|   |── conftest.py          # Test configuration
 │   ├── test_parser.py       # Parser unit tests
 │   ├── test_checkpoints.py  # Checkpoint system tests
 │   ├── test_api_scraper.py  # API scraper tests
