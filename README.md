@@ -197,8 +197,13 @@ Successfully scraped data is exported to the output/ directory:
 |--------|------|-------------|
 | `rank` | int | World ranking position |
 | `player` | string | Player name |
+| `id` | int | Player id # |
 | `tournaments` | int | Number of tournaments played |
 | `points` | int | Total ranking points |
+| `height(cm)` | int | Player height in cm |
+| `weight(kg)` | int | Player weight in kg |
+| `birthdate` | string | Player birthdate |
+| `country` | string | Player country |
 
 ### Log Files
 
