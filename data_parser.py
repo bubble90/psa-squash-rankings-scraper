@@ -12,6 +12,7 @@ logger = get_logger(__name__)
 REQUIRED_API_FIELDS = {
     "World Ranking",
     "Name",
+    "Id",
     "Tournaments",
     "Total Points",
 }
@@ -51,9 +52,23 @@ def parse_api_player(player: dict):
     parsed = {
         "rank": player["World Ranking"],
         "player": player["Name"],
+        "id": int(player["Id"]),
         "tournaments": int(player["Tournaments"]),
         "points": int(player["Total Points"]),
+        "height(cm)": "N/A",
+        "weight(kg)": "N/A",
+        "birthdate": "N/A",
+        "country": "N/A",
     }
+
+    if "Birthdate" in player:
+        parsed["birthdate"] = player["Birthdate"]
+    if "Height" in player:
+        parsed["height(cm)"] = int(player["Height"][:-2])
+    if "Weight" in player:
+        parsed["weight(kg)"] = int(player["Weight"][:-2])
+    if "Country" in player:
+        parsed["country"] = player["Country"]
 
     logger.debug(f"Parsed player: {parsed['player']} (Rank: {parsed['rank']})")
     return parsed
