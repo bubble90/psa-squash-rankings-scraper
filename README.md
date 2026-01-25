@@ -120,6 +120,9 @@ psa-squash-rankings-scraper/
 │   ├── test_checkpoints.py  # Checkpoint system tests
 │   ├── test_api_scraper.py  # API scraper tests
 │   └── test_html_scraper.py # HTML scraper tests
+├── .github/
+│   └── workflows/
+│       └── ci.yml           # GitHub Actions CI workflow
 ├── .vscode/
 │   └── extensions.json      # Recommended VS Code extensions
 ├── checkpoints/             # Checkpoint files (auto-created)
