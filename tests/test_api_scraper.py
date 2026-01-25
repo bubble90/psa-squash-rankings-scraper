@@ -16,14 +16,24 @@ def test_get_rankings_single_page(mock_get):
             {
                 "World Ranking": 1,
                 "Name": "Ali Farag",
+                "Id": 12345,
                 "Tournaments": 12,
                 "Total Points": 20000,
+                "Birthdate": "1992-01-01",
+                "Height": "180cm",
+                "Weight": "75kg",
+                "Country": "Egypt",
             },
             {
                 "World Ranking": 2,
                 "Name": "Paul Coll",
+                "Id": 67890,
                 "Tournaments": 10,
                 "Total Points": 18000,
+                "Birthdate": "1992-06-14",
+                "Height": "185cm",
+                "Weight": "80kg",
+                "Country": "New Zealand",
             },
         ],
         "hasMore": False,
@@ -36,8 +46,41 @@ def test_get_rankings_single_page(mock_get):
     assert len(df) == 2
     assert df.iloc[0]["player"] == "Ali Farag"
     assert df.iloc[0]["points"] == 20000
+    assert df.iloc[0]["id"] == 12345
+    assert df.iloc[0]["birthdate"] == "1992-01-01"
+    assert df.iloc[0]["height(cm)"] == 180
+    assert df.iloc[0]["weight(kg)"] == 75
+    assert df.iloc[0]["country"] == "Egypt"
     assert df.iloc[1]["player"] == "Paul Coll"
     assert df.iloc[1]["points"] == 18000
+
+
+@patch("api_scraper.requests.get")
+def test_get_rankings_with_missing_optional_fields(mock_get):
+    """Test fetching rankings when optional fields are missing."""
+    mock_response = Mock()
+    mock_response.json.return_value = {
+        "players": [
+            {
+                "World Ranking": 1,
+                "Name": "Ali Farag",
+                "Id": 12345,
+                "Tournaments": 12,
+                "Total Points": 20000,
+            },
+        ],
+        "hasMore": False,
+    }
+    mock_response.raise_for_status = Mock()
+    mock_get.return_value = mock_response
+
+    df = get_rankings("male", page_size=100, max_pages=1, resume=False)
+
+    assert len(df) == 1
+    assert df.iloc[0]["birthdate"] == "N/A"
+    assert df.iloc[0]["height(cm)"] == "N/A"
+    assert df.iloc[0]["weight(kg)"] == "N/A"
+    assert df.iloc[0]["country"] == "N/A"
 
 
 @patch("api_scraper.requests.get")
@@ -49,6 +92,7 @@ def test_get_rankings_multiple_pages(mock_get):
             {
                 "World Ranking": i,
                 "Name": f"Player {i}",
+                "Id": 1000 + i,
                 "Tournaments": 10,
                 "Total Points": 10000 - i * 100,
             }
@@ -64,6 +108,7 @@ def test_get_rankings_multiple_pages(mock_get):
             {
                 "World Ranking": i,
                 "Name": f"Player {i}",
+                "Id": 1000 + i,
                 "Tournaments": 10,
                 "Total Points": 10000 - i * 100,
             }
@@ -103,6 +148,7 @@ def test_get_rankings_respects_max_pages(mock_get):
             {
                 "World Ranking": i,
                 "Name": f"Player {i}",
+                "Id": 1000 + i,
                 "Tournaments": 10,
                 "Total Points": 10000,
             }
@@ -128,6 +174,7 @@ def test_get_rankings_female(mock_get):
             {
                 "World Ranking": 1,
                 "Name": "Nour El Sherbini",
+                "Id": 11111,
                 "Tournaments": 11,
                 "Total Points": 19000,
             }
@@ -186,6 +233,7 @@ def test_get_rankings_list_response(mock_get):
         {
             "World Ranking": 1,
             "Name": "Ali Farag",
+            "Id": 12345,
             "Tournaments": 12,
             "Total Points": 20000,
         }
@@ -208,19 +256,19 @@ def test_get_rankings_stops_on_partial_page(mock_get):
             {
                 "World Ranking": i,
                 "Name": f"Player {i}",
+                "Id": 1000 + i,
                 "Tournaments": 10,
                 "Total Points": 10000,
             }
-            for i in range(1, 26)  # Only 25 players, less than page_size of 50
+            for i in range(1, 26)
         ],
-        "hasMore": True,  # Even though hasMore is True
+        "hasMore": True,
     }
     mock_response.raise_for_status = Mock()
     mock_get.return_value = mock_response
 
     df = get_rankings("male", page_size=50, resume=False)
 
-    # Should stop after first page since partial results indicate last page
     assert len(df) == 25
     assert mock_get.call_count == 1
 
@@ -234,6 +282,7 @@ def test_get_rankings_uses_data_key(mock_get):
             {
                 "World Ranking": 1,
                 "Name": "Ali Farag",
+                "Id": 12345,
                 "Tournaments": 12,
                 "Total Points": 20000,
             }
@@ -258,6 +307,7 @@ def test_get_rankings_custom_page_size(mock_get):
             {
                 "World Ranking": i,
                 "Name": f"Player {i}",
+                "Id": 1000 + i,
                 "Tournaments": 10,
                 "Total Points": 10000,
             }
@@ -283,6 +333,7 @@ def test_get_rankings_pagination_url_format(mock_get):
             {
                 "World Ranking": 1,
                 "Name": "Player 1",
+                "Id": 1001,
                 "Tournaments": 10,
                 "Total Points": 10000,
             }
@@ -297,6 +348,7 @@ def test_get_rankings_pagination_url_format(mock_get):
             {
                 "World Ranking": 2,
                 "Name": "Player 2",
+                "Id": 1002,
                 "Tournaments": 10,
                 "Total Points": 9000,
             }
