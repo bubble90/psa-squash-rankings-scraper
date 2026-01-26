@@ -173,7 +173,6 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
 
             if isinstance(raw_data, dict):
                 players_data = raw_data.get("players", raw_data.get("data", []))
-                total_count = raw_data.get("total", 0)
                 has_more = raw_data.get("hasMore", False)
             else:
                 players_data = raw_data
