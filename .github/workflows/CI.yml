@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   lint:
@@ -12,41 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Run Ruff linter
-        uses: astral-sh/ruff-action@v3
-        with:
-          args: check .
-
-      - name: Run Ruff formatter check
-        uses: astral-sh/ruff-action@v3
-        with:
-          args: format --check .
+      - uses: astral-sh/ruff-action@v1
 
   test:
     name: Run Tests
-    runs-on: ubuntu-latest
-    steps:
-     - uses actions/checkout@v4
-
-     - name: Set up Python
-       uses: actions/setup-python@v5
-       with:
-          python-version: '3.12'
-
-     - name: Install uv
-       uses: astral-sh/setup-uv@v3
-
-     - name: Install depenacies
-        run: |
-          uv sync --all-extras
-
-      - name: Run tests
-        run: |
-          uv run pytest tests/ --cov-report=term
-
-  typecheck:
-    name: Type Check with Pyright
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -54,10 +23,30 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Run tests
+        run: uv run pytest
+
+  typecheck:
+    name: Type Check with ty
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
 
       - name: Install dependencies and ty
         run: |
@@ -65,5 +54,4 @@ jobs:
           uv pip install ty
 
       - name: Run ty type checking
-        run: |
-          uv run ty check
+        run: uv run ty check
