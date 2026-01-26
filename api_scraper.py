@@ -3,7 +3,6 @@ API-based scraper for PSA Squash Tour rankings.
 
 Fetches ranking data directly from the PSA backend API.
 """
-
 import os
 import json
 import itertools
@@ -44,11 +43,11 @@ def save_checkpoint(gender, page, data):
         "gender": gender,
         "last_page": page,
         "total_players": len(data),
-        "players": data,
+        "players": data
     }
 
     try:
-        with open(checkpoint_file, "w") as f:
+        with open(checkpoint_file, 'w') as f:
             json.dump(checkpoint_data, f, indent=2)
         logger.info(f"Checkpoint saved: {len(data)} players, page {page}")
     except Exception as e:
@@ -68,11 +67,9 @@ def load_checkpoint(gender):
 
     if checkpoint_file.exists():
         try:
-            with open(checkpoint_file, "r") as f:
+            with open(checkpoint_file, 'r') as f:
                 data = json.load(f)
-            logger.info(
-                f"Resuming from checkpoint: {data['total_players']} players, page {data['last_page']}"
-            )
+            logger.info(f"Resuming from checkpoint: {data['total_players']} players, page {data['last_page']}")
             return data
         except Exception as e:
             logger.error(f"Failed to load checkpoint: {e}")
@@ -108,9 +105,7 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
     Returns:
     - pandas DataFrame with all ranking data
     """
-    logger.info(
-        f"Starting {gender} rankings scrape (page_size={page_size}, max_pages={max_pages}, resume={resume})"
-    )
+    logger.info(f"Starting {gender} rankings scrape (page_size={page_size}, max_pages={max_pages}, resume={resume})")
 
     all_players = []
     start_page = 1
@@ -118,8 +113,8 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
     if resume:
         checkpoint = load_checkpoint(gender)
         if checkpoint:
-            all_players = checkpoint["players"]
-            start_page = checkpoint["last_page"] + 1
+            all_players = checkpoint['players']
+            start_page = checkpoint['last_page'] + 1
             logger.info(f"Resuming scrape from page {start_page}")
 
     base_url = f"https://psa-api.ptsportsuite.com/rankedplayers/{gender}"
@@ -152,9 +147,7 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
             logger.debug(f"User-Agent: {user_agent}")
 
             try:
-                response = requests.get(
-                    url, headers=headers, proxies=proxies, timeout=10
-                )
+                response = requests.get(url, headers=headers, proxies=proxies, timeout=10)
                 response.raise_for_status()
             except requests.exceptions.Timeout:
                 logger.error(f"Request timeout on page {page}")
@@ -167,14 +160,12 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
                 raise
 
             raw_data = response.json()
-            logger.debug(
-                f"Response keys: {raw_data.keys() if isinstance(raw_data, dict) else 'list response'}"
-            )
+            logger.debug(f"Response keys: {raw_data.keys() if isinstance(raw_data, dict) else 'list response'}")
 
             if isinstance(raw_data, dict):
-                players_data = raw_data.get("players", raw_data.get("data", []))
-                total_count = raw_data.get("total", 0)
-                has_more = raw_data.get("hasMore", False)
+                players_data = raw_data.get('players', raw_data.get('data', []))
+                total_count = raw_data.get('total', 0)
+                has_more = raw_data.get('hasMore', False)
             else:
                 players_data = raw_data
                 total_count = len(players_data)
@@ -187,9 +178,7 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
             parsed_players = [parse_api_player(player) for player in players_data]
             all_players.extend(parsed_players)
 
-            logger.info(
-                f"Fetched {len(parsed_players)} players (Total so far: {len(all_players)})"
-            )
+            logger.info(f"Fetched {len(parsed_players)} players (Total so far: {len(all_players)})")
 
             save_checkpoint(gender, page, all_players)
 
@@ -201,9 +190,7 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
 
     except Exception as e:
         logger.error(f"Error on page {page}: {e}")
-        logger.info(
-            f"Progress saved in checkpoint. Run again to resume from page {page + 1}"
-        )
+        logger.info(f"Progress saved in checkpoint. Run again to resume from page {page + 1}")
         raise
 
     clear_checkpoint(gender)
@@ -220,3 +207,8 @@ if __name__ == "__main__":
         print(df.head(10))
     except Exception as e:
         logger.exception(f"Fatal error: {e}")
+
+
+
+
+        
