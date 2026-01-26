@@ -177,7 +177,6 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
                 has_more = raw_data.get("hasMore", False)
             else:
                 players_data = raw_data
-                total_count = len(players_data)
                 has_more = len(players_data) == page_size
 
             if not players_data:
