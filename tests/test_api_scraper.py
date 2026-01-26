@@ -318,6 +318,8 @@ def test_get_rankings_custom_page_size(mock_get):
     mock_response.raise_for_status = Mock()
     mock_get.return_value = mock_response
 
+    df = get_rankings("male", page_size=5, resume=False)
+
     called_url = mock_get.call_args[0][0]
     assert "pageSize=5" in called_url
 
@@ -356,6 +358,8 @@ def test_get_rankings_pagination_url_format(mock_get):
     page2_response.raise_for_status = Mock()
 
     mock_get.side_effect = [page1_response, page2_response]
+
+    df = get_rankings("male", page_size=1, resume=False)
 
     assert mock_get.call_count == 2
 

@@ -21,3 +21,5 @@ dev = [
     "ty>=0.0.13",
 ]
 
+[tool.ruff]
+ignore = ["F841"]
