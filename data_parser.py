@@ -72,8 +72,3 @@ def parse_api_player(player: dict):
 
     logger.debug(f"Parsed player: {parsed['player']} (Rank: {parsed['rank']})")
     return parsed
-
-
-
-
-
