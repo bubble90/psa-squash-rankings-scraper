@@ -43,7 +43,7 @@ jobs:
 
       - name: Run tests
         run: |
-          uv run pytest tests/
+          uv run pytest tests/ --cov-report=term
 
   typecheck:
     name: Type Check with Pyright
