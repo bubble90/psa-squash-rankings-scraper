@@ -96,6 +96,7 @@ psa-squash-rankings-scraper/
 ├── run_scraper.py           # Main entry point
 ├── validator.py             # Data validation tool
 ├── pyproject.toml           # Project configuration and dependencies
+├── config.py                # Project configuration constants
 ├── .gitignore               # Git ignore rules
 ├── README.md                # This file
 ├── tests/                   # Test suite
