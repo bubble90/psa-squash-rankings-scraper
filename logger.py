@@ -7,11 +7,9 @@ log levels, and file output.
 
 import logging
 import sys
-from pathlib import Path
 from datetime import datetime
+from config import LOG_DIR
 
-LOG_DIR = Path("logs")
-LOG_DIR.mkdir(exist_ok=True)
 
 LOG_FILE = LOG_DIR / f"psa_scraper_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
 

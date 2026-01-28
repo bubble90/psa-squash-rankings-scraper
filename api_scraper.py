@@ -9,26 +9,18 @@ import json
 import itertools
 import requests
 import pandas as pd
-from pathlib import Path
 from data_parser import parse_api_player
 from logger import get_logger
+from config import (
+    API_BASE_URL,
+    API_TIMEOUT,
+    USER_AGENTS,
+    CHECKPOINT_DIR,
+)
 
-# Set up logger
 logger = get_logger(__name__)
 
-USER_AGENTS = [
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-    "Mozilla/5.0 (X11; Linux x86_64)",
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)",
-]
-
-# Create an infinite cycle iterator for user agents
 USER_AGENT_CYCLE = itertools.cycle(USER_AGENTS)
-
-CHECKPOINT_DIR = Path("checkpoints")
-CHECKPOINT_DIR.mkdir(exist_ok=True)
-
 
 def save_checkpoint(gender, page, data):
     """
@@ -122,7 +114,7 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
             start_page = checkpoint["last_page"] + 1
             logger.info(f"Resuming scrape from page {start_page}")
 
-    base_url = f"https://psa-api.ptsportsuite.com/rankedplayers/{gender}"
+    base_url = f"{API_BASE_URL}/{gender}"
 
     proxy_url = os.getenv("HTTP_PROXY") or os.getenv("HTTPS_PROXY")
     proxies = {"http": proxy_url, "https": proxy_url} if proxy_url else None
@@ -153,7 +145,7 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
 
             try:
                 response = requests.get(
-                    url, headers=headers, proxies=proxies, timeout=10
+                    url, headers=headers, proxies=proxies, timeout=API_TIMEOUT
                 )
                 response.raise_for_status()
             except requests.exceptions.Timeout:

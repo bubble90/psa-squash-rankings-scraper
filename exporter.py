@@ -4,13 +4,10 @@ Exporter utilities for PSA Squash rankings project.
 Handles exporting parsed ranking data to disk.
 """
 
-from pathlib import Path
 from logger import get_logger
+from config import OUTPUT_DIR
 
 logger = get_logger(__name__)
-
-OUTPUT_DIR = Path("output")
-OUTPUT_DIR.mkdir(exist_ok=True)
 
 
 def export_to_csv(df, filename):

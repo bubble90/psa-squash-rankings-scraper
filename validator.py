@@ -6,12 +6,10 @@ Compares HTML and API scraper outputs to validate completeness.
 
 import pandas as pd
 from pandas.errors import EmptyDataError
-from pathlib import Path
 from logger import get_logger
+from config import OUTPUT_DIR
 
 logger = get_logger(__name__)
-
-OUTPUT_DIR = Path("output")
 
 
 def validate_scraped_data(gender="male"):

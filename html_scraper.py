@@ -6,6 +6,11 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from logger import get_logger
+from config import (
+    HTML_BASE_URL,
+    HTML_TIMEOUT,
+    USER_AGENTS,
+)
 
 logger = get_logger(__name__)
 
@@ -15,16 +20,15 @@ def scrape_rankings_html():
     Fallback scraper that parses the PSA rankings HTML table.
     Note: May return limited results if content is JS-rendered.
     """
-    url = "https://www.psasquashtour.com/rankings/"
     headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
+        "User-Agent": USER_AGENTS[0]
     }
 
     logger.info("Fetching rankings from HTML (fallback)...")
-    logger.debug(f"Request URL: {url}")
+    logger.debug(f"Request URL: {HTML_BASE_URL}")
 
     try:
-        response = requests.get(url, headers=headers, timeout=15)
+        response = requests.get(HTML_BASE_URL, headers=headers, timeout=HTML_TIMEOUT)
         response.raise_for_status()
     except requests.exceptions.Timeout:
         logger.error("HTML request timeout")
