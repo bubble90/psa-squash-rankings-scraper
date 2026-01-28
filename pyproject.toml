@@ -3,7 +3,7 @@ name = "psa-squash-rankings-scraper"
 version = "1.0.0"
 description = "A robust Python-based web scraper for PSA Squash Tour rankings"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.12"
 
 dependencies = [
     "requests>=2.31.0",
