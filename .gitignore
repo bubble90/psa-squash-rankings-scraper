@@ -3,6 +3,10 @@ logs/
 checkpoints/
 .pytest_cache/
 .venv/
+venv/
 .ruff_cache/
 .coverage
 htmlcov/
+__pycache__/
+**/__pycache__/
+.DS_Store
