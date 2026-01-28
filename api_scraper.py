@@ -22,6 +22,7 @@ logger = get_logger(__name__)
 
 USER_AGENT_CYCLE = itertools.cycle(USER_AGENTS)
 
+
 def save_checkpoint(gender, page, data):
     """
     Save a checkpoint of the current scraping progress.

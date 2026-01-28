@@ -4,6 +4,7 @@ Centralized configuration for PSA Squash Rankings Scraper.
 All URLs, timeouts, paths, and constants are defined here
 to avoid duplication and make changes easier.
 """
+
 from pathlib import Path
 
 USER_AGENTS = [
