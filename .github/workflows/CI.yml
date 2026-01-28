@@ -55,3 +55,24 @@ jobs:
 
       - name: Run ty type checking
         run: uv run ty check
+        
+  report:
+    name: coverage report
+    runs-on: ubuntu-latest
+    needs: [lint, test, typecheck]
+    steps:
+      - name: check jobs
+      run: |
+        if [[ "${{ needs.lint.result }}" != "success" ]]; then
+          echo "Linting failed"
+          exit 1
+        fi
+        if [[ "${{ needs.test.result }}" != "success" ]]; then
+          echo "Tests failed"
+          exit 1
+        fi
+        if [[ "${{ needs.typecheck.result }}" != "success" ]]; then
+          echo "Type checking failed"
+          exit 1
+        fi
+        echo "All CI checks passed"
