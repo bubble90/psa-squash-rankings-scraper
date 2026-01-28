@@ -264,6 +264,14 @@ The project includes recommended VS Code extensions in .vscode/extensions.json:
 
 VS Code will prompt you to install these when you open the project.
 
+### Continuous Integration
+The project uses GitHub Actions for CI/CD. On every push and pull request, the workflow:
+
+- Runs Ruff linting
+- Executes the full test suite on Python 3.12
+- Performs type checking with ty
+
+See .github/workflows/ci.yml for details.
 
 ## Configuration
 
