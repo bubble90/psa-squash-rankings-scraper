@@ -16,8 +16,8 @@ A robust Python-based web scraper for fetching professional squash player rankin
 
 ## Requirements
 
-- Python 3.8+
-- uv (recommended) or pip
+- Python 3.12+
+- uv
 
 ## Installation
 
@@ -31,8 +31,6 @@ cd psa-squash-rankings-scraper
 
 ### 3. Install dependencies
 
-#### Using uv (recommended)
-
 ```bash
 # Install uv if you haven't already
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -41,21 +39,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 
 # Install with dev dependencies
-uv sync --extra dev
-```
-
-#### Using pip (alternative)
-
-```bash
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -e .
-
-# Install with dev dependencies
-pip install -e ".[dev]"
+uv sync --group dev
 ```
 
 
@@ -65,29 +49,29 @@ pip install -e ".[dev]"
 
 ```bash
 # Scrape both male and female rankings
-python run_scraper.py
+uv run_scraper.py
 
 # Scrape only male rankings
-python run_scraper.py --gender male
+uv run_scraper.py --gender male
 
 # Scrape only female rankings
-python run_scraper.py --gender female
+uv run_scraper.py --gender female
 ```
 
 ### Advanced Options
 
 ```bash
 # Custom page size
-python run_scraper.py --gender male --page-size 50
+uv run_scraper.py --gender male --page-size 50
 
 # Limit number of pages
-python run_scraper.py --gender male --max-pages 5
+uv run_scraper.py --gender male --max-pages 5
 
 # Start fresh (ignore checkpoints)
-python run_scraper.py --gender male --no-resume
+uv run_scraper.py --gender male --no-resume
 
 # Enable debug logging
-python run_scraper.py --gender male --log-level DEBUG
+uv run_scraper.py --gender male --log-level DEBUG
 ```
 
 ### Command-Line Arguments
@@ -120,11 +104,6 @@ psa-squash-rankings-scraper/
 │   ├── test_checkpoints.py  # Checkpoint system tests
 │   ├── test_api_scraper.py  # API scraper tests
 │   └── test_html_scraper.py # HTML scraper tests
-├── .github/
-│   └── workflows/
-│       └── ci.yml           # GitHub Actions CI workflow
-├── .vscode/
-│   └── extensions.json      # Recommended VS Code extensions
 ├── checkpoints/             # Checkpoint files (auto-created)
 ├── logs/                    # Log files (auto-created)
 └── output/                  # Scraped CSV files (auto-created)
@@ -203,10 +182,10 @@ Successfully scraped data is exported to the output/ directory:
 | `id` | int | Player id number |
 | `tournaments` | int | Number of tournaments played |
 | `points` | int | Total ranking points |
-| `height(cm)` | int | Player height in cm |
-| `weight(kg)` | int | Player weight in kg |
-| `birthdate` | string | Player birthdate |
-| `country` | string | Player country |
+| `height(cm)` | int | Player height in cm (or "N/A") |
+| `weight(kg)` | int | Player weight in kg (or "N/A") |
+| `birthdate` | string | Player birthdate (or "N/A") |
+| `country` | string | Player country (or "N/A") |
 
 ### Log Files
 
@@ -230,6 +209,17 @@ uv run ruff format .
 
 # Fix auto-fixable issues
 uv run ruff check --fix .
+```
+
+### Type Checking
+Type checking with ty:
+
+```bash
+# Install ty
+uv pip install ty
+
+# Run type checking
+uv run ty check
 ```
 
 ### Testing
@@ -298,13 +288,13 @@ Validate scraped data:
 
 ```bash
 # Validate male rankings
-python validator.py male
+uv validator.py male
 
 # Validate female rankings
-python validator.py female
+uv validator.py female
 
 # Validate both
-python validator.py both
+uv validator.py both
 ```
 
 The validator compares API and HTML scraper outputs and displays:
@@ -321,19 +311,6 @@ The validator compares API and HTML scraper outputs and displays:
 ```bash
 # Install uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Or use pip as alternative
-pip install -e ".[dev]"
-```
-
-### Issue: "command not found: pytest"
-
-**Solution:**
-
-```bash
-pip install -r requirements.txt
-# or
-python3 -m pytest test_parser.py -v
 ```
 
 ### Issue: API returns no data
@@ -351,7 +328,7 @@ python3 -m pytest test_parser.py -v
 ```bash
 # Delete checkpoints and start fresh
 rm -rf checkpoints/
-python run_scraper.py --no-resume
+uv run_scraper.py --no-resume
 ```
 
 ### Issue: Rate limiting
@@ -367,17 +344,17 @@ python run_scraper.py --no-resume
 
 ```bash
 # Scrape first 2 pages of male rankings
-python run_scraper.py --gender male --max-pages 2 --log-level DEBUG
+uv run run_scraper.py --gender male --max-pages 2 --log-level DEBUG
 ```
 
 ### Example 2: Resume Interrupted Scrape
 
 ```bash
 # First run (interrupted at page 5)
-python run_scraper.py --gender male
+uv run_scraper.py --gender male
 
 # Resume from checkpoint
-python run_scraper.py --gender male
+uv run_scraper.py --gender male
 ```
 
 ### Example 3: Using as a Module
@@ -405,7 +382,12 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 2. Create your feature branch (git checkout -b feature/AmazingFeature)
 3. Install dev dependencies (uv sync --extra dev)
 4. Make your changes and add tests
-5. Run tests and linting (uv run pytest && uv run ruff check .)
+5. Run tests, linting, and type checking:
+```bash
+uv run pytest
+uv run ruff check .
+uv run ty check
+```
 6. Commit your changes (git commit -m 'Add some AmazingFeature')
 7. Push to the branch (git push origin feature/AmazingFeature)
 8. Open a Pull Request
