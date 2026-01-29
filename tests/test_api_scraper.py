@@ -214,6 +214,7 @@ def test_get_rankings_female(mock_session_class):
 
     called_url = mock_session.get.call_args[0][0]
     assert "/rankedplayers/female" in called_url
+    mock_session.close.assert_called_once()
 
 
 @patch("api_scraper.requests.Session")
@@ -240,6 +241,7 @@ def test_get_rankings_http_error(mock_session_class):
 
     with pytest.raises(Exception, match="404 Not Found"):
         get_rankings("male", page_size=100, resume=False)
+    mock_session.close.assert_called_once()
 
 
 @patch("api_scraper.requests.Session")
@@ -255,6 +257,7 @@ def test_get_rankings_invalid_json(mock_session_class):
 
     with pytest.raises(ValueError, match="Invalid JSON"):
         get_rankings("male", page_size=100, resume=False)
+    mock_session.close.assert_called_once()
 
 
 @patch("api_scraper.requests.Session")
@@ -280,6 +283,7 @@ def test_get_rankings_list_response(mock_session_class):
 
     assert len(df) == 1
     assert df.iloc[0]["player"] == "Ali Farag"
+    mock_session.close.assert_called_once()
 
 
 @patch("api_scraper.requests.Session")
@@ -309,6 +313,7 @@ def test_get_rankings_stops_on_partial_page(mock_session_class):
 
     assert len(df) == 25
     assert mock_session.get.call_count == 1
+    mock_session.close.assert_called_once()
 
 
 @patch("api_scraper.requests.Session")
@@ -337,6 +342,7 @@ def test_get_rankings_uses_data_key(mock_session_class):
 
     assert len(df) == 1
     assert df.iloc[0]["player"] == "Ali Farag"
+    mock_session.close.assert_called_once()
 
 
 @patch("api_scraper.requests.Session")
@@ -366,6 +372,7 @@ def test_get_rankings_custom_page_size(mock_session_class):
 
     called_url = mock_session.get.call_args[0][0]
     assert "pageSize=5" in called_url
+    mock_session.close.assert_called_once()
 
 
 @patch("api_scraper.requests.Session")
@@ -417,3 +424,4 @@ def test_get_rankings_pagination_url_format(mock_session_class):
     assert "page=2" in call2_url
     assert "pageSize=1" in call1_url
     assert "pageSize=1" in call2_url
+    mock_session.close.assert_called_once()
