@@ -242,21 +242,27 @@ def test_get_rankings_http_error(mock_session_class):
         get_rankings("male", page_size=100, resume=False)
 
 
-@patch("api_scraper.requests.get")
-def test_get_rankings_invalid_json(mock_get):
+@patch("api_scraper.requests.Session")
+def test_get_rankings_invalid_json(mock_session_class):
     """Test handling of invalid JSON response."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
     mock_response = Mock()
     mock_response.json.side_effect = ValueError("Invalid JSON")
     mock_response.raise_for_status = Mock()
-    mock_get.return_value = mock_response
+    mock_session.get.return_value = mock_response
 
     with pytest.raises(ValueError, match="Invalid JSON"):
         get_rankings("male", page_size=100, resume=False)
 
 
-@patch("api_scraper.requests.get")
-def test_get_rankings_list_response(mock_get):
+@patch("api_scraper.requests.Session")
+def test_get_rankings_list_response(mock_session_class):
     """Test handling API response as a list (not dict)."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
     mock_response = Mock()
     mock_response.json.return_value = [
         {
@@ -268,7 +274,7 @@ def test_get_rankings_list_response(mock_get):
         }
     ]
     mock_response.raise_for_status = Mock()
-    mock_get.return_value = mock_response
+    mock_session.get.return_value = mock_response
 
     df = get_rankings("male", page_size=100, resume=False)
 
@@ -276,9 +282,12 @@ def test_get_rankings_list_response(mock_get):
     assert df.iloc[0]["player"] == "Ali Farag"
 
 
-@patch("api_scraper.requests.get")
-def test_get_rankings_stops_on_partial_page(mock_get):
+@patch("api_scraper.requests.Session")
+def test_get_rankings_stops_on_partial_page(mock_session_class):
     """Test scraper stops when partial page is returned."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
     mock_response = Mock()
     mock_response.json.return_value = {
         "players": [
@@ -294,17 +303,20 @@ def test_get_rankings_stops_on_partial_page(mock_get):
         "hasMore": True,
     }
     mock_response.raise_for_status = Mock()
-    mock_get.return_value = mock_response
+    mock_session.get.return_value = mock_response
 
     df = get_rankings("male", page_size=50, resume=False)
 
     assert len(df) == 25
-    assert mock_get.call_count == 1
+    assert mock_session.get.call_count == 1
 
 
-@patch("api_scraper.requests.get")
-def test_get_rankings_uses_data_key(mock_get):
+@patch("api_scraper.requests.Session")
+def test_get_rankings_uses_data_key(mock_session_class):
     """Test API response using 'data' key instead of 'players'."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
     mock_response = Mock()
     mock_response.json.return_value = {
         "data": [
@@ -319,7 +331,7 @@ def test_get_rankings_uses_data_key(mock_get):
         "hasMore": False,
     }
     mock_response.raise_for_status = Mock()
-    mock_get.return_value = mock_response
+    mock_session.get.return_value = mock_response
 
     df = get_rankings("male", page_size=100, resume=False)
 
@@ -327,9 +339,12 @@ def test_get_rankings_uses_data_key(mock_get):
     assert df.iloc[0]["player"] == "Ali Farag"
 
 
-@patch("api_scraper.requests.get")
-def test_get_rankings_custom_page_size(mock_get):
+@patch("api_scraper.requests.Session")
+def test_get_rankings_custom_page_size(mock_session_class):
     """Test custom page size parameter."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
     mock_response = Mock()
     mock_response.json.return_value = {
         "players": [
@@ -345,17 +360,20 @@ def test_get_rankings_custom_page_size(mock_get):
         "hasMore": False,
     }
     mock_response.raise_for_status = Mock()
-    mock_get.return_value = mock_response
+    mock_session.get.return_value = mock_response
 
     df = get_rankings("male", page_size=5, resume=False)
 
-    called_url = mock_get.call_args[0][0]
+    called_url = mock_session.get.call_args[0][0]
     assert "pageSize=5" in called_url
 
 
-@patch("api_scraper.requests.get")
-def test_get_rankings_pagination_url_format(mock_get):
+@patch("api_scraper.requests.Session")
+def test_get_rankings_pagination_url_format(mock_session_class):
     """Test that pagination URLs are formatted correctly."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
     page1_response = Mock()
     page1_response.json.return_value = {
         "players": [
@@ -386,14 +404,14 @@ def test_get_rankings_pagination_url_format(mock_get):
     }
     page2_response.raise_for_status = Mock()
 
-    mock_get.side_effect = [page1_response, page2_response]
+    mock_session.get.side_effect = [page1_response, page2_response]
 
     df = get_rankings("male", page_size=1, resume=False)
 
-    assert mock_get.call_count == 2
+    assert mock_session.get.call_count == 2
 
-    call1_url = mock_get.call_args_list[0][0][0]
-    call2_url = mock_get.call_args_list[1][0][0]
+    call1_url = mock_session.get.call_args_list[0][0][0]
+    call2_url = mock_session.get.call_args_list[1][0][0]
 
     assert "page=1" in call1_url
     assert "page=2" in call2_url
