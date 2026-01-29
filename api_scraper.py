@@ -123,6 +123,12 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
     if proxies:
         logger.debug(f"Using proxy: {proxy_url}")
 
+    session = requests.Session()
+    session.headers.update({"Accept": "application/json"})
+
+    if proxies:
+        session.proxies.update(proxies)
+
     page = start_page
 
     try:
@@ -133,21 +139,15 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
 
             url = f"{base_url}?page={page}&pageSize={page_size}"
 
-            # Get next user agent from the cycle
-            user_agent = next(USER_AGENT_CYCLE)
-            headers = {
-                "User-Agent": user_agent,
-                "Accept": "application/json",
-            }
+            session.headers["User-Agent"] = next(USER_AGENT_CYCLE)
 
             logger.info(f"Fetching {gender} rankings - Page {page}...")
             logger.debug(f"Request URL: {url}")
-            logger.debug(f"User-Agent: {user_agent}")
+            logger.debug(f"User-Agent: {session.headers['User-Agent']}")
+
 
             try:
-                response = requests.get(
-                    url, headers=headers, proxies=proxies, timeout=API_TIMEOUT
-                )
+                response = session.get(url, timeout=API_TIMEOUT)
                 response.raise_for_status()
             except requests.exceptions.Timeout:
                 logger.error(f"Request timeout on page {page}")
@@ -196,6 +196,11 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
             f"Progress saved in checkpoint. Run again to resume from page {page + 1}"
         )
         raise
+
+    finally:
+        session.close()
+        logger.debug("HTTP session closed")
+
 
     clear_checkpoint(gender)
 
