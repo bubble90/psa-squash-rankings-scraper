@@ -245,7 +245,7 @@ The project includes tests covering:
 - Data parser validation (4 tests)
 - Checkpoint system (9 tests)
 - API scraping (14 tests)
-- HTML scraping (14 tests)
+- HTML scraping (13 tests)
 - Export functionality
 - Error handling
 - Edge cases
