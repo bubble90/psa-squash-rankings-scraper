@@ -20,13 +20,15 @@ def scrape_rankings_html():
     Fallback scraper that parses the PSA rankings HTML table.
     Note: May return limited results if content is JS-rendered.
     """
-    headers = {"User-Agent": USER_AGENTS[0]}
 
     logger.info("Fetching rankings from HTML (fallback)...")
     logger.debug(f"Request URL: {HTML_BASE_URL}")
 
+    session = requests.Session()
+    session.headers.update({"User-Agent": USER_AGENTS[0]})
+
     try:
-        response = requests.get(HTML_BASE_URL, headers=headers, timeout=HTML_TIMEOUT)
+        response = session.get(HTML_BASE_URL, timeout=HTML_TIMEOUT)
         response.raise_for_status()
     except requests.exceptions.Timeout:
         logger.error("HTML request timeout")
