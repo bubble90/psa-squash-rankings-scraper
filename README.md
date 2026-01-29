@@ -244,7 +244,7 @@ uv run pytest -k "checkpoint" -v
 The project includes tests covering:
 - Data parser validation (4 tests)
 - Checkpoint system (9 tests)
-- API scraping (13 tests)
+- API scraping (14 tests)
 - HTML scraping (14 tests)
 - Export functionality
 - Error handling

@@ -3,13 +3,16 @@ Test suite for API scraper functionality in PSA Squash scraper.
 """
 
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, MagicMock
 from api_scraper import get_rankings
 
 
-@patch("api_scraper.requests.get")
-def test_get_rankings_single_page(mock_get):
+@patch("api_scraper.requests.Session")
+def test_get_rankings_single_page(mock_session_class):
     """Test fetching a single page of rankings."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
     mock_response = Mock()
     mock_response.json.return_value = {
         "players": [
@@ -39,7 +42,7 @@ def test_get_rankings_single_page(mock_get):
         "hasMore": False,
     }
     mock_response.raise_for_status = Mock()
-    mock_get.return_value = mock_response
+    mock_session.get.return_value = mock_response
 
     df = get_rankings("male", page_size=100, max_pages=1, resume=False)
 
@@ -53,11 +56,15 @@ def test_get_rankings_single_page(mock_get):
     assert df.iloc[0]["country"] == "Egypt"
     assert df.iloc[1]["player"] == "Paul Coll"
     assert df.iloc[1]["points"] == 18000
+    mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.get")
-def test_get_rankings_with_missing_optional_fields(mock_get):
+@patch("api_scraper.requests.Session")
+def test_get_rankings_with_missing_optional_fields(mock_session_class):
     """Test fetching rankings when optional fields are missing."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
     mock_response = Mock()
     mock_response.json.return_value = {
         "players": [
@@ -72,7 +79,7 @@ def test_get_rankings_with_missing_optional_fields(mock_get):
         "hasMore": False,
     }
     mock_response.raise_for_status = Mock()
-    mock_get.return_value = mock_response
+    mock_session.get.return_value = mock_response
 
     df = get_rankings("male", page_size=100, max_pages=1, resume=False)
 
@@ -81,11 +88,15 @@ def test_get_rankings_with_missing_optional_fields(mock_get):
     assert df.iloc[0]["height(cm)"] == "N/A"
     assert df.iloc[0]["weight(kg)"] == "N/A"
     assert df.iloc[0]["country"] == "N/A"
+    mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.get")
-def test_get_rankings_multiple_pages(mock_get):
+@patch("api_scraper.requests.Session")
+def test_get_rankings_multiple_pages(mock_session_class):
     """Test fetching multiple pages with pagination."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
     page1_response = Mock()
     page1_response.json.return_value = {
         "players": [
@@ -118,12 +129,12 @@ def test_get_rankings_multiple_pages(mock_get):
     }
     page2_response.raise_for_status = Mock()
 
-    mock_get.side_effect = [page1_response, page2_response]
+    mock_session.get.side_effect = [page1_response, page2_response]
 
     df = get_rankings("male", page_size=50, resume=False)
 
     assert len(df) == 100
-    assert mock_get.call_count == 2
+    assert mock_session.get.call_count == 2
 
 
 @patch("api_scraper.requests.get")
