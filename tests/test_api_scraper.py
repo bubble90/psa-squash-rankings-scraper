@@ -135,24 +135,32 @@ def test_get_rankings_multiple_pages(mock_session_class):
 
     assert len(df) == 100
     assert mock_session.get.call_count == 2
+    mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.get")
-def test_get_rankings_empty_response(mock_get):
+@patch("api_scraper.requests.Session")
+def test_get_rankings_empty_response(mock_session_class):
     """Test handling of empty API response."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
     mock_response = Mock()
     mock_response.json.return_value = {"players": [], "hasMore": False}
     mock_response.raise_for_status = Mock()
-    mock_get.return_value = mock_response
+    mock_session_class.get.return_value = mock_response
 
     df = get_rankings("male", page_size=100, resume=False)
 
     assert len(df) == 0
+    mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.get")
-def test_get_rankings_respects_max_pages(mock_get):
+@patch("api_scraper.requests.Session")
+def test_get_rankings_respects_max_pages(mock_session_class):
     """Test that max_pages parameter is respected."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
     mock_response = Mock()
     mock_response.json.return_value = {
         "players": [
@@ -168,17 +176,21 @@ def test_get_rankings_respects_max_pages(mock_get):
         "hasMore": True,
     }
     mock_response.raise_for_status = Mock()
-    mock_get.return_value = mock_response
+    mock_session.get.return_value = mock_response
 
     df = get_rankings("male", page_size=10, max_pages=3, resume=False)
 
-    assert mock_get.call_count == 3
+    assert mock_session.get.call_count == 3
     assert len(df) == 30
+    mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.get")
-def test_get_rankings_female(mock_get):
+@patch("api_scraper.requests.Session")
+def test_get_rankings_female(mock_session_class):
     """Test fetching female rankings."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
     mock_response = Mock()
     mock_response.json.return_value = {
         "players": [
@@ -193,32 +205,38 @@ def test_get_rankings_female(mock_get):
         "hasMore": False,
     }
     mock_response.raise_for_status = Mock()
-    mock_get.return_value = mock_response
+    mock_session.get.return_value = mock_response
 
     df = get_rankings("female", page_size=100, resume=False)
 
     assert len(df) == 1
     assert df.iloc[0]["player"] == "Nour El Sherbini"
 
-    called_url = mock_get.call_args[0][0]
+    called_url = mock_session.get.call_args[0][0]
     assert "/rankedplayers/female" in called_url
 
 
-@patch("api_scraper.requests.get")
-def test_get_rankings_network_error(mock_get):
+@patch("api_scraper.requests.Session")
+def test_get_rankings_network_error(mock_session_class):
     """Test handling of network errors."""
-    mock_get.side_effect = Exception("Network error")
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
+    mock_session.get.side_effect = Exception("Network error")
 
     with pytest.raises(Exception, match="Network error"):
         get_rankings("male", page_size=100, resume=False)
 
 
-@patch("api_scraper.requests.get")
-def test_get_rankings_http_error(mock_get):
+@patch("api_scraper.requests.Session")
+def test_get_rankings_http_error(mock_session_class):
     """Test handling of HTTP errors."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
     mock_response = Mock()
     mock_response.raise_for_status.side_effect = Exception("404 Not Found")
-    mock_get.return_value = mock_response
+    mock_session.get.return_value = mock_response
 
     with pytest.raises(Exception, match="404 Not Found"):
         get_rankings("male", page_size=100, resume=False)
