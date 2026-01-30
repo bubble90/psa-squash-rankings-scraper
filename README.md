@@ -105,6 +105,7 @@ psa-squash-rankings-scraper/
 │   ├── test_checkpoints.py  # Checkpoint system tests
 │   ├── test_api_scraper.py  # API scraper tests
 │   └── test_html_scraper.py # HTML scraper tests
+│   └── test_exporter.py     # Exporter tests
 ├── checkpoints/             # Checkpoint files (auto-created)
 ├── logs/                    # Log files (auto-created)
 └── output/                  # Scraped CSV files (auto-created)
@@ -246,6 +247,7 @@ The project includes tests covering:
 - Checkpoint system (9 tests)
 - API scraping (14 tests)
 - HTML scraping (14 tests)
+- Exporter (7 tests)
 - Export functionality
 - Error handling
 - Edge cases
