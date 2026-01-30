@@ -145,7 +145,6 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
             logger.debug(f"Request URL: {url}")
             logger.debug(f"User-Agent: {session.headers['User-Agent']}")
 
-
             try:
                 response = session.get(url, timeout=API_TIMEOUT)
                 response.raise_for_status()
@@ -200,7 +199,6 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
     finally:
         session.close()
         logger.debug("HTTP session closed")
-
 
     clear_checkpoint(gender)
 

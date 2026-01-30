@@ -37,7 +37,6 @@ def test_scrape_rankings_html_success(mock_session_class):
     mock_response.raise_for_status = Mock()
     mock_session.get.return_value = mock_response
 
-
     df = scrape_rankings_html()
 
     assert len(df) == 2
