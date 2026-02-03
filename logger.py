@@ -11,9 +11,6 @@ from datetime import datetime
 from config import LOG_DIR
 
 
-LOG_FILE = LOG_DIR / f"psa_scraper_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-
-
 def setup_logger(name: str, level=logging.INFO):
     """
     Set up a logger with consistent formatting and handlers.
@@ -31,6 +28,8 @@ def setup_logger(name: str, level=logging.INFO):
     if logger.handlers:
         return logger
 
+    log_file = LOG_DIR / f"psa_scraper_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+
     formatter = logging.Formatter(
         fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
@@ -40,7 +39,7 @@ def setup_logger(name: str, level=logging.INFO):
     console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(formatter)
 
-    file_handler = logging.FileHandler(LOG_FILE, mode="a", encoding="utf-8")
+    file_handler = logging.FileHandler(log_file, mode="a", encoding="utf-8")
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
 

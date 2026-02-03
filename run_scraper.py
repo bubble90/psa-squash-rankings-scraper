@@ -11,8 +11,6 @@ from exporter import export_to_csv
 from logger import get_logger
 from config import init_dirs
 
-logger = get_logger(__name__)
-
 def configure_log_level(log_level: str):
     """
     Configure logging level for application loggers only.
@@ -20,8 +18,6 @@ def configure_log_level(log_level: str):
     Parameters:
     - log_level: Logging level string (DEBUG, INFO, WARNING, ERROR)
     """
-    init_dirs()
-
     level = getattr(logging, log_level.upper())
 
     app_logger_names = [
@@ -47,6 +43,10 @@ def main():
     Main entry point with command-line argument support.
     Tries API with pagination for both genders, falls back to HTML if needed.
     """
+    init_dirs()
+
+    logger = get_logger(__name__)
+
     parser = argparse.ArgumentParser(description="PSA Squash Rankings Scraper")
     parser.add_argument(
         "--gender",
