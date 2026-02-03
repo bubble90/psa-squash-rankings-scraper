@@ -32,6 +32,8 @@ jobs:
         run: |
           uv sync --all-groups
 
+      - name: Create logs directory
+        run: mkdir -p logs
       - name: Run tests
         run: |
           uv run pytest
