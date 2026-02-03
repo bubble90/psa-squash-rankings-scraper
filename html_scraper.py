@@ -73,9 +73,6 @@ if __name__ == "__main__":
     try:
         df = scrape_rankings_html()
         logger.info(f"Successfully scraped {len(df)} players from HTML.")
-
-
-        
         print(df.head())
     except Exception as e:
         logger.exception(f"HTML Scraper failed: {e}")
