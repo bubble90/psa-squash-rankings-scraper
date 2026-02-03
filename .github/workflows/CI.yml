@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v1
 
-test:
+  test:
     name: Run Tests
     runs-on: ubuntu-latest
     steps:
@@ -29,15 +29,17 @@ test:
         uses: astral-sh/setup-uv@v4
 
       - name: Install dependencies
-        run: uv sync --all-groups
+        run: |
+          uv sync --all-groups
 
       - name: Create required directories
         run: mkdir -p logs checkpoints
 
       - name: Run tests
-        run: uv run pytest
+        run: |
+          uv run pytest
 
-typecheck:
+  typecheck:
     name: Type Check with ty
     runs-on: ubuntu-latest
     steps:
