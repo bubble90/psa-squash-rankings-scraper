@@ -12,6 +12,32 @@ from logger import get_logger
 
 logger = get_logger(__name__)
 
+def configure_log_level(log_level: str):
+    """
+    Configure logging level for application loggers only.
+
+    Parameters:
+    - log_level: Logging level string (DEBUG, INFO, WARNING, ERROR)
+    """
+    level = getattr(logging, log_level.upper())
+
+    app_logger_names = [
+        __name__,
+        "api_scraper",
+        "html_scraper",
+        "data_parser",
+        "exporter",
+        "logger",
+        "validator",
+    ]
+
+    for logger_name in app_logger_names:
+        app_logger = logging.getLogger(logger_name)
+        app_logger.setLevel(level)
+
+        for handler in app_logger.handlers:
+            if isinstance(handler, logging.StreamHandler):
+                handler.setLevel(level)
 
 def main():
     """
@@ -49,10 +75,7 @@ def main():
 
     args = parser.parse_args()
 
-    logging.getLogger().setLevel(getattr(logging, args.log_level))
-    for handler in logging.getLogger().handlers:
-        if isinstance(handler, logging.StreamHandler):
-            handler.setLevel(getattr(logging, args.log_level))
+    configure_log_level(args.log_level)
 
     logger.info("=" * 60)
     logger.info("PSA Squash Rankings Scraper - Starting")
