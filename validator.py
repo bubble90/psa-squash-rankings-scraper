@@ -25,7 +25,7 @@ def validate_scraped_data(gender="male"):
     HTML_FILE = OUTPUT_DIR / f"psa_rankings_{gender}_fallback.csv"
 
     api_exists = API_FILE.exists()
-    html_exists = API_FILE.exists()
+    html_exists = HTML_FILE.exists()
 
     if not api_exists and not html_exists:
         logger.error(f"No data files found for {gender}. Run the scraper first:")
