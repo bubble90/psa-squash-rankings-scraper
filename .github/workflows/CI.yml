@@ -37,7 +37,7 @@ test:
       - name: Run tests
         run: uv run pytest
 
-  typecheck:
+typecheck:
     name: Type Check with ty
     runs-on: ubuntu-latest
     steps:
