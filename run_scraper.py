@@ -119,18 +119,21 @@ def main():
 
         except Exception as e:
             logger.error(f"API failed for {gender}: {e}")
-            logger.info(f"Attempting HTML fallback for {gender}...")
 
-            try:
-                df_fallback = scrape_rankings_html()
-                fallback_file = f"psa_rankings_{gender}_fallback.csv"
-                export_to_csv(df_fallback, fallback_file)
-                logger.info(f"Fallback successful: {fallback_file}")
-                success_count += 1
-
-            except Exception as html_err:
-                logger.error(f"Critical Error: Both sources failed for {gender}")
-                logger.exception(f"Error details: {html_err}")
+            if gender == "male":
+                logger.info(f"Attempting HTML fallback for {gender}...")
+                try:
+                    df_fallback = scrape_rankings_html()
+                    fallback_file = f"psa_rankings_{gender}_fallback.csv"
+                    export_to_csv(df_fallback, fallback_file)
+                    logger.info(f"Fallback successful: {fallback_file}")
+                    success_count += 1
+                except Exception as html_err:
+                    logger.error(f"Critical Error: HTML fallback failed for {gender}")
+                    logger.exception(f"Error details: {html_err}")
+                    failure_count += 1
+            else:
+                logger.error(f"Critical Error: No semantic fallback available for {gender}")
                 failure_count += 1
 
     logger.info("")
