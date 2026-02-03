@@ -9,8 +9,6 @@ from pandas.errors import EmptyDataError
 from logger import get_logger
 from config import OUTPUT_DIR
 
-logger = get_logger(__name__)
-
 
 def validate_scraped_data(gender="male"):
     """
@@ -19,6 +17,8 @@ def validate_scraped_data(gender="male"):
     Parameters:
     - gender: 'male' or 'female'
     """
+    logger = get_logger(__name__)
+
     logger.info(f"Starting validation for {gender} rankings")
 
     API_FILE = OUTPUT_DIR / f"psa_rankings_{gender}.csv"
@@ -93,6 +93,8 @@ def validate_scraped_data(gender="male"):
 
 
 if __name__ == "__main__":
+    logger = get_logger(__name__)
+    
     import sys
 
     logger.info("=" * 60)

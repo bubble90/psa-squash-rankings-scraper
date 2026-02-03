@@ -7,8 +7,6 @@ Handles exporting parsed ranking data to disk.
 from logger import get_logger
 from config import OUTPUT_DIR
 
-logger = get_logger(__name__)
-
 
 def export_to_csv(df, filename):
     """
@@ -18,6 +16,8 @@ def export_to_csv(df, filename):
     - df: pandas DataFrame containing ranking data
     - filename: output CSV file name
     """
+    logger = get_logger(__name__)
+    
     try:
         OUTPUT = OUTPUT_DIR / filename
         df.to_csv(OUTPUT, index=False)

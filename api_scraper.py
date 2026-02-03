@@ -18,7 +18,6 @@ from config import (
     CHECKPOINT_DIR,
 )
 
-logger = get_logger(__name__)
 
 USER_AGENT_CYCLE = itertools.cycle(USER_AGENTS)
 
@@ -32,6 +31,8 @@ def save_checkpoint(gender, page, data):
     - page: current page number
     - data: list of player dictionaries collected so far
     """
+    logger = get_logger(__name__)
+
     checkpoint_file = CHECKPOINT_DIR / f"{gender}_checkpoint.json"
     checkpoint_data = {
         "gender": gender,
@@ -57,6 +58,7 @@ def load_checkpoint(gender):
     - dict with 'last_page' and 'players' if checkpoint exists
     - None if no checkpoint found
     """
+    logger = get_logger(__name__)
     checkpoint_file = CHECKPOINT_DIR / f"{gender}_checkpoint.json"
 
     if checkpoint_file.exists():
@@ -79,6 +81,8 @@ def clear_checkpoint(gender):
     """
     Remove checkpoint file after successful completion.
     """
+    logger = get_logger(__name__)
+
     checkpoint_file = CHECKPOINT_DIR / f"{gender}_checkpoint.json"
     if checkpoint_file.exists():
         try:
@@ -101,6 +105,8 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
     Returns:
     - pandas DataFrame with all ranking data
     """
+    logger = get_logger(__name__)
+
     logger.info(
         f"Starting {gender} rankings scrape (page_size={page_size}, max_pages={max_pages}, resume={resume})"
     )
@@ -207,6 +213,7 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
 
 
 if __name__ == "__main__":
+    logger = get_logger(__name__)
     try:
         df = get_rankings("male", page_size=50, resume=True)
         logger.info(f"Total players fetched: {len(df)}")

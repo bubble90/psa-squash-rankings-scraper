@@ -143,6 +143,7 @@ def main():
 
 
 if __name__ == "__main__":
+    logger = get_logger(__name__)
     try:
         main()
     except KeyboardInterrupt:

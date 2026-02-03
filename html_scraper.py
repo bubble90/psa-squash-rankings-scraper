@@ -12,14 +12,13 @@ from config import (
     USER_AGENTS,
 )
 
-logger = get_logger(__name__)
-
 
 def scrape_rankings_html():
     """
     Fallback scraper that parses the PSA rankings HTML table.
     Note: May return limited results if content is JS-rendered.
     """
+    logger = get_logger(__name__)
 
     logger.info("Fetching rankings from HTML (fallback)...")
     logger.debug(f"Request URL: {HTML_BASE_URL}")
@@ -70,6 +69,7 @@ def scrape_rankings_html():
 
 
 if __name__ == "__main__":
+    logger = get_logger(__name__)
     try:
         df = scrape_rankings_html()
         logger.info(f"Successfully scraped {len(df)} players from HTML.")

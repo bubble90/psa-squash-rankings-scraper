@@ -140,12 +140,14 @@ def test_export_to_csv_logs_success(tmp_path, monkeypatch, sample_dataframe):
     """Test that successful export logs appropriate message."""
     monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
 
-    with patch("exporter.logger") as mock_logger:
+    with patch("exporter.get_logger") as mock_get_logger:
+        mock_logger = mock_get_logger.return_value
+
         filename = "test_rankings.csv"
         export_to_csv(sample_dataframe, filename)
 
         mock_logger.info.assert_called_once()
         call_args = mock_logger.info.call_args[0][0]
         assert "Exported" in call_args
-        assert "3 rows" in call_args
+        assert f"{len(sample_dataframe)} rows" in call_args
         assert filename in call_args

@@ -7,7 +7,6 @@ and prevent silent data corruption.
 
 from logger import get_logger
 
-logger = get_logger(__name__)
 
 REQUIRED_API_FIELDS = {
     "World Ranking",
@@ -26,6 +25,8 @@ def validate_api_schema(player: dict):
     Raises:
         ValueError: if the API schema is missing fields
     """
+    logger = get_logger(__name__)
+
     missing_fields = REQUIRED_API_FIELDS - player.keys()
 
     if missing_fields:
@@ -47,6 +48,8 @@ def parse_api_player(player: dict):
     Returns:
         dict: normalized ranking record
     """
+    logger = get_logger(__name__)
+    
     validate_api_schema(player)
 
     parsed = {
