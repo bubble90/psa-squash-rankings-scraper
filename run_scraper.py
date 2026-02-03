@@ -9,6 +9,7 @@ from api_scraper import get_rankings
 from html_scraper import scrape_rankings_html
 from exporter import export_to_csv
 from logger import get_logger
+from config import init_dirs
 
 logger = get_logger(__name__)
 
@@ -19,6 +20,8 @@ def configure_log_level(log_level: str):
     Parameters:
     - log_level: Logging level string (DEBUG, INFO, WARNING, ERROR)
     """
+    init_dirs()
+
     level = getattr(logging, log_level.upper())
 
     app_logger_names = [
