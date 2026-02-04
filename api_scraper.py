@@ -106,7 +106,7 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
     - pandas DataFrame with all ranking data
     """
     logger = get_logger(__name__)
-
+    
     logger.info(
         f"Starting {gender} rankings scrape (page_size={page_size}, max_pages={max_pages}, resume={resume})"
     )
@@ -170,11 +170,33 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
             )
 
             if isinstance(raw_data, dict):
-                players_data = raw_data.get("players", raw_data.get("data", []))
-                has_more = raw_data.get("hasMore", False)
-            else:
+                if "players" not in raw_data:
+                    raise ValueError(
+                        f"API response missing required 'players' key. "
+                        f"Got keys: {list(raw_data.keys())}"
+                    )
+
+                players_data = raw_data["players"]
+
+                if "hasMore" not in raw_data:
+                    raise ValueError(
+                        f"API response missing required 'hasMore' key. "
+                        f"Cannot determine pagination state. Got keys: {list(raw_data.keys())}"
+                    )
+
+                has_more = raw_data["hasMore"]
+
+            elif isinstance(raw_data, list):
                 players_data = raw_data
-                has_more = len(players_data) == page_size
+                has_more = False
+                logger.warning(
+                    "API returned a list instead of dict - assuming complete dataset"
+                )
+            else:
+                raise ValueError(
+                    f"Unexpected API response type: {type(raw_data).__name__}. "
+                    f"Expected dict or list."
+                )
 
             if not players_data:
                 logger.info(f"No more data returned on page {page}")
@@ -189,8 +211,15 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
 
             save_checkpoint(gender, page, all_players)
 
-            if not has_more or len(parsed_players) < page_size:
-                logger.info("Reached last page")
+            if not has_more:
+                logger.info("API indicates no more pages (hasMore=False)")
+                break
+
+            if len(parsed_players) < page_size:
+                logger.info(
+                    f"Received {len(parsed_players)} players (less than page_size={page_size}), "
+                    f"assuming last page"
+                )
                 break
 
             page += 1
@@ -201,7 +230,6 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
             f"Progress saved in checkpoint. Run again to resume from page {page + 1}"
         )
         raise
-
     finally:
         session.close()
         logger.debug("HTTP session closed")
