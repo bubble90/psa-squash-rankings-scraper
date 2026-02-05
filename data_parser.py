@@ -40,21 +40,43 @@ def validate_api_schema(player: dict):
         f"Schema validation passed for player: {player.get('Name', 'Unknown')}"
     )
 
+import re
+
 def parse_measure(value, unit_label):
     """
-    Robustly parses a measurement string (e.g., '185cm', '185 cm', '185').
-    Returns an int or raises a descriptive ValueError.
+    Parses height/weight from various formats into an integer (Metric).
+    Handles: "185cm", "185 cm", "185", "6' 1\"", "72in".
     """
     if not value or not str(value).strip():
         return "N/A"
 
-    clean_value = re.sub(r'[^0-9]', '', str(value))
+    val_str = str(value).strip().lower()
+
+    if "'" in val_str or "ft" in val_str:
+        try:
+            parts = re.findall(r"(\d+)", val_str)
+            if len(parts) >= 2:
+                feet, inches = int(parts[0]), int(parts[1])
+                return round((feet * 12 + inches) * 2.54)
+            elif len(parts) == 1:
+                return round(int(parts[0]) * 30.48)
+        except (ValueError, IndexError):
+            raise ValueError(f"Malformed Imperial height in {unit_label}: '{val_str}'")
+
+    if "in" in val_str:
+        clean_inches = re.sub(r'[^0-9]', '', val_str)
+        if clean_inches:
+            return round(int(clean_inches) * 2.54)
+
+    if "lb" in val_str or "pound" in val_str:
+        clean_lbs = re.sub(r'[^0-9]', '', val_str)
+        if clean_lbs:
+            return round(int(clean_lbs) * 0.453592)
+
+    clean_value = re.sub(r'[^0-9]', '', val_str)
 
     if not clean_value:
-        raise ValueError(
-            f"Invalid format for {unit_label}: '{value}'. "
-            f"Expected numeric value (e.g., '185cm' or '185')."
-        )
+        raise ValueError(f"No numeric data found for {unit_label}: '{val_str}'")
 
     return int(clean_value)
 
@@ -84,7 +106,7 @@ def parse_api_player(player: dict):
 
     if "Birthdate" in player:
         parsed["birthdate"] = player["Birthdate"]
-        
+
     if player.get("Height"):
         try:
             parsed["height(cm)"] = parse_measure(player["Height"], "Height")
