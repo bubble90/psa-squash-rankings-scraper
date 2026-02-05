@@ -5,6 +5,7 @@ Includes schema validation to detect API changes early
 and prevent silent data corruption.
 """
 
+import re
 from logger import get_logger
 
 
@@ -39,6 +40,23 @@ def validate_api_schema(player: dict):
         f"Schema validation passed for player: {player.get('Name', 'Unknown')}"
     )
 
+def parse_measure(value, unit_label):
+    """
+    Robustly parses a measurement string (e.g., '185cm', '185 cm', '185').
+    Returns an int or raises a descriptive ValueError.
+    """
+    if not value or not str(value).strip():
+        return "N/A"
+
+    clean_value = re.sub(r'[^0-9]', '', str(value))
+
+    if not clean_value:
+        raise ValueError(
+            f"Invalid format for {unit_label}: '{value}'. "
+            f"Expected numeric value (e.g., '185cm' or '185')."
+        )
+
+    return int(clean_value)
 
 def parse_api_player(player: dict):
     """
@@ -49,7 +67,7 @@ def parse_api_player(player: dict):
         dict: normalized ranking record
     """
     logger = get_logger(__name__)
-    
+
     validate_api_schema(player)
 
     parsed = {
@@ -66,10 +84,21 @@ def parse_api_player(player: dict):
 
     if "Birthdate" in player:
         parsed["birthdate"] = player["Birthdate"]
-    if "Height" in player:
-        parsed["height(cm)"] = int(player["Height"][:-2])
-    if "Weight" in player:
-        parsed["weight(kg)"] = int(player["Weight"][:-2])
+        
+    if player.get("Height"):
+        try:
+            parsed["height(cm)"] = parse_measure(player["Height"], "Height")
+        except ValueError as e:
+            logger.warning(f"Skipping height for {player.get('Name')}: {e}")
+            parsed["height(cm)"] = "N/A"
+
+    if player.get("Weight"):
+        try:
+            parsed["weight(kg)"] = parse_measure(player["Weight"], "Weight")
+        except ValueError as e:
+            logger.warning(f"Skipping weight for {player.get('Name')}: {e}")
+            parsed["weight(kg)"] = "N/A"
+
     if "Country" in player:
         parsed["country"] = player["Country"]
 
