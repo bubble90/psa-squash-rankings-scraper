@@ -36,10 +36,10 @@ def test_parse_api_player_transformation():
     assert parsed["player"] == "Mohamed ElShorbagy"
     assert isinstance(parsed["tournaments"], int)
     assert parsed["points"] == 15000
-    assert parsed["birthdate"] == "N/A"
-    assert parsed["height(cm)"] == "N/A"
-    assert parsed["weight(kg)"] == "N/A"
-    assert parsed["country"] == "N/A"
+    assert parsed["birthdate"] == None
+    assert parsed["height(cm)"] == None
+    assert parsed["weight(kg)"] == None
+    assert parsed["country"] == None
 
 
 def test_parse_api_player_with_all_optional_fields():

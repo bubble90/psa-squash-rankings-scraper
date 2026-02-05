@@ -85,10 +85,10 @@ def test_get_rankings_with_missing_optional_fields(mock_session_class: MagicMock
     df = get_rankings("male", page_size=100, max_pages=1, resume=False)
 
     assert len(df) == 1
-    assert df.iloc[0]["birthdate"] == "N/A"
-    assert df.iloc[0]["height(cm)"] == "N/A"
-    assert df.iloc[0]["weight(kg)"] == "N/A"
-    assert df.iloc[0]["country"] == "N/A"
+    assert df.iloc[0]["birthdate"] == None
+    assert df.iloc[0]["height(cm)"] == None
+    assert df.iloc[0]["weight(kg)"] == None
+    assert df.iloc[0]["country"] == None
     mock_session.close.assert_called_once()
 
 

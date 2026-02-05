@@ -98,10 +98,10 @@ def parse_api_player(player: dict):
         "id": int(player["Id"]),
         "tournaments": int(player["Tournaments"]),
         "points": int(player["Total Points"]),
-        "height(cm)": "N/A",
-        "weight(kg)": "N/A",
-        "birthdate": "N/A",
-        "country": "N/A",
+        "height(cm)": None,
+        "weight(kg)": None,
+        "birthdate": None,
+        "country": None,
     }
 
     if "Birthdate" in player:
@@ -112,14 +112,14 @@ def parse_api_player(player: dict):
             parsed["height(cm)"] = parse_measure(player["Height"], "Height")
         except ValueError as e:
             logger.warning(f"Skipping height for {player.get('Name')}: {e}")
-            parsed["height(cm)"] = "N/A"
+            parsed["height(cm)"] = None
 
     if player.get("Weight"):
         try:
             parsed["weight(kg)"] = parse_measure(player["Weight"], "Weight")
         except ValueError as e:
             logger.warning(f"Skipping weight for {player.get('Name')}: {e}")
-            parsed["weight(kg)"] = "N/A"
+            parsed["weight(kg)"] = None
 
     if "Country" in player:
         parsed["country"] = player["Country"]
