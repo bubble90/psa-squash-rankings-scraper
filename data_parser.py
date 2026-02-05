@@ -40,7 +40,6 @@ def validate_api_schema(player: dict):
         f"Schema validation passed for player: {player.get('Name', 'Unknown')}"
     )
 
-import re
 
 def parse_measure(value, unit_label):
     """
