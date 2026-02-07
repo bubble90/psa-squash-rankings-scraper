@@ -106,7 +106,7 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
     - pandas DataFrame with all ranking data
     """
     logger = get_logger(__name__)
-    
+
     logger.info(
         f"Starting {gender} rankings scrape (page_size={page_size}, max_pages={max_pages}, resume={resume})"
     )
@@ -226,9 +226,13 @@ def get_rankings(gender="male", page_size=100, max_pages=None, resume=True):
 
     except Exception as e:
         logger.error(f"Error on page {page}: {e}")
-        logger.info(
-            f"Progress saved in checkpoint. Run again to resume from page {page + 1}"
-        )
+        if all_players:
+            logger.info(
+                f"Progress saved in checkpoint ({len(all_players)} players). "
+                f"Run again to resume from the last successfully saved page."
+            )
+        else:
+            logger.info("No progress to save. Run again to retry from page 1.")
         raise
     finally:
         session.close()
