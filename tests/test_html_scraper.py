@@ -110,9 +110,8 @@ def test_scrape_rankings_html_empty_table(mock_session_class):
     mock_response.raise_for_status = Mock()
     mock_session.get.return_value = mock_response
 
-    df = scrape_rankings_html()
-
-    assert len(df) == 0
+    with pytest.raises(ValueError, match="The rankings table structure is empty or invalid"):
+        scrape_rankings_html()
 
 
 @patch("html_scraper.requests.Session")

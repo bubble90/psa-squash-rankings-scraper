@@ -46,7 +46,18 @@ def scrape_rankings_html():
         logger.error("Could not find rankings table in HTML")
         raise ValueError("Could not find rankings table in HTML.")
 
-    rows = table.find("tbody").find_all("tr")
+    tbody = table.find("tbody")
+
+    if tbody:
+        rows = tbody.find_all("tr")
+    else:
+        logger.info("No <tbody> found; searching for <tr> directly in <table>.")
+        rows = table.find_all("tr", recursive=False)
+
+    if not rows:
+        logger.error("Rankings table found, but no rows (<tr>) were detected.")
+        raise ValueError("The rankings table structure is empty or invalid.")
+
     data = []
 
     for row in rows:
