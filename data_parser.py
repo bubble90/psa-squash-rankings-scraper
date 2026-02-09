@@ -7,6 +7,7 @@ and prevent silent data corruption.
 
 import re
 from logger import get_logger
+from typing import Dict, Any, Union
 
 
 REQUIRED_API_FIELDS = {
@@ -18,7 +19,7 @@ REQUIRED_API_FIELDS = {
 }
 
 
-def validate_api_schema(player: dict):
+def validate_api_schema(player: Dict[str, Any]) -> None:
     """
     Validate that a single API player object
     contains all required fields.
@@ -41,7 +42,10 @@ def validate_api_schema(player: dict):
     )
 
 
-def parse_measure(value, unit_label):
+def parse_measure(
+        value: Any,
+        unit_label: str
+        ) -> Union[int, str]:
     """
     Parses height/weight from various formats into an integer (Metric).
     Handles: "185cm", "185 cm", "185", "6' 1\"", "72in".
@@ -79,7 +83,7 @@ def parse_measure(value, unit_label):
 
     return int(clean_value)
 
-def parse_api_player(player: dict):
+def parse_api_player(player: Dict[str, Any]) -> Dict[str, Any]:
     """
     Validate and extract required fields from
     a PSA API player object.

@@ -5,11 +5,12 @@ Test suite for exporter functionality.
 import pytest
 import pandas as pd
 from unittest.mock import patch
+from pathlib import Path
 from exporter import export_to_csv
 
 
 @pytest.fixture
-def sample_dataframe():
+def sample_dataframe()-> pd.DataFrame:
     """Create a sample DataFrame for testing."""
     return pd.DataFrame(
         {
@@ -27,12 +28,16 @@ def sample_dataframe():
 
 
 @pytest.fixture
-def empty_dataframe():
+def empty_dataframe()-> pd.DataFrame:
     """Create an empty DataFrame with columns but no rows."""
     return pd.DataFrame(columns=["rank", "player", "points"])
 
 
-def test_export_to_csv_creates_file(tmp_path, monkeypatch, sample_dataframe):
+def test_export_to_csv_creates_file(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        sample_dataframe: pd.DataFrame
+        ) -> None:
     """Test that export_to_csv creates a CSV file."""
 
     monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
@@ -44,7 +49,11 @@ def test_export_to_csv_creates_file(tmp_path, monkeypatch, sample_dataframe):
     assert output_file.exists()
 
 
-def test_export_to_csv_correct_content(tmp_path, monkeypatch, sample_dataframe):
+def test_export_to_csv_correct_content(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        sample_dataframe: pd.DataFrame
+        ) -> None:
     """Test that exported CSV has correct content."""
     monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
 
@@ -61,7 +70,11 @@ def test_export_to_csv_correct_content(tmp_path, monkeypatch, sample_dataframe):
     assert df_read.iloc[2]["player"] == "Diego Elias"
 
 
-def test_export_to_csv_empty_dataframe(tmp_path, monkeypatch, empty_dataframe):
+def test_export_to_csv_empty_dataframe(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        empty_dataframe: pd.DataFrame
+        ) -> None:
     """Test exporting an empty DataFrame."""
     monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
 
@@ -75,7 +88,11 @@ def test_export_to_csv_empty_dataframe(tmp_path, monkeypatch, empty_dataframe):
     assert list(df_read.columns) == ["rank", "player", "points"]
 
 
-def test_export_to_csv_overwrites_existing(tmp_path, monkeypatch, sample_dataframe):
+def test_export_to_csv_overwrites_existing(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        sample_dataframe: pd.DataFrame
+        ) -> None:
     """Test that exporting overwrites existing file."""
     monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
 
@@ -101,7 +118,11 @@ def test_export_to_csv_overwrites_existing(tmp_path, monkeypatch, sample_datafra
     assert df_read.iloc[0]["points"] == 999999
 
 
-def test_export_to_csv_different_filenames(tmp_path, monkeypatch, sample_dataframe):
+def test_export_to_csv_different_filenames(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        sample_dataframe: pd.DataFrame
+        ) -> None:
     """Test exporting to multiple different files."""
     monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
 
@@ -114,7 +135,10 @@ def test_export_to_csv_different_filenames(tmp_path, monkeypatch, sample_datafra
     assert (tmp_path / "backup_rankings.csv").exists()
 
 
-def test_export_to_csv_large_dataset(tmp_path, monkeypatch):
+def test_export_to_csv_large_dataset(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch
+        ) -> None:
     """Test exporting a large DataFrame."""
     monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
 
@@ -136,7 +160,11 @@ def test_export_to_csv_large_dataset(tmp_path, monkeypatch):
     assert len(df_read) == 1000
 
 
-def test_export_to_csv_logs_success(tmp_path, monkeypatch, sample_dataframe):
+def test_export_to_csv_logs_success(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        sample_dataframe: pd.DataFrame
+        ) -> None:
     """Test that successful export logs appropriate message."""
     monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
 

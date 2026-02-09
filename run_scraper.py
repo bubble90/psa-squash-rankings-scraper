@@ -6,12 +6,13 @@ import sys
 import argparse
 import logging
 from api_scraper import get_rankings
+from typing import Literal, List
 from html_scraper import scrape_rankings_html
 from exporter import export_to_csv
 from logger import get_logger
 from config import init_dirs
 
-def configure_log_level(log_level: str):
+def configure_log_level(log_level: str) -> None:
     """
     Configure logging level for application loggers only.
 
@@ -38,7 +39,7 @@ def configure_log_level(log_level: str):
             if isinstance(handler, logging.StreamHandler):
                 handler.setLevel(level)
 
-def main():
+def main() -> None:
     """
     Main entry point with command-line argument support.
     Tries API with pagination for both genders, falls back to HTML if needed.
@@ -89,9 +90,9 @@ def main():
     )
 
     if args.gender == "both":
-        genders = ["male", "female"]
+        genders: List[Literal["male", "female"]] = ["male", "female"]
     else:
-        genders = [args.gender]
+        genders: List[Literal["male", "female"]] = [args.gender]
 
     success_count = 0
     failure_count = 0

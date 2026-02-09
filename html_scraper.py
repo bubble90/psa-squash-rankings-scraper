@@ -13,7 +13,7 @@ from config import (
 )
 
 
-def scrape_rankings_html():
+def scrape_rankings_html() -> pd.DataFrame:
     """
     Fallback scraper that parses the PSA rankings HTML table.
     Note: May return limited results if content is JS-rendered.

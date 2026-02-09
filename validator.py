@@ -8,9 +8,10 @@ import pandas as pd
 from pandas.errors import EmptyDataError
 from logger import get_logger
 from config import OUTPUT_DIR
+from typing import Literal
 
 
-def validate_scraped_data(gender="male"):
+def validate_scraped_data(gender: Literal["male", "female"] = "male") -> None:
     """
     Validate scraped data for a specific gender.
 
@@ -94,7 +95,7 @@ def validate_scraped_data(gender="male"):
 
 if __name__ == "__main__":
     logger = get_logger(__name__)
-    
+
     import sys
 
     logger.info("=" * 60)
@@ -108,7 +109,7 @@ if __name__ == "__main__":
         print()
         validate_scraped_data("female")
     elif gender in ["male", "female"]:
-        validate_scraped_data(gender)
+        validate_scraped_data(gender) # type: ignore
     else:
         logger.error(f"Invalid gender: {gender}. Use 'male', 'female', or 'both'")
         logger.info("Usage: python validator.py [male|female|both]")

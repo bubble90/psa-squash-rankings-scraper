@@ -4,11 +4,15 @@ Exporter utilities for PSA Squash rankings project.
 Handles exporting parsed ranking data to disk.
 """
 
+import pandas as pd
 from logger import get_logger
 from config import OUTPUT_DIR
 
 
-def export_to_csv(df, filename):
+def export_to_csv(
+        df: pd.DataFrame,
+        filename: str
+        ) -> None:
     """
     Export a pandas DataFrame to a CSV file.
 
@@ -17,7 +21,7 @@ def export_to_csv(df, filename):
     - filename: output CSV file name
     """
     logger = get_logger(__name__)
-    
+
     try:
         OUTPUT = OUTPUT_DIR / filename
         df.to_csv(OUTPUT, index=False)

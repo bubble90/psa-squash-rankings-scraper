@@ -26,7 +26,7 @@ CHECKPOINT_DIR = PROJECT_ROOT / "checkpoints"
 LOG_DIR = PROJECT_ROOT / "logs"
 OUTPUT_DIR = PROJECT_ROOT / "output"
 
-def init_dirs():
+def init_dirs() -> None:
     """Explicitly create required directories."""
     for dir in [OUTPUT_DIR, LOG_DIR, CHECKPOINT_DIR]:
         dir.mkdir(exist_ok=True)

@@ -3,10 +3,14 @@ Test suite for checkpoint functionality in PSA Squash scraper.
 """
 
 import json
+import pytest
+from pathlib import Path
 from api_scraper import save_checkpoint, load_checkpoint, clear_checkpoint
 
 
-def test_save_checkpoint(tmp_path, monkeypatch):
+def test_save_checkpoint(tmp_path: Path,
+                         monkeypatch: pytest.MonkeyPatch
+                         ) -> None:
     """Test that checkpoints are saved correctly."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
@@ -29,7 +33,9 @@ def test_save_checkpoint(tmp_path, monkeypatch):
     assert saved_data["players"] == test_data
 
 
-def test_load_checkpoint_exists(tmp_path, monkeypatch):
+def test_load_checkpoint_exists(tmp_path: Path,
+                         monkeypatch: pytest.MonkeyPatch
+                         ) -> None:
     """Test loading an existing checkpoint."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
@@ -48,7 +54,9 @@ def test_load_checkpoint_exists(tmp_path, monkeypatch):
     assert loaded["players"] == test_data
 
 
-def test_load_checkpoint_not_exists(tmp_path, monkeypatch):
+def test_load_checkpoint_not_exists(tmp_path: Path,
+                         monkeypatch: pytest.MonkeyPatch
+                         ) -> None:
     """Test loading checkpoint when file doesn't exist."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
@@ -56,7 +64,9 @@ def test_load_checkpoint_not_exists(tmp_path, monkeypatch):
     assert result is None
 
 
-def test_clear_checkpoint(tmp_path, monkeypatch):
+def test_clear_checkpoint(tmp_path: Path,
+                         monkeypatch: pytest.MonkeyPatch
+                         ) -> None:
     """Test that checkpoints are cleared correctly."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
@@ -70,14 +80,18 @@ def test_clear_checkpoint(tmp_path, monkeypatch):
     assert not checkpoint_file.exists()
 
 
-def test_clear_checkpoint_not_exists(tmp_path, monkeypatch):
+def test_clear_checkpoint_not_exists(tmp_path: Path,
+                         monkeypatch: pytest.MonkeyPatch
+                         ) -> None:
     """Test clearing checkpoint when file doesn't exist (should not raise error)."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
     clear_checkpoint("female")
 
 
-def test_save_checkpoint_female(tmp_path, monkeypatch):
+def test_save_checkpoint_female(tmp_path: Path,
+                         monkeypatch: pytest.MonkeyPatch
+                         ) -> None:
     """Test checkpoint for female rankings."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
@@ -91,11 +105,14 @@ def test_save_checkpoint_female(tmp_path, monkeypatch):
     assert checkpoint_file.exists()
 
     loaded = load_checkpoint("female")
+    assert loaded is not None
     assert loaded["gender"] == "female"
     assert loaded["last_page"] == 3
 
 
-def test_checkpoint_overwrites_existing(tmp_path, monkeypatch):
+def test_checkpoint_overwrites_existing(tmp_path: Path,
+                         monkeypatch: pytest.MonkeyPatch
+                         ) -> None:
     """Test that saving a checkpoint overwrites existing file."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
@@ -109,22 +126,28 @@ def test_checkpoint_overwrites_existing(tmp_path, monkeypatch):
     save_checkpoint("male", 2, data2)
 
     loaded = load_checkpoint("male")
+    assert loaded is not None
     assert loaded["last_page"] == 2
     assert loaded["total_players"] == 2
 
 
-def test_checkpoint_empty_data(tmp_path, monkeypatch):
+def test_checkpoint_empty_data(tmp_path: Path,
+                         monkeypatch: pytest.MonkeyPatch
+                         ) -> None:
     """Test saving checkpoint with empty data."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
     save_checkpoint("male", 0, [])
 
     loaded = load_checkpoint("male")
+    assert loaded is not None
     assert loaded["total_players"] == 0
     assert loaded["players"] == []
 
 
-def test_checkpoint_large_dataset(tmp_path, monkeypatch):
+def test_checkpoint_large_dataset(tmp_path: Path,
+                         monkeypatch: pytest.MonkeyPatch
+                         ) -> None:
     """Test checkpoint with large dataset."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
@@ -136,6 +159,7 @@ def test_checkpoint_large_dataset(tmp_path, monkeypatch):
     save_checkpoint("male", 5, large_data)
     loaded = load_checkpoint("male")
 
+    assert loaded is not None
     assert loaded["total_players"] == 500
     assert len(loaded["players"]) == 500
     assert loaded["players"][0]["rank"] == 1

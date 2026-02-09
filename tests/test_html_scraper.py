@@ -8,7 +8,7 @@ from html_scraper import scrape_rankings_html
 
 
 @patch("html_scraper.requests.Session")
-def test_scrape_rankings_html_success(mock_session_class):
+def test_scrape_rankings_html_success(mock_session_class: MagicMock) -> None:
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
 
@@ -48,7 +48,7 @@ def test_scrape_rankings_html_success(mock_session_class):
 
 
 @patch("html_scraper.requests.Session")
-def test_scrape_rankings_html_removes_commas(mock_session_class):
+def test_scrape_rankings_html_removes_commas(mock_session_class: MagicMock) -> None:
     """Test that commas are removed from points."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
@@ -78,7 +78,7 @@ def test_scrape_rankings_html_removes_commas(mock_session_class):
 
 
 @patch("html_scraper.requests.Session")
-def test_scrape_rankings_html_no_table(mock_session_class):
+def test_scrape_rankings_html_no_table(mock_session_class: MagicMock) -> None:
     """Test HTML scraper when table is not found."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
@@ -115,7 +115,7 @@ def test_scrape_rankings_html_empty_table(mock_session_class):
 
 
 @patch("html_scraper.requests.Session")
-def test_scrape_rankings_html_skips_incomplete_rows(mock_session_class):
+def test_scrape_rankings_html_skips_incomplete_rows(mock_session_class: MagicMock) -> None:
     """Test that rows with insufficient cells are skipped."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
@@ -156,7 +156,7 @@ def test_scrape_rankings_html_skips_incomplete_rows(mock_session_class):
 
 
 @patch("html_scraper.requests.Session")
-def test_scrape_rankings_html_strips_whitespace(mock_session_class):
+def test_scrape_rankings_html_strips_whitespace(mock_session_class: MagicMock) -> None:
     """Test that whitespace is stripped from cell text."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
@@ -190,7 +190,7 @@ def test_scrape_rankings_html_strips_whitespace(mock_session_class):
 
 
 @patch("html_scraper.requests.Session")
-def test_scrape_rankings_html_network_error(mock_session_class):
+def test_scrape_rankings_html_network_error(mock_session_class: MagicMock) -> None:
     """Test HTML scraper handles network errors."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
@@ -202,7 +202,7 @@ def test_scrape_rankings_html_network_error(mock_session_class):
 
 
 @patch("html_scraper.requests.Session")
-def test_scrape_rankings_html_timeout(mock_session_class):
+def test_scrape_rankings_html_timeout(mock_session_class: MagicMock) -> None:
     """Test HTML scraper handles timeout errors."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
@@ -216,7 +216,7 @@ def test_scrape_rankings_html_timeout(mock_session_class):
 
 
 @patch("html_scraper.requests.Session")
-def test_scrape_rankings_html_http_error(mock_session_class):
+def test_scrape_rankings_html_http_error(mock_session_class: MagicMock) -> None:
     """Test HTML scraper handles HTTP errors."""
     import requests
 
@@ -234,7 +234,7 @@ def test_scrape_rankings_html_http_error(mock_session_class):
 
 
 @patch("html_scraper.requests.Session")
-def test_scrape_rankings_html_correct_url(mock_session_class):
+def test_scrape_rankings_html_correct_url(mock_session_class: MagicMock) -> None:
     """Test that the correct URL is called."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
@@ -259,13 +259,12 @@ def test_scrape_rankings_html_correct_url(mock_session_class):
 
     scrape_rankings_html()
 
-    # Verify correct URL was called
     called_url = mock_session.get.call_args[0][0]
     assert called_url == "https://www.psasquashtour.com/rankings/"
 
 
 @patch("html_scraper.requests.Session")
-def test_scrape_rankings_html_user_agent_present(mock_session_class):
+def test_scrape_rankings_html_user_agent_present(mock_session_class: MagicMock) -> None:
     """Test that User-Agent header is set."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
@@ -299,7 +298,7 @@ def test_scrape_rankings_html_user_agent_present(mock_session_class):
 
 
 @patch("html_scraper.requests.Session")
-def test_scrape_rankings_html_timeout_parameter(mock_session_class):
+def test_scrape_rankings_html_timeout_parameter(mock_session_class: MagicMock) -> None:
     """Test that timeout parameter is set."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
@@ -329,7 +328,7 @@ def test_scrape_rankings_html_timeout_parameter(mock_session_class):
 
 
 @patch("html_scraper.requests.Session")
-def test_scrape_rankings_html_large_dataset(mock_session_class):
+def test_scrape_rankings_html_large_dataset(mock_session_class: MagicMock) -> None:
     """Test HTML scraper with many rows."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
@@ -366,7 +365,7 @@ def test_scrape_rankings_html_large_dataset(mock_session_class):
 
 
 @patch("html_scraper.requests.Session")
-def test_scrape_rankings_html_special_characters(mock_session_class):
+def test_scrape_rankings_html_special_characters(mock_session_class: MagicMock) -> None:
     """Test HTML scraper handles special characters in player names."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session

@@ -2,7 +2,7 @@ import pytest
 from data_parser import parse_api_player, validate_api_schema
 
 
-def test_validate_api_schema_success():
+def test_validate_api_schema_success() -> None:
     """Test that valid data passes schema validation."""
     valid_player = {
         "World Ranking": 1,
@@ -14,14 +14,14 @@ def test_validate_api_schema_success():
     validate_api_schema(valid_player)
 
 
-def test_validate_api_schema_failure():
+def test_validate_api_schema_failure() -> None:
     """Test that missing fields raise a ValueError."""
     invalid_player = {"Name": "Ali Farag", "Tournaments": 12}
     with pytest.raises(ValueError, match="Missing fields"):
         validate_api_schema(invalid_player)
 
 
-def test_parse_api_player_transformation():
+def test_parse_api_player_transformation() -> None:
     """Test that the parser correctly renames and converts fields."""
     raw_data = {
         "World Ranking": "5",
@@ -42,7 +42,7 @@ def test_parse_api_player_transformation():
     assert parsed["country"] is None
 
 
-def test_parse_api_player_with_all_optional_fields():
+def test_parse_api_player_with_all_optional_fields() -> None:
     """Test that the parser correctly extracts all optional fields when present."""
     raw_data = {
         "World Ranking": "1",

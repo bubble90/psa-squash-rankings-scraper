@@ -11,7 +11,10 @@ from datetime import datetime
 from config import LOG_DIR
 
 
-def setup_logger(name: str, level=logging.INFO):
+def setup_logger(
+        name: str,
+        level: int = logging.INFO
+        ) -> logging.Logger:
     """
     Set up a logger with consistent formatting and handlers.
 
@@ -49,7 +52,7 @@ def setup_logger(name: str, level=logging.INFO):
     return logger
 
 
-def get_logger(name: str):
+def get_logger(name: str) -> logging.Logger:
     """
     Get or create a logger instance.
 
