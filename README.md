@@ -1,18 +1,18 @@
 # PSA Squash Rankings Scraper
 
-A robust Python-based web scraper for fetching professional squash player rankings from the PSA World Tour. Features API-first approach with HTML fallback, resumable pagination, checkpoint recovery, and comprehensive logging.
+A robust Python-based web scraper for fetching professional squash player rankings from the PSA World Tour. Features **explicit typing** with distinct schemas for API and HTML fallback data, ensuring consumers are always aware when working with degraded data.
 
 ## Features
 
-- **Dual Scraping Strategy**: Primary API scraper with automatic HTML fallback
+- **Explicit Fallback Typing**: Distinct `ApiPlayerRecord` and `HtmlPlayerRecord` types make data quality visible
+- **Type-Safe Data Handling**: Type guards and union types prevent silent schema mismatches
+- **API-First Approach**: Primary API scraper with automatic HTML fallback
 - **Resumable Scraping**: Checkpoint system allows recovery from interruptions
 - **Pagination**: Efficiently handles large datasets with configurable page sizes
-- **User Agent Rotation**: Systematic rotation to avoid rate limiting
-- **Proxy Support**: Configurable HTTP/HTTPS proxy via environment variables
-- **Error Handling**: Graceful fallback and detailed error reporting
-- **Organized Output**: All scraped data saved to dedicated output/ directory
+- **User Agent Rotation**: Both scrapers use systematic rotation to avoid rate limiting
+- **Proxy Support**: Configurable HTTP/HTTPS proxy via environment variables (both scrapers)
+- **Comprehensive Logging**: Data quality warnings make degraded data explicit
 - **Modern Tooling**: Uses uv for fast dependency management and ruff for linting
-- **Extensive Test Coverage**: Unit tests with mocking
 
 ## Requirements
 
@@ -28,8 +28,7 @@ git clone https://github.com/yourusername/psa-squash-rankings-scraper.git
 cd psa-squash-rankings-scraper
 ```
 
-
-### 3. Install dependencies
+### 2. Install dependencies
 
 ```bash
 # Install uv if you haven't already
@@ -42,6 +41,44 @@ uv sync
 uv sync --group dev
 ```
 
+## Data Quality: API vs HTML Fallback
+
+This scraper uses **explicit typing** to make data quality visible to consumers.
+
+### ApiPlayerRecord (Complete Data)
+
+```python
+class ApiPlayerRecord(TypedDict):
+    rank: int
+    player: str
+    id: int                      # ✓ Unique player identifier
+    tournaments: int
+    points: int
+    height_cm: Optional[int]     # ✓ Biographical data
+    weight_kg: Optional[int]     # ✓ Biographical data
+    birthdate: Optional[str]     # ✓ Biographical data
+    country: Optional[str]       # ✓ Biographical data
+    source: Literal["api"]       # ✓ Data quality indicator
+```
+
+**Use for**: Production systems, data analysis, player tracking, joining datasets
+
+### HtmlPlayerRecord (Degraded Fallback)
+
+```python
+class HtmlPlayerRecord(TypedDict):
+    rank: int
+    player: str
+    tournaments: int
+    points: int
+    source: Literal["html"]      # ⚠ Degraded data indicator
+    # ✗ NO player ID
+    # ✗ NO biographical data
+```
+
+**Use for**: Display purposes only when API is unavailable
+
+**Cannot be used for**: Joining datasets, player tracking, biographical analysis
 
 ## Usage
 
@@ -49,54 +86,78 @@ uv sync --group dev
 
 ```bash
 # Scrape both male and female rankings
-uv run_scraper.py
+uv run run_scraper.py
 
 # Scrape only male rankings
-uv run_scraper.py --gender male
+uv run run_scraper.py --gender male
 
 # Scrape only female rankings
-uv run_scraper.py --gender female
+uv run run_scraper.py --gender female
 ```
 
 ### Advanced Options
 
 ```bash
 # Custom page size
-uv run_scraper.py --gender male --page-size 50
+uv run run_scraper.py --gender male --page-size 50
 
 # Limit number of pages
-uv run_scraper.py --gender male --max-pages 5
+uv run run_scraper.py --gender male --max-pages 5
 
 # Start fresh (ignore checkpoints)
-uv run_scraper.py --gender male --no-resume
+uv run run_scraper.py --gender male --no-resume
 
 # Enable debug logging
-uv run_scraper.py --gender male --log-level DEBUG
+uv run run_scraper.py --gender male --log-level DEBUG
 ```
 
-### Command-Line Arguments
+### Programmatic Usage with Type Safety
 
-| Argument | Options | Default | Description |
-|----------|---------|---------|-------------|
-| `--gender` | `male`, `female`, `both` | `both` | Gender to scrape |
-| `--page-size` | integer | `100` | Results per page |
-| `--max-pages` | integer | `None` | Maximum pages to fetch |
-| `--no-resume` | flag | `False` | Ignore checkpoints |
-| `--log-level` | `DEBUG`, `INFO`, `WARNING`, `ERROR` | `INFO` | Logging verbosity |
+```python
+from api_scraper import get_rankings
+from html_scraper import scrape_rankings_html
+from schema import is_api_result, is_html_result, ScraperResult
+
+# Try API first
+try:
+    result: ScraperResult = get_rankings("male")
+
+    # Type-safe handling
+    if is_api_result(result):
+        # Safe to access 'id' field and biographical data
+        for player in result:
+            print(f"ID: {player['id']}, Name: {player['player']}")
+            if player['country']:
+                print(f"  Country: {player['country']}")
+
+except Exception as e:
+    print(f"API failed: {e}")
+
+    # Explicit fallback with degraded data
+    result = scrape_rankings_html()
+
+    if is_html_result(result):
+        # Code is aware this is degraded data
+        print("WARNING: Using fallback data without IDs")
+        for player in result:
+            # Cannot access 'id' field - type checker will warn
+            print(f"Name: {player['player']}, Rank: {player['rank']}")
+```
 
 ## Project Structure
 
 ```
 psa-squash-rankings-scraper/
-├── api_scraper.py           # Main API scraper with pagination
-├── html_scraper.py          # Fallback HTML scraper
+├── schema.py                # Type definitions (ApiPlayerRecord, HtmlPlayerRecord)
+├── api_scraper.py           # API scraper (returns list[ApiPlayerRecord])
+├── html_scraper.py          # HTML fallback (returns list[HtmlPlayerRecord])
 ├── data_parser.py           # Schema validation and parsing
-├── exporter.py              # CSV export utilities
-├── logger.py                # Centralized logging configuration
-├── run_scraper.py           # Main entry point
-├── validator.py             # Data validation tool
-├── pyproject.toml           # Project configuration and dependencies
-├── config.py                # Project configuration constants
+├── exporter.py              # Type-aware CSV export
+├── logger.py                # Centralized logging
+├── run_scraper.py           # Main entry point with explicit fallback handling
+├── validator.py             # Type-aware data validation
+├── pyproject.toml           # Project configuration
+├── config.py                # Configuration constants
 ├── .gitignore               # Git ignore rules
 ├── README.md                # This file
 ├── tests/                   # Test suite
@@ -104,102 +165,124 @@ psa-squash-rankings-scraper/
 │   ├── test_parser.py       # Parser unit tests
 │   ├── test_checkpoints.py  # Checkpoint system tests
 │   ├── test_api_scraper.py  # API scraper tests
-│   └── test_html_scraper.py # HTML scraper tests
-│   └── test_exporter.py     # Exporter tests
+│   ├── test_html_scraper.py # HTML scraper tests
+│   ├── test_exporter.py     # Exporter tests
+│   └── test_schema.py       # Schema tests
 ├── checkpoints/             # Checkpoint files (auto-created)
 ├── logs/                    # Log files (auto-created)
 └── output/                  # Scraped CSV files (auto-created)
 ```
 
-## How It Works
-
-### 1. API Scraping (Primary)
-
-The scraper fetches data from the PSA backend API:
-
-```python
-from api_scraper import get_rankings
-
-# Fetch male rankings
-df = get_rankings(gender="male", page_size=100, resume=True)
-```
-
-**Features:**
-- Pagination with automatic page detection
-- Checkpoint system for resumable scraping
-- Systematic user agent rotation
-- Proxy support via environment variables
-
-### 2. HTML Scraping (Fallback)
-
-If the API fails, automatically falls back to HTML parsing:
-
-```python
-from html_scraper import scrape_rankings_html
-
-# Fallback scraping
-df = scrape_rankings_html()
-```
-
-### 3. Data Validation
-
-Schema validation ensures data integrity:
-
-```python
-from data_parser import parse_api_player, validate_api_schema
-
-# Validates required fields before parsing
-player_data = parse_api_player(raw_player_data)
-```
-
-### 4. Checkpoint System
-
-Scraping progress is automatically saved:
-
-```
-checkpoints/
-├── male_checkpoint.json
-└── female_checkpoint.json
-```
-
-If scraping is interrupted, simply re-run the script to resume from the last checkpoint.
-
-## Output
+## Output Files
 
 ### CSV Files
 
-Successfully scraped data is exported to the output/ directory:
-- `output/psa_rankings_male.csv`
-- `output/psa_rankings_female.csv`
-- `output/psa_rankings_male_fallback.csv` (if API fails)
-- `output/psa_rankings_female_fallback.csv` (if API fails)
+Successfully scraped data is exported to the output/ directory with clear naming:
 
+- `output/psa_rankings_male.csv` - Male rankings (complete API data)
+- `output/psa_rankings_female.csv` - Female rankings (complete API data)
+- `output/psa_rankings_male_fallback.csv` - Male fallback (degraded HTML data)
 
 ### CSV Format
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `rank` | int | World ranking position |
-| `player` | string | Player name |
-| `id` | int | Player id number |
-| `tournaments` | int | Number of tournaments played |
-| `points` | int | Total ranking points |
-| `height(cm)` | int | Player height in cm (or "N/A") |
-| `weight(kg)` | int | Player weight in kg (or "N/A") |
-| `birthdate` | string | Player birthdate (or "N/A") |
-| `country` | string | Player country (or "N/A") |
+**API Data CSV** (complete):
+```csv
+rank,player,id,tournaments,points,height_cm,weight_kg,birthdate,country,source
+1,Ali Farag,123,15,2500,180,75,1992-01-01,Egypt,api
+```
 
-### Log Files
+**HTML Fallback CSV** (degraded):
+```csv
+rank,player,tournaments,points,source
+1,Ali Farag,15,2500,html
+```
 
-Timestamped log files are created in the `logs/` directory:
+Note the `source` column indicates data quality.
+
+## How It Works
+
+### 1. Explicit Type System
+
+The scraper uses Python's `TypedDict` to define distinct schemas:
+
+```python
+# schema.py defines two incompatible types
+ApiPlayerRecord   # Complete data with 'id' field
+HtmlPlayerRecord  # Degraded data without 'id' field
+
+# Type guards make checking explicit
+if is_api_result(data):
+    # Safe to use player['id']
+elif is_html_result(data):
+    # Cannot use player['id'] - not in schema
+```
+
+### 2. Fallback with Warnings
+
+The scraper makes degraded data explicit through logging:
 
 ```
-logs/psa_scraper_20260112_143025.log
+INFO: Attempting API scrape for male rankings...
+ERROR: API scrape failed: Connection timeout
+WARNING: ============================================================
+WARNING: FALLING BACK TO HTML SCRAPER
+WARNING: WARNING: HTML data is DEGRADED - missing player IDs and biographical info
+WARNING: ============================================================
+WARNING: Using HTML fallback scraper - data will be incomplete
+```
+
+### 3. Type-Safe Export
+
+The exporter detects data quality and logs appropriately:
+
+```python
+if is_api_result(data):
+    logger.info("Exporting complete API records")
+elif is_html_result(data):
+    logger.warning("Exporting DEGRADED HTML records - missing IDs")
+```
+
+## Validation
+
+Validate scraped data with type-aware checks:
+
+```bash
+# Validate male rankings
+uv validator.py male
+
+# Validate female rankings
+uv validator.py female
+
+# Validate both
+uv validator.py both
+```
+
+The validator displays:
+- Data source (API vs HTML)
+- Data quality assessment
+- Schema completeness
+- Available fields
+- Recommendations for production use
+
+Example output:
+```
+Data Quality Assessment:
+--------------------------------------------------
+API scraper results (500 players):
+  ✓ Data source: API (COMPLETE DATA)
+  ✓ Contains player IDs: Yes
+  ✓ Contains biographical data: Yes
+  ✓ Schema complete
+
+Validation Summary:
+--------------------------------------------------
+✓ COMPLETE API DATA AVAILABLE - recommended for production use
 ```
 
 ## Development
 
 ### Code Quality
+
 This project uses Ruff for linting and formatting:
 
 ```bash
@@ -214,7 +297,6 @@ uv run ruff check --fix .
 ```
 
 ### Type Checking
-Type checking with ty:
 
 ```bash
 # Install ty
@@ -230,58 +312,19 @@ uv run ty check
 # Run all tests
 uv run pytest
 
-# Run specific test file
-uv run pytest test_parser.py -v
-
 # Run with coverage
 uv run pytest --cov=. --cov-report=html
 
-# Run tests matching pattern
-uv run pytest -k "checkpoint" -v
-```
-
-### Test Coverage
-
-The project includes tests covering:
-- Data parser validation (4 tests)
-- Checkpoint system (9 tests)
-- API scraping (13 tests)
-- HTML scraping (14 tests)
-- Exporter (7 tests)
-- Export functionality
-- Error handling
-- Edge cases
-
-View coverage report:
-
-```bash
-uv run pytest --cov=. --cov-report=html
+# View coverage report
 open htmlcov/index.html
 ```
-
-### VS Code Setup
-The project includes recommended VS Code extensions in .vscode/extensions.json:
-
-- Ruff (astral-sh.ruff) - Fast Python linter and formatter
-- Python (ms-python.python) - Python language support
-
-VS Code will prompt you to install these when you open the project.
-
-### Continuous Integration
-The project uses GitHub Actions for CI/CD. On every push and pull request, the workflow:
-
-- Runs Ruff linting
-- Executes the full test suite on Python 3.12
-- Performs type checking with ty
-
-See .github/workflows/ci.yml for details.
 
 ## Configuration
 
 ### Environment Variables
 
 ```bash
-# Set proxy (optional)
+# Set proxy (both API and HTML scrapers support this)
 export HTTP_PROXY="http://proxy.example.com:8080"
 export HTTPS_PROXY="https://proxy.example.com:8080"
 ```
@@ -293,112 +336,125 @@ Modify `logger.py` to customize:
 - Log format
 - Console/file log levels
 
-## Validation
+## Key Improvements Over Original
 
-Validate scraped data:
+### 1. Explicit Typing
+- **Before**: Silent schema mismatches between scrapers
+- **After**: Distinct types (`ApiPlayerRecord` vs `HtmlPlayerRecord`) make data quality explicit
 
-```bash
-# Validate male rankings
-uv validator.py male
+### 2. Consistent Network Behavior
+- **Before**: Only API scraper supported proxies and UA rotation
+- **After**: Both scrapers support proxies and UA rotation
 
-# Validate female rankings
-uv validator.py female
+### 3. Type-Safe Code
+- **Before**: Consumers didn't know when they got degraded data
+- **After**: Type guards (`is_api_result()`, `is_html_result()`) make checks explicit
 
-# Validate both
-uv validator.py both
-```
+### 4. Clear Warnings
+- **Before**: Fallback happened silently
+- **After**: Extensive logging warns about degraded data quality
 
-The validator compares API and HTML scraper outputs and displays:
-- Row counts
-- Top 5 players
-- Data consistency checks
+### 5. Proper Resource Management
+- **Before**: HTML scraper didn't close sessions
+- **After**: Both scrapers use proper session cleanup
 
 ## Troubleshooting
 
 ### Issue: "command not found: uv"
 
 **Solution:**
-
 ```bash
 # Install uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-### Issue: API returns no data
+### Issue: Type errors in IDE
 
 **Solution:**
-- Check internet connection
-- Verify API endpoint is accessible
-- Check logs for detailed error messages
-- Scraper will automatically fall back to HTML
+Make sure your IDE is using Python 3.12+ and has type checking enabled. The explicit typing requires modern Python.
 
-### Issue: Checkpoint corruption
+### Issue: Fallback always used
 
 **Solution:**
-
+Check logs for API error details:
 ```bash
-# Delete checkpoints and start fresh
-rm -rf checkpoints/
-uv run_scraper.py --no-resume
+uv run run_scraper.py --log-level DEBUG
 ```
 
-### Issue: Rate limiting
+Common causes:
+- Network connectivity issues
+- Proxy misconfiguration
+- API endpoint changes
+- Rate limiting
+
+### Issue: Missing player IDs in output
 
 **Solution:**
-- Reduce page size: `--page-size 50`
-- Add delays between requests (modify `api_scraper.py`)
-- Use proxy: Set `HTTP_PROXY` environment variable
+Check the `source` column in your CSV:
+- `source=api`: Should have IDs
+- `source=html`: Expected - HTML data doesn't include IDs
+
+If `source=html`, the scraper fell back to degraded data. Check logs to see why API failed.
 
 ## Examples
 
-### Example 1: Quick Test
-
-```bash
-# Scrape first 2 pages of male rankings
-uv run run_scraper.py --gender male --max-pages 2 --log-level DEBUG
-```
-
-### Example 2: Resume Interrupted Scrape
-
-```bash
-# First run (interrupted at page 5)
-uv run_scraper.py --gender male
-
-# Resume from checkpoint
-uv run_scraper.py --gender male
-```
-
-### Example 3: Using as a Module
+### Example 1: Type-Safe Data Processing
 
 ```python
 from api_scraper import get_rankings
-from exporter import export_to_csv
+from schema import is_api_result
+import pandas as pd
 
 # Fetch data
-df = get_rankings(gender="female", page_size=50, max_pages=10)
+result = get_rankings("male", max_pages=5)
 
-# Custom processing
-top_10 = df.head(10)
-print(f"Top 10 female players:\n{top_10}")
+# Type-safe processing
+if is_api_result(result):
+    # We know we have complete data with IDs
+    df = pd.DataFrame(result)
 
-# Export
-export_to_csv(top_10, "top_10_female.csv")
+    # Safe to use 'id' column for joins
+    print(f"Player IDs available: {df['id'].notna().sum()}")
+
+    # Safe to analyze biographical data
+    print(f"Average height: {df['height_cm'].mean():.1f} cm")
+else:
+    print("WARNING: Degraded data - cannot perform ID-based analysis")
+```
+
+### Example 2: Handling Fallback Explicitly
+
+```python
+from run_scraper import scrape_gender
+from schema import is_html_result
+
+# Scrape with explicit fallback handling
+data, is_fallback = scrape_gender("male", page_size=100, max_pages=None, resume=True)
+
+if is_fallback:
+    print("⚠ Using degraded HTML data")
+    print("⚠ Cannot track players across time (no IDs)")
+    print("⚠ Use for display purposes only")
+else:
+    print("✓ Complete API data available")
+    print("✓ Safe for production use")
 ```
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please:
 
 1. Fork the repository
-2. Create your feature branch (git checkout -b feature/AmazingFeature)
-3. Install dev dependencies (uv sync --extra dev)
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Install dev dependencies (`uv sync --group dev`)
 4. Make your changes and add tests
-5. Run tests, linting, and type checking:
-```bash
-uv run pytest
-uv run ruff check .
-uv run ty check
-```
-6. Commit your changes (git commit -m 'Add some AmazingFeature')
-7. Push to the branch (git push origin feature/AmazingFeature)
-8. Open a Pull Request
+5. Ensure type safety: `uv run ty check`
+6. Run tests: `uv run pytest`
+7. Check code quality: `uv run ruff check .`
+8. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+9. Push to the branch (`git push origin feature/AmazingFeature`)
+10. Open a Pull Request
+
+## Acknowledgments
+
+- PSA World Tour for providing the ranking data

@@ -11,10 +11,7 @@ from schema import ScraperResult, is_api_result, is_html_result
 from config import OUTPUT_DIR
 
 
-def export_to_csv(
-        data: ScraperResult,
-        filename: str
-        ) -> None:
+def export_to_csv(data: ScraperResult, filename: str) -> None:
     """
     Export scraper results to a CSV file.
 
@@ -38,15 +35,19 @@ def export_to_csv(
     try:
         if is_api_result(data):
             logger.info(f"Exporting {len(data)} complete API records to {filename}")
-            logger.debug("Data includes: rank, player, id, tournaments, points, height_cm, weight_kg, birthdate, country")
+            logger.debug(
+                "Data includes: rank, player, id, tournaments, points, height_cm, weight_kg, birthdate, country"
+            )
         elif is_html_result(data):
             logger.warning(
                 f"Exporting {len(data)} DEGRADED HTML records to {filename} - "
                 "missing player IDs and biographical data"
             )
-            logger.debug("Data includes: rank, player, tournaments, points (NO ID or biographical data)")
+            logger.debug(
+                "Data includes: rank, player, tournaments, points (NO ID or biographical data)"
+            )
         else:
-            logger.error(f"Unknown data source type in export")
+            logger.error("Unknown data source type in export")
 
         OUTPUT = OUTPUT_DIR / filename
         df = pd.DataFrame(data)

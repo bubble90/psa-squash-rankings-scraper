@@ -15,9 +15,10 @@ class ApiPlayerRecord(TypedDict):
     Contains all available fields including player ID and biographical data.
     This is the preferred data source.
     """
+
     rank: int
     player: str
-    id: int  
+    id: int
     tournaments: int
     points: int
     height_cm: Optional[int]
@@ -37,6 +38,7 @@ class HtmlPlayerRecord(TypedDict):
 
     Use only when API is unavailable.
     """
+
     rank: int
     player: str
     tournaments: int

@@ -74,10 +74,10 @@ def sample_html_data() -> list[HtmlPlayerRecord]:
 
 
 def test_export_to_csv_creates_file_api_data(
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-        sample_api_data: list[ApiPlayerRecord]
-        ) -> None:
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    sample_api_data: list[ApiPlayerRecord],
+) -> None:
     """Test that export_to_csv creates a CSV file with API data."""
     monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
 
@@ -89,10 +89,10 @@ def test_export_to_csv_creates_file_api_data(
 
 
 def test_export_to_csv_creates_file_html_data(
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-        sample_html_data: list[HtmlPlayerRecord]
-        ) -> None:
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    sample_html_data: list[HtmlPlayerRecord],
+) -> None:
     """Test that export_to_csv creates a CSV file with HTML data."""
     monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
 
@@ -104,10 +104,10 @@ def test_export_to_csv_creates_file_html_data(
 
 
 def test_export_to_csv_correct_content_api(
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-        sample_api_data: list[ApiPlayerRecord]
-        ) -> None:
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    sample_api_data: list[ApiPlayerRecord],
+) -> None:
     """Test that exported CSV has correct API content."""
     import pandas as pd
 
@@ -128,10 +128,10 @@ def test_export_to_csv_correct_content_api(
 
 
 def test_export_to_csv_correct_content_html(
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-        sample_html_data: list[HtmlPlayerRecord]
-        ) -> None:
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    sample_html_data: list[HtmlPlayerRecord],
+) -> None:
     """Test that exported CSV has correct HTML content."""
     import pandas as pd
 
@@ -151,9 +151,8 @@ def test_export_to_csv_correct_content_html(
 
 
 def test_export_to_csv_empty_data(
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch
-        ) -> None:
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test exporting empty data."""
     monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
 
@@ -161,12 +160,11 @@ def test_export_to_csv_empty_data(
     export_to_csv([], filename)
 
 
-
 def test_export_to_csv_overwrites_existing(
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-        sample_api_data: list[ApiPlayerRecord]
-        ) -> None:
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    sample_api_data: list[ApiPlayerRecord],
+) -> None:
     """Test that exporting overwrites existing file."""
     import pandas as pd
 
@@ -203,10 +201,10 @@ def test_export_to_csv_overwrites_existing(
 
 
 def test_export_to_csv_different_filenames(
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-        sample_api_data: list[ApiPlayerRecord]
-        ) -> None:
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    sample_api_data: list[ApiPlayerRecord],
+) -> None:
     """Test exporting to multiple different files."""
     monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
 
@@ -220,9 +218,8 @@ def test_export_to_csv_different_filenames(
 
 
 def test_export_to_csv_large_dataset(
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch
-        ) -> None:
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test exporting a large dataset."""
     import pandas as pd
 
@@ -255,10 +252,10 @@ def test_export_to_csv_large_dataset(
 
 
 def test_export_to_csv_logs_success_api(
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-        sample_api_data: list[ApiPlayerRecord]
-        ) -> None:
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    sample_api_data: list[ApiPlayerRecord],
+) -> None:
     """Test that successful export of API data logs appropriate message."""
     monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
 
@@ -275,10 +272,10 @@ def test_export_to_csv_logs_success_api(
 
 
 def test_export_to_csv_logs_warning_html(
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-        sample_html_data: list[HtmlPlayerRecord]
-        ) -> None:
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    sample_html_data: list[HtmlPlayerRecord],
+) -> None:
     """Test that export of HTML data logs warning about degraded data."""
     monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
 

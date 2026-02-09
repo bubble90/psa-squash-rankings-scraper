@@ -7,21 +7,19 @@ and prevent silent data corruption.
 
 import re
 from logger import get_logger
-from typing import Any, Union
+from typing import Any
 from validator import validate_api_schema
 from schema import ApiPlayerRecord
 
 
-def parse_measure(
-        value: Any,
-        unit_label: str
-        ) -> Union[int, str]:
+def parse_measure(value: Any, unit_label: str) -> int | None:
     """
     Parses height/weight from various formats into an integer (Metric).
     Handles: "185cm", "185 cm", "185", "6' 1\"", "72in".
+    Returns None if value is empty or invalid.
     """
     if not value or not str(value).strip():
-        return "N/A"
+        return None
 
     val_str = str(value).strip().lower()
 
@@ -37,16 +35,16 @@ def parse_measure(
             raise ValueError(f"Malformed Imperial height in {unit_label}: '{val_str}'")
 
     if "in" in val_str:
-        clean_inches = re.sub(r'[^0-9]', '', val_str)
+        clean_inches = re.sub(r"[^0-9]", "", val_str)
         if clean_inches:
             return round(int(clean_inches) * 2.54)
 
     if "lb" in val_str or "pound" in val_str:
-        clean_lbs = re.sub(r'[^0-9]', '', val_str)
+        clean_lbs = re.sub(r"[^0-9]", "", val_str)
         if clean_lbs:
             return round(int(clean_lbs) * 0.453592)
 
-    clean_value = re.sub(r'[^0-9]', '', val_str)
+    clean_value = re.sub(r"[^0-9]", "", val_str)
 
     if not clean_value:
         raise ValueError(f"No numeric data found for {unit_label}: '{val_str}'")

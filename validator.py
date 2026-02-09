@@ -75,8 +75,8 @@ def validate_scraped_data(gender: Literal["male", "female"] = "male") -> None:
     if api_exists:
         try:
             api_df = pd.read_csv(API_FILE)
-            if 'source' in api_df.columns and len(api_df) > 0:
-                api_source = api_df['source'].iloc[0]
+            if "source" in api_df.columns and len(api_df) > 0:
+                api_source = api_df["source"].iloc[0]
             logger.info(f"Loaded API file: {len(api_df)} rows from {API_FILE}")
             if api_source:
                 logger.info(f"  Data source: {api_source}")
@@ -91,8 +91,8 @@ def validate_scraped_data(gender: Literal["male", "female"] = "male") -> None:
     if html_exists:
         try:
             html_df = pd.read_csv(HTML_FILE)
-            if 'source' in html_df.columns and len(html_df) > 0:
-                html_source = html_df['source'].iloc[0]
+            if "source" in html_df.columns and len(html_df) > 0:
+                html_source = html_df["source"].iloc[0]
             logger.info(f"Loaded HTML file: {len(html_df)} rows from {HTML_FILE}")
             if html_source:
                 logger.info(f"  Data source: {html_source}")
@@ -117,8 +117,18 @@ def validate_scraped_data(gender: Literal["male", "female"] = "male") -> None:
             logger.info("  ✓ Contains player IDs: Yes")
             logger.info("  ✓ Contains biographical data: Yes")
 
-            expected_cols = {'rank', 'player', 'id', 'tournaments', 'points',
-                           'height_cm', 'weight_kg', 'birthdate', 'country', 'source'}
+            expected_cols = {
+                "rank",
+                "player",
+                "id",
+                "tournaments",
+                "points",
+                "height_cm",
+                "weight_kg",
+                "birthdate",
+                "country",
+                "source",
+            }
             missing_cols = expected_cols - set(api_df.columns)
             if missing_cols:
                 logger.warning(f"  ⚠ Missing expected columns: {missing_cols}")
@@ -136,15 +146,21 @@ def validate_scraped_data(gender: Literal["male", "female"] = "male") -> None:
 
         logger.info(f"\n  Top 5 {gender} players:")
         for idx, row in api_df.head(5).iterrows():
-            player_id = f" (ID: {row['id']})" if 'id' in row and pd.notna(row['id']) and row['id'] != -1 else " (no ID)"
-            logger.info(f"    {row['rank']}. {row['player']}{player_id} - {row['points']} points")
+            player_id = (
+                f" (ID: {row['id']})"
+                if "id" in row and pd.notna(row["id"]) and row["id"] != -1
+                else " (no ID)"
+            )
+            logger.info(
+                f"    {row['rank']}. {row['player']}{player_id} - {row['points']} points"
+            )
 
     if len(html_df) > 0:
         logger.info(f"\nHTML scraper results ({len(html_df)} players):")
         logger.warning("  ⚠ Data source: HTML fallback (DEGRADED DATA)")
         logger.warning("  ✗ This is limited data for fallback purposes only")
 
-        expected_html_cols = {'rank', 'player', 'tournaments', 'points', 'source'}
+        expected_html_cols = {"rank", "player", "tournaments", "points", "source"}
         missing_cols = expected_html_cols - set(html_df.columns)
         extra_cols = set(html_df.columns) - expected_html_cols
 
@@ -185,7 +201,9 @@ def validate_scraped_data(gender: Literal["male", "female"] = "male") -> None:
         logger.warning("⚠ Re-run scraper to obtain complete API data if possible")
     elif len(html_df) > 0:
         logger.warning("⚠ ONLY HTML FALLBACK DATA AVAILABLE")
-        logger.warning("⚠ This is degraded data without player IDs or biographical info")
+        logger.warning(
+            "⚠ This is degraded data without player IDs or biographical info"
+        )
     else:
         logger.error("✗ NO VALID DATA FOUND")
 

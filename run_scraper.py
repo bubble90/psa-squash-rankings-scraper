@@ -49,8 +49,8 @@ def scrape_gender(
     gender: Literal["male", "female"],
     page_size: int,
     max_pages: int | None,
-    resume: bool
-    ) -> tuple[ScraperResult, bool]:
+    resume: bool,
+) -> tuple[ScraperResult, bool]:
     """
     Scrape rankings for a specific gender with explicit fallback handling.
 
@@ -73,7 +73,9 @@ def scrape_gender(
             resume=resume,
         )
 
-        logger.info(f"✓ API scrape successful: {len(data)} {gender} players with complete data")
+        logger.info(
+            f"✓ API scrape successful: {len(data)} {gender} players with complete data"
+        )
         return data, False
 
     except Exception as api_error:
@@ -82,12 +84,16 @@ def scrape_gender(
         if gender == "male":
             logger.warning("=" * 60)
             logger.warning("FALLING BACK TO HTML SCRAPER")
-            logger.warning("WARNING: HTML data is DEGRADED - missing player IDs and biographical info")
+            logger.warning(
+                "WARNING: HTML data is DEGRADED - missing player IDs and biographical info"
+            )
             logger.warning("=" * 60)
 
             try:
                 data = scrape_rankings_html()
-                logger.info(f"✓ HTML fallback successful: {len(data)} {gender} players (degraded data)")
+                logger.info(
+                    f"✓ HTML fallback successful: {len(data)} {gender} players (degraded data)"
+                )
                 return data, True
 
             except Exception as html_error:
@@ -97,8 +103,12 @@ def scrape_gender(
                     f"API error: {api_error}. HTML error: {html_error}"
                 )
         else:
-            logger.error(f"No HTML fallback available for {gender} (HTML scraper only supports male)")
-            raise Exception(f"API scraper failed for {gender} and no fallback available: {api_error}")
+            logger.error(
+                f"No HTML fallback available for {gender} (HTML scraper only supports male)"
+            )
+            raise Exception(
+                f"API scraper failed for {gender} and no fallback available: {api_error}"
+            )
 
 
 def main() -> None:
@@ -173,7 +183,7 @@ def main() -> None:
                 gender=gender,
                 page_size=args.page_size,
                 max_pages=args.max_pages,
-                resume=not args.no_resume
+                resume=not args.no_resume,
             )
 
             if is_fallback:

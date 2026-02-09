@@ -10,7 +10,7 @@ import json
 import itertools
 import requests
 import pandas as pd
-from typing import Literal
+from typing import Literal, Any
 from data_parser import parse_api_player
 from logger import get_logger
 from schema import ApiPlayerRecord
@@ -25,11 +25,7 @@ from config import (
 USER_AGENT_CYCLE = itertools.cycle(USER_AGENTS)
 
 
-def save_checkpoint(
-        gender: str,
-        page: int,
-        data: list[ApiPlayerRecord]
-        ) -> None:
+def save_checkpoint(gender: str, page: int, data: list[ApiPlayerRecord]) -> None:
     """
     Save a checkpoint of the current scraping progress.
 
@@ -57,7 +53,7 @@ def save_checkpoint(
         raise
 
 
-def load_checkpoint(gender: str) -> dict[str, any] | None:
+def load_checkpoint(gender: str) -> dict[str, Any] | None:
     """
     Load a checkpoint for resumable scraping.
 
@@ -100,11 +96,11 @@ def clear_checkpoint(gender: str) -> None:
 
 
 def get_rankings(
-        gender: Literal["male", "female"] = "male",
-        page_size: int = 100,
-        max_pages: int | None = None,
-        resume: bool = True,
-        ) -> list[ApiPlayerRecord]:
+    gender: Literal["male", "female"] = "male",
+    page_size: int = 100,
+    max_pages: int | None = None,
+    resume: bool = True,
+) -> list[ApiPlayerRecord]:
     """
     Fetches PSA rankings for a specific gender with pagination support.
 
@@ -270,4 +266,3 @@ if __name__ == "__main__":
         print(df.head(10))
     except Exception as e:
         logger.exception(f"Fatal error: {e}")
-        

@@ -115,14 +115,18 @@ def test_scrape_rankings_html_empty_table(mock_session_class: MagicMock) -> None
     mock_response.raise_for_status = Mock()
     mock_session.get.return_value = mock_response
 
-    with pytest.raises(ValueError, match="The rankings table structure is empty or invalid"):
+    with pytest.raises(
+        ValueError, match="The rankings table structure is empty or invalid"
+    ):
         scrape_rankings_html()
 
     mock_session.close.assert_called_once()
 
 
 @patch("html_scraper.requests.Session")
-def test_scrape_rankings_html_skips_incomplete_rows(mock_session_class: MagicMock) -> None:
+def test_scrape_rankings_html_skips_incomplete_rows(
+    mock_session_class: MagicMock,
+) -> None:
     """Test that rows with insufficient cells are skipped."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
@@ -280,7 +284,9 @@ def test_scrape_rankings_html_correct_url(mock_session_class: MagicMock) -> None
 
 
 @patch("html_scraper.requests.Session")
-def test_scrape_rankings_html_user_agent_rotation(mock_session_class: MagicMock) -> None:
+def test_scrape_rankings_html_user_agent_rotation(
+    mock_session_class: MagicMock,
+) -> None:
     """Test that User-Agent is rotated."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
@@ -421,7 +427,9 @@ def test_scrape_rankings_html_special_characters(mock_session_class: MagicMock) 
 
 
 @patch("html_scraper.requests.Session")
-def test_scrape_rankings_html_returns_html_player_record_type(mock_session_class: MagicMock) -> None:
+def test_scrape_rankings_html_returns_html_player_record_type(
+    mock_session_class: MagicMock,
+) -> None:
     """Test that return type is list[HtmlPlayerRecord]."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session

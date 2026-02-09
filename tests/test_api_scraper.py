@@ -5,7 +5,6 @@ Test suite for API scraper functionality in PSA Squash scraper.
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from api_scraper import get_rankings
-from schema import ApiPlayerRecord
 
 
 @patch("api_scraper.requests.Session")
@@ -64,7 +63,9 @@ def test_get_rankings_single_page(mock_session_class: MagicMock) -> None:
 
 
 @patch("api_scraper.requests.Session")
-def test_get_rankings_with_missing_optional_fields(mock_session_class: MagicMock) -> None:
+def test_get_rankings_with_missing_optional_fields(
+    mock_session_class: MagicMock,
+) -> None:
     """Test fetching rankings when optional fields are missing."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
@@ -412,7 +413,9 @@ def test_get_rankings_pagination_url_format(mock_session_class: MagicMock) -> No
 
 
 @patch("api_scraper.requests.Session")
-def test_get_rankings_returns_api_player_record_type(mock_session_class: MagicMock) -> None:
+def test_get_rankings_returns_api_player_record_type(
+    mock_session_class: MagicMock,
+) -> None:
     """Test that return type is list[ApiPlayerRecord]."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session

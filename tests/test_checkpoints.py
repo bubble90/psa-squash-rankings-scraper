@@ -9,9 +9,7 @@ from api_scraper import save_checkpoint, load_checkpoint, clear_checkpoint
 from schema import ApiPlayerRecord
 
 
-def test_save_checkpoint(tmp_path: Path,
-                         monkeypatch: pytest.MonkeyPatch
-                         ) -> None:
+def test_save_checkpoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test that checkpoints are saved correctly."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
@@ -26,7 +24,7 @@ def test_save_checkpoint(tmp_path: Path,
             "weight_kg": 75,
             "birthdate": "1992-01-01",
             "country": "Egypt",
-            "source": "api"
+            "source": "api",
         },
         {
             "rank": 2,
@@ -38,7 +36,7 @@ def test_save_checkpoint(tmp_path: Path,
             "weight_kg": 80,
             "birthdate": "1992-06-14",
             "country": "New Zealand",
-            "source": "api"
+            "source": "api",
         },
     ]
 
@@ -56,9 +54,9 @@ def test_save_checkpoint(tmp_path: Path,
     assert saved_data["players"] == test_data
 
 
-def test_load_checkpoint_exists(tmp_path: Path,
-                         monkeypatch: pytest.MonkeyPatch
-                         ) -> None:
+def test_load_checkpoint_exists(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test loading an existing checkpoint."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
@@ -73,7 +71,7 @@ def test_load_checkpoint_exists(tmp_path: Path,
             "weight_kg": None,
             "birthdate": None,
             "country": None,
-            "source": "api"
+            "source": "api",
         },
         {
             "rank": 2,
@@ -85,7 +83,7 @@ def test_load_checkpoint_exists(tmp_path: Path,
             "weight_kg": None,
             "birthdate": None,
             "country": None,
-            "source": "api"
+            "source": "api",
         },
     ]
 
@@ -99,9 +97,9 @@ def test_load_checkpoint_exists(tmp_path: Path,
     assert loaded["players"] == test_data
 
 
-def test_load_checkpoint_not_exists(tmp_path: Path,
-                         monkeypatch: pytest.MonkeyPatch
-                         ) -> None:
+def test_load_checkpoint_not_exists(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test loading checkpoint when file doesn't exist."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
@@ -109,24 +107,24 @@ def test_load_checkpoint_not_exists(tmp_path: Path,
     assert result is None
 
 
-def test_clear_checkpoint(tmp_path: Path,
-                         monkeypatch: pytest.MonkeyPatch
-                         ) -> None:
+def test_clear_checkpoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test that checkpoints are cleared correctly."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
-    test_data: list[ApiPlayerRecord] = [{
-        "rank": 1,
-        "player": "Test",
-        "id": 1,
-        "tournaments": 5,
-        "points": 1000,
-        "height_cm": None,
-        "weight_kg": None,
-        "birthdate": None,
-        "country": None,
-        "source": "api"
-    }]
+    test_data: list[ApiPlayerRecord] = [
+        {
+            "rank": 1,
+            "player": "Test",
+            "id": 1,
+            "tournaments": 5,
+            "points": 1000,
+            "height_cm": None,
+            "weight_kg": None,
+            "birthdate": None,
+            "country": None,
+            "source": "api",
+        }
+    ]
     save_checkpoint("male", 1, test_data)
 
     checkpoint_file = tmp_path / "male_checkpoint.json"
@@ -136,18 +134,18 @@ def test_clear_checkpoint(tmp_path: Path,
     assert not checkpoint_file.exists()
 
 
-def test_clear_checkpoint_not_exists(tmp_path: Path,
-                         monkeypatch: pytest.MonkeyPatch
-                         ) -> None:
+def test_clear_checkpoint_not_exists(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test clearing checkpoint when file doesn't exist (should not raise error)."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
     clear_checkpoint("female")
 
 
-def test_save_checkpoint_female(tmp_path: Path,
-                         monkeypatch: pytest.MonkeyPatch
-                         ) -> None:
+def test_save_checkpoint_female(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test checkpoint for female rankings."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
@@ -162,7 +160,7 @@ def test_save_checkpoint_female(tmp_path: Path,
             "weight_kg": None,
             "birthdate": None,
             "country": None,
-            "source": "api"
+            "source": "api",
         }
     ]
 
@@ -177,24 +175,26 @@ def test_save_checkpoint_female(tmp_path: Path,
     assert loaded["last_page"] == 3
 
 
-def test_checkpoint_overwrites_existing(tmp_path: Path,
-                         monkeypatch: pytest.MonkeyPatch
-                         ) -> None:
+def test_checkpoint_overwrites_existing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test that saving a checkpoint overwrites existing file."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
-    data1: list[ApiPlayerRecord] = [{
-        "rank": 1,
-        "player": "Player 1",
-        "id": 1,
-        "tournaments": 5,
-        "points": 1000,
-        "height_cm": None,
-        "weight_kg": None,
-        "birthdate": None,
-        "country": None,
-        "source": "api"
-    }]
+    data1: list[ApiPlayerRecord] = [
+        {
+            "rank": 1,
+            "player": "Player 1",
+            "id": 1,
+            "tournaments": 5,
+            "points": 1000,
+            "height_cm": None,
+            "weight_kg": None,
+            "birthdate": None,
+            "country": None,
+            "source": "api",
+        }
+    ]
     save_checkpoint("male", 1, data1)
 
     data2: list[ApiPlayerRecord] = [
@@ -208,7 +208,7 @@ def test_checkpoint_overwrites_existing(tmp_path: Path,
             "weight_kg": None,
             "birthdate": None,
             "country": None,
-            "source": "api"
+            "source": "api",
         },
         {
             "rank": 2,
@@ -220,7 +220,7 @@ def test_checkpoint_overwrites_existing(tmp_path: Path,
             "weight_kg": None,
             "birthdate": None,
             "country": None,
-            "source": "api"
+            "source": "api",
         },
     ]
     save_checkpoint("male", 2, data2)
@@ -231,9 +231,7 @@ def test_checkpoint_overwrites_existing(tmp_path: Path,
     assert loaded["total_players"] == 2
 
 
-def test_checkpoint_empty_data(tmp_path: Path,
-                         monkeypatch: pytest.MonkeyPatch
-                         ) -> None:
+def test_checkpoint_empty_data(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test saving checkpoint with empty data."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
@@ -245,9 +243,9 @@ def test_checkpoint_empty_data(tmp_path: Path,
     assert loaded["players"] == []
 
 
-def test_checkpoint_large_dataset(tmp_path: Path,
-                         monkeypatch: pytest.MonkeyPatch
-                         ) -> None:
+def test_checkpoint_large_dataset(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Test checkpoint with large dataset."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
@@ -262,7 +260,7 @@ def test_checkpoint_large_dataset(tmp_path: Path,
             "weight_kg": None,
             "birthdate": None,
             "country": None,
-            "source": "api"
+            "source": "api",
         }
         for i in range(1, 501)
     ]
