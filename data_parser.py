@@ -7,8 +7,10 @@ and prevent silent data corruption.
 
 import re
 from logger import get_logger
-from typing import Dict, Any, Union
+from typing import Any, Union
 from validator import validate_api_schema
+from schema import ApiPlayerRecord
+
 
 def parse_measure(
         value: Any,
@@ -51,28 +53,32 @@ def parse_measure(
 
     return int(clean_value)
 
-def parse_api_player(player: Dict[str, Any]) -> Dict[str, Any]:
+
+def parse_api_player(player: dict[str, Any]) -> ApiPlayerRecord:
     """
-    Validate and extract required fields from
-    a PSA API player object.
+    Validate and extract required fields from a PSA API player object.
 
     Returns:
-        dict: normalized ranking record
+        ApiPlayerRecord: Complete player record with all available fields
+
+    Raises:
+        ValueError: If API schema validation fails
     """
     logger = get_logger(__name__)
 
     validate_api_schema(player)
 
-    parsed = {
+    parsed: ApiPlayerRecord = {
         "rank": player["World Ranking"],
         "player": player["Name"],
         "id": int(player["Id"]),
         "tournaments": int(player["Tournaments"]),
         "points": int(player["Total Points"]),
-        "height(cm)": None,
-        "weight(kg)": None,
+        "height_cm": None,
+        "weight_kg": None,
         "birthdate": None,
         "country": None,
+        "source": "api",
     }
 
     if "Birthdate" in player:
@@ -80,17 +86,17 @@ def parse_api_player(player: Dict[str, Any]) -> Dict[str, Any]:
 
     if player.get("Height"):
         try:
-            parsed["height(cm)"] = parse_measure(player["Height"], "Height")
+            parsed["height_cm"] = parse_measure(player["Height"], "Height")
         except ValueError as e:
             logger.warning(f"Skipping height for {player.get('Name')}: {e}")
-            parsed["height(cm)"] = None
+            parsed["height_cm"] = None
 
     if player.get("Weight"):
         try:
-            parsed["weight(kg)"] = parse_measure(player["Weight"], "Weight")
+            parsed["weight_kg"] = parse_measure(player["Weight"], "Weight")
         except ValueError as e:
             logger.warning(f"Skipping weight for {player.get('Name')}: {e}")
-            parsed["weight(kg)"] = None
+            parsed["weight_kg"] = None
 
     if "Country" in player:
         parsed["country"] = player["Country"]

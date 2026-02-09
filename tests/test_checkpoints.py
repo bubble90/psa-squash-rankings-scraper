@@ -6,6 +6,7 @@ import json
 import pytest
 from pathlib import Path
 from api_scraper import save_checkpoint, load_checkpoint, clear_checkpoint
+from schema import ApiPlayerRecord
 
 
 def test_save_checkpoint(tmp_path: Path,
@@ -14,9 +15,31 @@ def test_save_checkpoint(tmp_path: Path,
     """Test that checkpoints are saved correctly."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
-    test_data = [
-        {"rank": 1, "player": "Ali Farag", "tournaments": 12, "points": 20000},
-        {"rank": 2, "player": "Paul Coll", "tournaments": 10, "points": 18000},
+    test_data: list[ApiPlayerRecord] = [
+        {
+            "rank": 1,
+            "player": "Ali Farag",
+            "id": 12345,
+            "tournaments": 12,
+            "points": 20000,
+            "height_cm": 180,
+            "weight_kg": 75,
+            "birthdate": "1992-01-01",
+            "country": "Egypt",
+            "source": "api"
+        },
+        {
+            "rank": 2,
+            "player": "Paul Coll",
+            "id": 67890,
+            "tournaments": 10,
+            "points": 18000,
+            "height_cm": 185,
+            "weight_kg": 80,
+            "birthdate": "1992-06-14",
+            "country": "New Zealand",
+            "source": "api"
+        },
     ]
 
     save_checkpoint("male", 5, test_data)
@@ -39,9 +62,31 @@ def test_load_checkpoint_exists(tmp_path: Path,
     """Test loading an existing checkpoint."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
-    test_data = [
-        {"rank": 1, "player": "Ali Farag", "tournaments": 12, "points": 20000},
-        {"rank": 2, "player": "Paul Coll", "tournaments": 10, "points": 18000},
+    test_data: list[ApiPlayerRecord] = [
+        {
+            "rank": 1,
+            "player": "Ali Farag",
+            "id": 12345,
+            "tournaments": 12,
+            "points": 20000,
+            "height_cm": None,
+            "weight_kg": None,
+            "birthdate": None,
+            "country": None,
+            "source": "api"
+        },
+        {
+            "rank": 2,
+            "player": "Paul Coll",
+            "id": 67890,
+            "tournaments": 10,
+            "points": 18000,
+            "height_cm": None,
+            "weight_kg": None,
+            "birthdate": None,
+            "country": None,
+            "source": "api"
+        },
     ]
 
     save_checkpoint("male", 5, test_data)
@@ -70,7 +115,18 @@ def test_clear_checkpoint(tmp_path: Path,
     """Test that checkpoints are cleared correctly."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
-    test_data = [{"rank": 1, "player": "Test", "tournaments": 5, "points": 1000}]
+    test_data: list[ApiPlayerRecord] = [{
+        "rank": 1,
+        "player": "Test",
+        "id": 1,
+        "tournaments": 5,
+        "points": 1000,
+        "height_cm": None,
+        "weight_kg": None,
+        "birthdate": None,
+        "country": None,
+        "source": "api"
+    }]
     save_checkpoint("male", 1, test_data)
 
     checkpoint_file = tmp_path / "male_checkpoint.json"
@@ -95,8 +151,19 @@ def test_save_checkpoint_female(tmp_path: Path,
     """Test checkpoint for female rankings."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
-    test_data = [
-        {"rank": 1, "player": "Nour El Sherbini", "tournaments": 11, "points": 19000}
+    test_data: list[ApiPlayerRecord] = [
+        {
+            "rank": 1,
+            "player": "Nour El Sherbini",
+            "id": 11111,
+            "tournaments": 11,
+            "points": 19000,
+            "height_cm": None,
+            "weight_kg": None,
+            "birthdate": None,
+            "country": None,
+            "source": "api"
+        }
     ]
 
     save_checkpoint("female", 3, test_data)
@@ -116,12 +183,45 @@ def test_checkpoint_overwrites_existing(tmp_path: Path,
     """Test that saving a checkpoint overwrites existing file."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
-    data1 = [{"rank": 1, "player": "Player 1", "tournaments": 5, "points": 1000}]
+    data1: list[ApiPlayerRecord] = [{
+        "rank": 1,
+        "player": "Player 1",
+        "id": 1,
+        "tournaments": 5,
+        "points": 1000,
+        "height_cm": None,
+        "weight_kg": None,
+        "birthdate": None,
+        "country": None,
+        "source": "api"
+    }]
     save_checkpoint("male", 1, data1)
 
-    data2 = [
-        {"rank": 1, "player": "Player 1", "tournaments": 5, "points": 1000},
-        {"rank": 2, "player": "Player 2", "tournaments": 6, "points": 2000},
+    data2: list[ApiPlayerRecord] = [
+        {
+            "rank": 1,
+            "player": "Player 1",
+            "id": 1,
+            "tournaments": 5,
+            "points": 1000,
+            "height_cm": None,
+            "weight_kg": None,
+            "birthdate": None,
+            "country": None,
+            "source": "api"
+        },
+        {
+            "rank": 2,
+            "player": "Player 2",
+            "id": 2,
+            "tournaments": 6,
+            "points": 2000,
+            "height_cm": None,
+            "weight_kg": None,
+            "birthdate": None,
+            "country": None,
+            "source": "api"
+        },
     ]
     save_checkpoint("male", 2, data2)
 
@@ -151,8 +251,19 @@ def test_checkpoint_large_dataset(tmp_path: Path,
     """Test checkpoint with large dataset."""
     monkeypatch.setattr("api_scraper.CHECKPOINT_DIR", tmp_path)
 
-    large_data = [
-        {"rank": i, "player": f"Player {i}", "tournaments": 10, "points": 10000 - i}
+    large_data: list[ApiPlayerRecord] = [
+        {
+            "rank": i,
+            "player": f"Player {i}",
+            "id": i,
+            "tournaments": 10,
+            "points": 10000 - i,
+            "height_cm": None,
+            "weight_kg": None,
+            "birthdate": None,
+            "country": None,
+            "source": "api"
+        }
         for i in range(1, 501)
     ]
 

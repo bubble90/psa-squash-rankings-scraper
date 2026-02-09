@@ -5,6 +5,7 @@ Test suite for API scraper functionality in PSA Squash scraper.
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from api_scraper import get_rankings
+from schema import ApiPlayerRecord
 
 
 @patch("api_scraper.requests.Session")
@@ -44,18 +45,21 @@ def test_get_rankings_single_page(mock_session_class: MagicMock) -> None:
     mock_response.raise_for_status = Mock()
     mock_session.get.return_value = mock_response
 
-    df = get_rankings("male", page_size=100, max_pages=1, resume=False)
+    result = get_rankings("male", page_size=100, max_pages=1, resume=False)
 
-    assert len(df) == 2
-    assert df.iloc[0]["player"] == "Ali Farag"
-    assert df.iloc[0]["points"] == 20000
-    assert df.iloc[0]["id"] == 12345
-    assert df.iloc[0]["birthdate"] == "1992-01-01"
-    assert df.iloc[0]["height(cm)"] == 180
-    assert df.iloc[0]["weight(kg)"] == 75
-    assert df.iloc[0]["country"] == "Egypt"
-    assert df.iloc[1]["player"] == "Paul Coll"
-    assert df.iloc[1]["points"] == 18000
+    assert len(result) == 2
+    assert isinstance(result, list)
+    assert result[0]["player"] == "Ali Farag"
+    assert result[0]["points"] == 20000
+    assert result[0]["id"] == 12345
+    assert result[0]["birthdate"] == "1992-01-01"
+    assert result[0]["height_cm"] == 180
+    assert result[0]["weight_kg"] == 75
+    assert result[0]["country"] == "Egypt"
+    assert result[0]["source"] == "api"
+    assert result[1]["player"] == "Paul Coll"
+    assert result[1]["points"] == 18000
+    assert result[1]["source"] == "api"
     mock_session.close.assert_called_once()
 
 
@@ -82,13 +86,14 @@ def test_get_rankings_with_missing_optional_fields(mock_session_class: MagicMock
 
     mock_session.get.return_value = mock_response
 
-    df = get_rankings("male", page_size=100, max_pages=1, resume=False)
+    result = get_rankings("male", page_size=100, max_pages=1, resume=False)
 
-    assert len(df) == 1
-    assert df.iloc[0]["birthdate"] is None
-    assert df.iloc[0]["height(cm)"] is None
-    assert df.iloc[0]["weight(kg)"] is None
-    assert df.iloc[0]["country"] is None
+    assert len(result) == 1
+    assert result[0]["birthdate"] is None
+    assert result[0]["height_cm"] is None
+    assert result[0]["weight_kg"] is None
+    assert result[0]["country"] is None
+    assert result[0]["source"] == "api"
     mock_session.close.assert_called_once()
 
 
@@ -132,10 +137,11 @@ def test_get_rankings_multiple_pages(mock_session_class: MagicMock) -> None:
 
     mock_session.get.side_effect = [page1_response, page2_response]
 
-    df = get_rankings("male", page_size=50, resume=False)
+    result = get_rankings("male", page_size=50, resume=False)
 
-    assert len(df) == 100
+    assert len(result) == 100
     assert mock_session.get.call_count == 2
+    assert all(record["source"] == "api" for record in result)
     mock_session.close.assert_called_once()
 
 
@@ -150,9 +156,9 @@ def test_get_rankings_empty_response(mock_session_class: MagicMock) -> None:
     mock_response.raise_for_status = Mock()
     mock_session.get.return_value = mock_response
 
-    df = get_rankings("male", page_size=100, resume=False)
+    result = get_rankings("male", page_size=100, resume=False)
 
-    assert len(df) == 0
+    assert len(result) == 0
     mock_session.close.assert_called_once()
 
 
@@ -179,10 +185,10 @@ def test_get_rankings_respects_max_pages(mock_session_class: MagicMock) -> None:
     mock_response.raise_for_status = Mock()
     mock_session.get.return_value = mock_response
 
-    df = get_rankings("male", page_size=10, max_pages=3, resume=False)
+    result = get_rankings("male", page_size=10, max_pages=3, resume=False)
 
     assert mock_session.get.call_count == 3
-    assert len(df) == 30
+    assert len(result) == 30
     mock_session.close.assert_called_once()
 
 
@@ -208,10 +214,11 @@ def test_get_rankings_female(mock_session_class: MagicMock) -> None:
     mock_response.raise_for_status = Mock()
     mock_session.get.return_value = mock_response
 
-    df = get_rankings("female", page_size=100, resume=False)
+    result = get_rankings("female", page_size=100, resume=False)
 
-    assert len(df) == 1
-    assert df.iloc[0]["player"] == "Nour El Sherbini"
+    assert len(result) == 1
+    assert result[0]["player"] == "Nour El Sherbini"
+    assert result[0]["source"] == "api"
 
     called_url = mock_session.get.call_args[0][0]
     assert "/rankedplayers/female" in called_url
@@ -284,10 +291,11 @@ def test_get_rankings_list_response(mock_session_class: MagicMock) -> None:
     mock_response.raise_for_status = Mock()
     mock_session.get.return_value = mock_response
 
-    df = get_rankings("male", page_size=100, resume=False)
+    result = get_rankings("male", page_size=100, resume=False)
 
-    assert len(df) == 1
-    assert df.iloc[0]["player"] == "Ali Farag"
+    assert len(result) == 1
+    assert result[0]["player"] == "Ali Farag"
+    assert result[0]["source"] == "api"
     mock_session.close.assert_called_once()
 
 
@@ -314,9 +322,9 @@ def test_get_rankings_stops_on_partial_page(mock_session_class: MagicMock) -> No
     mock_response.raise_for_status = Mock()
     mock_session.get.return_value = mock_response
 
-    df = get_rankings("male", page_size=50, resume=False)
+    result = get_rankings("male", page_size=50, resume=False)
 
-    assert len(df) == 25
+    assert len(result) == 25
     assert mock_session.get.call_count == 1
     mock_session.close.assert_called_once()
 
@@ -344,7 +352,7 @@ def test_get_rankings_custom_page_size(mock_session_class: MagicMock) -> None:
     mock_response.raise_for_status = Mock()
     mock_session.get.return_value = mock_response
 
-    df = get_rankings("male", page_size=5, resume=False)
+    result = get_rankings("male", page_size=5, resume=False)
 
     called_url = mock_session.get.call_args[0][0]
     assert "pageSize=5" in called_url
@@ -389,7 +397,7 @@ def test_get_rankings_pagination_url_format(mock_session_class: MagicMock) -> No
 
     mock_session.get.side_effect = [page1_response, page2_response]
 
-    df = get_rankings("male", page_size=1, resume=False)
+    result = get_rankings("male", page_size=1, resume=False)
 
     assert mock_session.get.call_count == 2
 
@@ -401,3 +409,44 @@ def test_get_rankings_pagination_url_format(mock_session_class: MagicMock) -> No
     assert "pageSize=1" in call1_url
     assert "pageSize=1" in call2_url
     mock_session.close.assert_called_once()
+
+
+@patch("api_scraper.requests.Session")
+def test_get_rankings_returns_api_player_record_type(mock_session_class: MagicMock) -> None:
+    """Test that return type is list[ApiPlayerRecord]."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
+    mock_response = Mock()
+    mock_response.json.return_value = {
+        "players": [
+            {
+                "World Ranking": 1,
+                "Name": "Ali Farag",
+                "Id": 12345,
+                "Tournaments": 12,
+                "Total Points": 20000,
+            }
+        ],
+        "hasMore": False,
+    }
+    mock_response.raise_for_status = Mock()
+    mock_session.get.return_value = mock_response
+
+    result = get_rankings("male", page_size=100, resume=False)
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+
+    record = result[0]
+    assert "rank" in record
+    assert "player" in record
+    assert "id" in record
+    assert "tournaments" in record
+    assert "points" in record
+    assert "height_cm" in record
+    assert "weight_kg" in record
+    assert "birthdate" in record
+    assert "country" in record
+    assert "source" in record
+    assert record["source"] == "api"

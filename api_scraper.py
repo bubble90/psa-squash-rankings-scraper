@@ -2,6 +2,7 @@
 API-based scraper for PSA Squash Tour rankings.
 
 Fetches ranking data directly from the PSA backend API.
+Returns ApiPlayerRecord objects with complete player information.
 """
 
 import os
@@ -9,9 +10,10 @@ import json
 import itertools
 import requests
 import pandas as pd
-from typing import List, Dict, Any, Literal
+from typing import Literal
 from data_parser import parse_api_player
 from logger import get_logger
+from schema import ApiPlayerRecord
 from config import (
     API_BASE_URL,
     API_TIMEOUT,
@@ -26,7 +28,7 @@ USER_AGENT_CYCLE = itertools.cycle(USER_AGENTS)
 def save_checkpoint(
         gender: str,
         page: int,
-        data: List[Dict[str, Any]]
+        data: list[ApiPlayerRecord]
         ) -> None:
     """
     Save a checkpoint of the current scraping progress.
@@ -34,7 +36,7 @@ def save_checkpoint(
     Parameters:
     - gender: 'male' or 'female'
     - page: current page number
-    - data: list of player dictionaries collected so far
+    - data: list of ApiPlayerRecord dictionaries collected so far
     """
     logger = get_logger(__name__)
 
@@ -55,7 +57,7 @@ def save_checkpoint(
         raise
 
 
-def load_checkpoint(gender: str) -> Dict[str, Any] | None:
+def load_checkpoint(gender: str) -> dict[str, any] | None:
     """
     Load a checkpoint for resumable scraping.
 
@@ -102,7 +104,7 @@ def get_rankings(
         page_size: int = 100,
         max_pages: int | None = None,
         resume: bool = True,
-        ) -> pd.DataFrame:
+        ) -> list[ApiPlayerRecord]:
     """
     Fetches PSA rankings for a specific gender with pagination support.
 
@@ -113,7 +115,11 @@ def get_rankings(
     - resume: whether to resume from checkpoint if available
 
     Returns:
-    - pandas DataFrame with all ranking data
+    - list[ApiPlayerRecord]: Complete player records with IDs and biographical data
+
+    Raises:
+    - requests.exceptions.RequestException: On network or API errors
+    - ValueError: On invalid API response format
     """
     logger = get_logger(__name__)
 
@@ -121,7 +127,7 @@ def get_rankings(
         f"Starting {gender} rankings scrape (page_size={page_size}, max_pages={max_pages}, resume={resume})"
     )
 
-    all_players = []
+    all_players: list[ApiPlayerRecord] = []
     start_page = 1
 
     if resume:
@@ -251,15 +257,17 @@ def get_rankings(
     clear_checkpoint(gender)
 
     logger.info(f"Successfully scraped {len(all_players)} {gender} players")
-    return pd.DataFrame(all_players)
+    return all_players
 
 
 if __name__ == "__main__":
     logger = get_logger(__name__)
     try:
-        df = get_rankings("male", page_size=50, resume=True)
-        logger.info(f"Total players fetched: {len(df)}")
+        result = get_rankings("male", page_size=50, resume=True)
+        logger.info(f"Total players fetched: {len(result)}")
         print("\nFirst 10 players:")
+        df = pd.DataFrame(result)
         print(df.head(10))
     except Exception as e:
         logger.exception(f"Fatal error: {e}")
+        

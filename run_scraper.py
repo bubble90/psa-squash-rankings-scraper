@@ -1,16 +1,21 @@
 """
-Main scraper runner.
+Main scraper runner with explicit fallback typing.
+
+This script makes it clear to consumers when they are working with
+degraded HTML fallback data versus complete API data.
 """
 
 import sys
 import argparse
 import logging
+from typing import Literal
 from api_scraper import get_rankings
-from typing import Literal, List
 from html_scraper import scrape_rankings_html
 from exporter import export_to_csv
 from logger import get_logger
+from schema import ScraperResult, is_api_result, is_html_result
 from config import init_dirs
+
 
 def configure_log_level(log_level: str) -> None:
     """
@@ -39,10 +44,69 @@ def configure_log_level(log_level: str) -> None:
             if isinstance(handler, logging.StreamHandler):
                 handler.setLevel(level)
 
+
+def scrape_gender(
+    gender: Literal["male", "female"],
+    page_size: int,
+    max_pages: int | None,
+    resume: bool
+    ) -> tuple[ScraperResult, bool]:
+    """
+    Scrape rankings for a specific gender with explicit fallback handling.
+
+    Returns:
+    - tuple[ScraperResult, bool]: (data, is_fallback)
+        - data: Either list[ApiPlayerRecord] or list[HtmlPlayerRecord]
+        - is_fallback: True if HTML fallback was used
+
+    Raises:
+    - Exception: If both API and fallback fail
+    """
+    logger = get_logger(__name__)
+
+    try:
+        logger.info(f"Attempting API scrape for {gender} rankings...")
+        data = get_rankings(
+            gender=gender,
+            page_size=page_size,
+            max_pages=max_pages,
+            resume=resume,
+        )
+
+        logger.info(f"✓ API scrape successful: {len(data)} {gender} players with complete data")
+        return data, False
+
+    except Exception as api_error:
+        logger.error(f"✗ API scrape failed for {gender}: {api_error}")
+
+        if gender == "male":
+            logger.warning("=" * 60)
+            logger.warning("FALLING BACK TO HTML SCRAPER")
+            logger.warning("WARNING: HTML data is DEGRADED - missing player IDs and biographical info")
+            logger.warning("=" * 60)
+
+            try:
+                data = scrape_rankings_html()
+                logger.info(f"✓ HTML fallback successful: {len(data)} {gender} players (degraded data)")
+                return data, True
+
+            except Exception as html_error:
+                logger.error(f"✗ HTML fallback also failed for {gender}: {html_error}")
+                raise Exception(
+                    f"Both API and HTML scrapers failed for {gender}. "
+                    f"API error: {api_error}. HTML error: {html_error}"
+                )
+        else:
+            logger.error(f"No HTML fallback available for {gender} (HTML scraper only supports male)")
+            raise Exception(f"API scraper failed for {gender} and no fallback available: {api_error}")
+
+
 def main() -> None:
     """
     Main entry point with command-line argument support.
+
     Tries API with pagination for both genders, falls back to HTML if needed.
+    Explicitly logs data quality (complete vs degraded) for each result.
     """
     init_dirs()
 
@@ -90,12 +154,13 @@ def main() -> None:
     )
 
     if args.gender == "both":
-        genders: List[Literal["male", "female"]] = ["male", "female"]
+        genders: list[Literal["male", "female"]] = ["male", "female"]
     else:
-        genders: List[Literal["male", "female"]] = [args.gender]
+        genders: list[Literal["male", "female"]] = [args.gender]
 
     success_count = 0
     failure_count = 0
+    fallback_count = 0
 
     for gender in genders:
         logger.info("")
@@ -104,44 +169,54 @@ def main() -> None:
         logger.info("=" * 60)
 
         try:
-            df = get_rankings(
+            data, is_fallback = scrape_gender(
                 gender=gender,
                 page_size=args.page_size,
                 max_pages=args.max_pages,
-                resume=not args.no_resume,
+                resume=not args.no_resume
             )
 
-            output_file = f"psa_rankings_{gender}.csv"
-            export_to_csv(df, output_file)
+            if is_fallback:
+                output_file = f"psa_rankings_{gender}_fallback.csv"
+                fallback_count += 1
+            else:
+                output_file = f"psa_rankings_{gender}.csv"
 
-            logger.info(f"Successfully scraped {len(df)} {gender} players")
+            export_to_csv(data, output_file)
+
+            if is_api_result(data):
+                logger.info(
+                    f"✓ Successfully scraped {len(data)} {gender} players with COMPLETE data "
+                    f"(includes player IDs and biographical info)"
+                )
+            elif is_html_result(data):
+                logger.warning(
+                    f"⚠ Successfully scraped {len(data)} {gender} players with DEGRADED data "
+                    f"(missing player IDs and biographical info)"
+                )
+
             logger.info(f"Data exported to: {output_file}")
             success_count += 1
 
         except Exception as e:
-            logger.error(f"API failed for {gender}: {e}")
-
-            if gender == "male":
-                logger.info(f"Attempting HTML fallback for {gender}...")
-                try:
-                    df_fallback = scrape_rankings_html()
-                    fallback_file = f"psa_rankings_{gender}_fallback.csv"
-                    export_to_csv(df_fallback, fallback_file)
-                    logger.info(f"Fallback successful: {fallback_file}")
-                    success_count += 1
-                except Exception as html_err:
-                    logger.error(f"Critical Error: HTML fallback failed for {gender}")
-                    logger.exception(f"Error details: {html_err}")
-                    failure_count += 1
-            else:
-                logger.error(f"Critical Error: No semantic fallback available for {gender}")
-                failure_count += 1
+            logger.error(f"✗ Failed to scrape {gender} rankings: {e}")
+            logger.exception("Full error traceback:")
+            failure_count += 1
 
     logger.info("")
     logger.info("=" * 60)
     logger.info("Scraping complete!")
     logger.info("=" * 60)
     logger.info(f"Summary: {success_count} successful, {failure_count} failed")
+
+    if fallback_count > 0:
+        logger.warning(
+            f"⚠ WARNING: {fallback_count} result(s) used HTML fallback - "
+            f"data is DEGRADED (missing IDs and biographical info)"
+        )
+        logger.warning(
+            "For production use, investigate why the API scraper failed and use complete API data."
+        )
 
     sys.exit(0 if failure_count == 0 else 1)
 
