@@ -8,39 +8,7 @@ and prevent silent data corruption.
 import re
 from logger import get_logger
 from typing import Dict, Any, Union
-
-
-REQUIRED_API_FIELDS = {
-    "World Ranking",
-    "Name",
-    "Id",
-    "Tournaments",
-    "Total Points",
-}
-
-
-def validate_api_schema(player: Dict[str, Any]) -> None:
-    """
-    Validate that a single API player object
-    contains all required fields.
-
-    Raises:
-        ValueError: if the API schema is missing fields
-    """
-    logger = get_logger(__name__)
-
-    missing_fields = REQUIRED_API_FIELDS - player.keys()
-
-    if missing_fields:
-        logger.error(f"API schema validation failed. Missing fields: {missing_fields}")
-        raise ValueError(
-            f"API schema validation failed. Missing fields: {missing_fields}"
-        )
-
-    logger.debug(
-        f"Schema validation passed for player: {player.get('Name', 'Unknown')}"
-    )
-
+from validator import validate_api_schema
 
 def parse_measure(
         value: Any,
