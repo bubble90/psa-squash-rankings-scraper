@@ -189,7 +189,6 @@ def validate_scraped_data(gender: Literal["male", "female"] = "male") -> None:
             logger.info(f"    API:  {len(api_df)} players")
             logger.info(f"    HTML: {len(html_df)} players")
 
-    # Summary and recommendations
     logger.info("\n" + "=" * 60)
     logger.info("Validation Summary:")
     logger.info("=" * 60)

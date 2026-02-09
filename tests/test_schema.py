@@ -25,7 +25,6 @@ def test_api_player_record_structure() -> None:
         "source": "api",
     }
 
-    # Verify all required fields exist
     assert record["rank"] == 1
     assert record["player"] == "Test Player"
     assert record["id"] == 12345
