@@ -10,11 +10,11 @@ import json
 import itertools
 import requests
 import pandas as pd
-from typing import Literal, Any
-from data_parser import parse_api_player
-from logger import get_logger
-from schema import ApiPlayerRecord
-from config import (
+from typing import Literal, Any, Union, Optional
+from psa_squash_rankings.data_parser import parse_api_player
+from psa_squash_rankings.logger import get_logger
+from psa_squash_rankings.schema import ApiPlayerRecord
+from psa_squash_rankings.config import (
     API_BASE_URL,
     API_TIMEOUT,
     USER_AGENTS,
@@ -53,7 +53,7 @@ def save_checkpoint(gender: str, page: int, data: list[ApiPlayerRecord]) -> None
         raise
 
 
-def load_checkpoint(gender: str) -> dict[str, Any] | None:
+def load_checkpoint(gender: str) -> Optional[dict[str, Any]]:
     """
     Load a checkpoint for resumable scraping.
 
@@ -98,7 +98,7 @@ def clear_checkpoint(gender: str) -> None:
 def get_rankings(
     gender: Literal["male", "female"] = "male",
     page_size: int = 100,
-    max_pages: int | None = None,
+    max_pages: Optional[int] = None,
     resume: bool = True,
 ) -> list[ApiPlayerRecord]:
     """

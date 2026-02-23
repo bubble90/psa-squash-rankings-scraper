@@ -5,8 +5,8 @@ Test suite for exporter functionality.
 import pytest
 from unittest.mock import patch
 from pathlib import Path
-from exporter import export_to_csv
-from schema import ApiPlayerRecord, HtmlPlayerRecord
+from psa_squash_rankings.exporter import export_to_csv
+from psa_squash_rankings.schema import ApiPlayerRecord, HtmlPlayerRecord
 
 
 @pytest.fixture
@@ -79,7 +79,7 @@ def test_export_to_csv_creates_file_api_data(
     sample_api_data: list[ApiPlayerRecord],
 ) -> None:
     """Test that export_to_csv creates a CSV file with API data."""
-    monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
+    monkeypatch.setattr("psa_squash_rankings.exporter.OUTPUT_DIR", tmp_path)
 
     filename = "test_rankings.csv"
     export_to_csv(sample_api_data, filename)
@@ -94,7 +94,7 @@ def test_export_to_csv_creates_file_html_data(
     sample_html_data: list[HtmlPlayerRecord],
 ) -> None:
     """Test that export_to_csv creates a CSV file with HTML data."""
-    monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
+    monkeypatch.setattr("psa_squash_rankings.exporter.OUTPUT_DIR", tmp_path)
 
     filename = "test_rankings_fallback.csv"
     export_to_csv(sample_html_data, filename)
@@ -111,7 +111,7 @@ def test_export_to_csv_correct_content_api(
     """Test that exported CSV has correct API content."""
     import pandas as pd
 
-    monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
+    monkeypatch.setattr("psa_squash_rankings.exporter.OUTPUT_DIR", tmp_path)
 
     filename = "test_rankings.csv"
     export_to_csv(sample_api_data, filename)
@@ -135,7 +135,7 @@ def test_export_to_csv_correct_content_html(
     """Test that exported CSV has correct HTML content."""
     import pandas as pd
 
-    monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
+    monkeypatch.setattr("psa_squash_rankings.exporter.OUTPUT_DIR", tmp_path)
 
     filename = "test_rankings_fallback.csv"
     export_to_csv(sample_html_data, filename)
@@ -154,7 +154,7 @@ def test_export_to_csv_empty_data(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test exporting empty data."""
-    monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
+    monkeypatch.setattr("psa_squash_rankings.exporter.OUTPUT_DIR", tmp_path)
 
     filename = "test_rankings.csv"
     export_to_csv([], filename)
@@ -168,7 +168,7 @@ def test_export_to_csv_overwrites_existing(
     """Test that exporting overwrites existing file."""
     import pandas as pd
 
-    monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
+    monkeypatch.setattr("psa_squash_rankings.exporter.OUTPUT_DIR", tmp_path)
 
     filename = "test_rankings.csv"
 
@@ -206,7 +206,7 @@ def test_export_to_csv_different_filenames(
     sample_api_data: list[ApiPlayerRecord],
 ) -> None:
     """Test exporting to multiple different files."""
-    monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
+    monkeypatch.setattr("psa_squash_rankings.exporter.OUTPUT_DIR", tmp_path)
 
     export_to_csv(sample_api_data, "male_rankings.csv")
     export_to_csv(sample_api_data, "female_rankings.csv")
@@ -223,7 +223,7 @@ def test_export_to_csv_large_dataset(
     """Test exporting a large dataset."""
     import pandas as pd
 
-    monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
+    monkeypatch.setattr("psa_squash_rankings.exporter.OUTPUT_DIR", tmp_path)
 
     large_data: list[ApiPlayerRecord] = [
         {
@@ -257,9 +257,9 @@ def test_export_to_csv_logs_success_api(
     sample_api_data: list[ApiPlayerRecord],
 ) -> None:
     """Test that successful export of API data logs appropriate message."""
-    monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
+    monkeypatch.setattr("psa_squash_rankings.exporter.OUTPUT_DIR", tmp_path)
 
-    with patch("exporter.get_logger") as mock_get_logger:
+    with patch("psa_squash_rankings.exporter.get_logger") as mock_get_logger:
         mock_logger = mock_get_logger.return_value
 
         filename = "test_rankings.csv"
@@ -277,9 +277,9 @@ def test_export_to_csv_logs_warning_html(
     sample_html_data: list[HtmlPlayerRecord],
 ) -> None:
     """Test that export of HTML data logs warning about degraded data."""
-    monkeypatch.setattr("exporter.OUTPUT_DIR", tmp_path)
+    monkeypatch.setattr("psa_squash_rankings.exporter.OUTPUT_DIR", tmp_path)
 
-    with patch("exporter.get_logger") as mock_get_logger:
+    with patch("psa_squash_rankings.exporter.get_logger") as mock_get_logger:
         mock_logger = mock_get_logger.return_value
 
         filename = "test_rankings_fallback.csv"

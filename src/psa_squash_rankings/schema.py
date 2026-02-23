@@ -5,7 +5,7 @@ Defines distinct types for API and HTML scraper outputs,
 making it explicit when consumers are working with degraded data.
 """
 
-from typing import TypedDict, Optional, Literal
+from typing import TypedDict, Optional, Literal, Union
 
 
 class ApiPlayerRecord(TypedDict):
@@ -46,7 +46,7 @@ class HtmlPlayerRecord(TypedDict):
     source: Literal["html"]
 
 
-ScraperResult = list[ApiPlayerRecord] | list[HtmlPlayerRecord]
+ScraperResult = Union[list[ApiPlayerRecord], list[HtmlPlayerRecord]]
 
 
 def is_api_result(result: ScraperResult) -> bool:

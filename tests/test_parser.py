@@ -3,8 +3,8 @@ Test suite for data parser functionality.
 """
 
 import pytest
-from data_parser import parse_api_player
-from validator import validate_api_schema
+from psa_squash_rankings.data_parser import parse_api_player
+from psa_squash_rankings.validator import validate_api_schema
 
 
 def test_validate_api_schema_success() -> None:

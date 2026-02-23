@@ -402,9 +402,9 @@ wheels = [
 ]
 
 [[package]]
-name = "psa-squash-rankings-scraper"
+name = "psa-squash-rankings"
 version = "1.0.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "lxml" },

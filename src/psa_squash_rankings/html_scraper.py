@@ -13,9 +13,9 @@ import os
 import itertools
 import requests
 from bs4 import BeautifulSoup
-from logger import get_logger
-from schema import HtmlPlayerRecord
-from config import (
+from psa_squash_rankings.logger import get_logger
+from psa_squash_rankings.schema import HtmlPlayerRecord
+from psa_squash_rankings.config import (
     HTML_BASE_URL,
     HTML_TIMEOUT,
     USER_AGENTS,

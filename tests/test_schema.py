@@ -2,7 +2,7 @@
 Test suite for schema types and type guards.
 """
 
-from schema import (
+from psa_squash_rankings.schema import (
     ApiPlayerRecord,
     HtmlPlayerRecord,
     is_api_result,

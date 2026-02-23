@@ -147,30 +147,36 @@ except Exception as e:
 ## Project Structure
 
 ```
-psa-squash-rankings-scraper/
-├── schema.py                # Type definitions (ApiPlayerRecord, HtmlPlayerRecord)
-├── api_scraper.py           # API scraper (returns list[ApiPlayerRecord])
-├── html_scraper.py          # HTML fallback (returns list[HtmlPlayerRecord])
-├── data_parser.py           # Schema validation and parsing
-├── exporter.py              # Type-aware CSV export
-├── logger.py                # Centralized logging
-├── run_scraper.py           # Main entry point with explicit fallback handling
-├── validator.py             # Type-aware data validation
-├── pyproject.toml           # Project configuration
-├── config.py                # Configuration constants
-├── .gitignore               # Git ignore rules
-├── README.md                # This file
-├── tests/                   # Test suite
-|   |── conftest.py          # Test configuration
-│   ├── test_parser.py       # Parser unit tests
-│   ├── test_checkpoints.py  # Checkpoint system tests
-│   ├── test_api_scraper.py  # API scraper tests
-│   ├── test_html_scraper.py # HTML scraper tests
-│   ├── test_exporter.py     # Exporter tests
-│   └── test_schema.py       # Schema tests
-├── checkpoints/             # Checkpoint files (auto-created)
-├── logs/                    # Log files (auto-created)
-└── output/                  # Scraped CSV files (auto-created)
+psa-squash-rankings/
+├── src/
+│   └── psa_squash_rankings/
+│       ├── __init__.py
+│       ├── py.typed
+│       ├── api_scraper.py
+│       ├── html_scraper.py
+│       ├── data_parser.py
+│       ├── schema.py
+│       ├── config.py
+│       ├── logger.py
+│       ├── exporter.py
+│       ├── validator.py
+│       └── cli.py
+├── tests/
+│   ├── conftest.py
+│   ├── test_api_scraper.py
+│   ├── test_html_scraper.py
+│   ├── test_parser.py
+│   ├── test_checkpoints.py
+│   ├── test_exporter.py
+│   └── test_schema.py
+├── .github/
+│   └── workflows/
+│       └── CI.yml
+├── pyproject.toml
+├── README.md
+├── LICENSE
+├── uv.lock
+└── .gitignore
 ```
 
 ## Output Files
@@ -458,3 +464,7 @@ Contributions are welcome! Please:
 ## Acknowledgments
 
 - PSA World Tour for providing the ranking data
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

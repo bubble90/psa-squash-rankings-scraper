@@ -1,12 +1,32 @@
+# Build artifacts
+dist/
+build/
+*.egg-info/
+src/*.egg-info/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+
+# Testing/Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# IDE
+.vscode/
+.idea/
+
+# Project data (user-generated)
 output/
 logs/
 checkpoints/
-.pytest_cache/
-.venv/
-venv/
+
+# Ruff
 .ruff_cache/
-.coverage
-htmlcov/
-__pycache__/
-**/__pycache__/
-.DS_Store

@@ -6,9 +6,10 @@ Supports both API and HTML scraper outputs with appropriate column handling.
 """
 
 import pandas as pd
-from logger import get_logger
-from schema import ScraperResult, is_api_result, is_html_result
-from config import OUTPUT_DIR
+
+from psa_squash_rankings.logger import get_logger
+from psa_squash_rankings.schema import ScraperResult, is_api_result, is_html_result
+from psa_squash_rankings.config import OUTPUT_DIR
 
 
 def export_to_csv(data: ScraperResult, filename: str) -> None:

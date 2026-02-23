@@ -8,7 +8,7 @@ log levels, and file output.
 import logging
 import sys
 from datetime import datetime
-from config import LOG_DIR
+from psa_squash_rankings.config import LOG_DIR
 
 
 def setup_logger(name: str, level: int = logging.INFO) -> logging.Logger:

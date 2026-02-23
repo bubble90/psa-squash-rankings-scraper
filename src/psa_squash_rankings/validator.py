@@ -7,8 +7,8 @@ with explicit handling of their different data structures.
 
 import pandas as pd
 from pandas.errors import EmptyDataError
-from logger import get_logger
-from config import OUTPUT_DIR
+from psa_squash_rankings.logger import get_logger
+from psa_squash_rankings.config import OUTPUT_DIR
 from typing import Literal, Any
 
 

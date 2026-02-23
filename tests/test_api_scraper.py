@@ -4,10 +4,10 @@ Test suite for API scraper functionality in PSA Squash scraper.
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from api_scraper import get_rankings
+from psa_squash_rankings.api_scraper import get_rankings
 
 
-@patch("api_scraper.requests.Session")
+@patch("psa_squash_rankings.api_scraper.requests.Session")
 def test_get_rankings_single_page(mock_session_class: MagicMock) -> None:
     """Test fetching a single page of rankings."""
     mock_session = MagicMock()
@@ -62,7 +62,7 @@ def test_get_rankings_single_page(mock_session_class: MagicMock) -> None:
     mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.Session")
+@patch("psa_squash_rankings.api_scraper.requests.Session")
 def test_get_rankings_with_missing_optional_fields(
     mock_session_class: MagicMock,
 ) -> None:
@@ -98,7 +98,7 @@ def test_get_rankings_with_missing_optional_fields(
     mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.Session")
+@patch("psa_squash_rankings.api_scraper.requests.Session")
 def test_get_rankings_multiple_pages(mock_session_class: MagicMock) -> None:
     """Test fetching multiple pages with pagination."""
     mock_session = MagicMock()
@@ -146,7 +146,7 @@ def test_get_rankings_multiple_pages(mock_session_class: MagicMock) -> None:
     mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.Session")
+@patch("psa_squash_rankings.api_scraper.requests.Session")
 def test_get_rankings_empty_response(mock_session_class: MagicMock) -> None:
     """Test handling of empty API response."""
     mock_session = MagicMock()
@@ -163,7 +163,7 @@ def test_get_rankings_empty_response(mock_session_class: MagicMock) -> None:
     mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.Session")
+@patch("psa_squash_rankings.api_scraper.requests.Session")
 def test_get_rankings_respects_max_pages(mock_session_class: MagicMock) -> None:
     """Test that max_pages parameter is respected."""
     mock_session = MagicMock()
@@ -193,7 +193,7 @@ def test_get_rankings_respects_max_pages(mock_session_class: MagicMock) -> None:
     mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.Session")
+@patch("psa_squash_rankings.api_scraper.requests.Session")
 def test_get_rankings_female(mock_session_class: MagicMock) -> None:
     """Test fetching female rankings."""
     mock_session = MagicMock()
@@ -226,7 +226,7 @@ def test_get_rankings_female(mock_session_class: MagicMock) -> None:
     mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.Session")
+@patch("psa_squash_rankings.api_scraper.requests.Session")
 def test_get_rankings_network_error(mock_session_class: MagicMock) -> None:
     """Test handling of network errors."""
     mock_session = MagicMock()
@@ -240,7 +240,7 @@ def test_get_rankings_network_error(mock_session_class: MagicMock) -> None:
     mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.Session")
+@patch("psa_squash_rankings.api_scraper.requests.Session")
 def test_get_rankings_http_error(mock_session_class: MagicMock) -> None:
     """Test handling of HTTP errors."""
     mock_session = MagicMock()
@@ -256,7 +256,7 @@ def test_get_rankings_http_error(mock_session_class: MagicMock) -> None:
     mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.Session")
+@patch("psa_squash_rankings.api_scraper.requests.Session")
 def test_get_rankings_invalid_json(mock_session_class: MagicMock) -> None:
     """Test handling of invalid JSON response."""
     mock_session = MagicMock()
@@ -273,7 +273,7 @@ def test_get_rankings_invalid_json(mock_session_class: MagicMock) -> None:
     mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.Session")
+@patch("psa_squash_rankings.api_scraper.requests.Session")
 def test_get_rankings_list_response(mock_session_class: MagicMock) -> None:
     """Test handling API response as a list (not dict)."""
     mock_session = MagicMock()
@@ -300,7 +300,7 @@ def test_get_rankings_list_response(mock_session_class: MagicMock) -> None:
     mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.Session")
+@patch("psa_squash_rankings.api_scraper.requests.Session")
 def test_get_rankings_stops_on_partial_page(mock_session_class: MagicMock) -> None:
     """Test scraper stops when partial page is returned."""
     mock_session = MagicMock()
@@ -330,7 +330,7 @@ def test_get_rankings_stops_on_partial_page(mock_session_class: MagicMock) -> No
     mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.Session")
+@patch("psa_squash_rankings.api_scraper.requests.Session")
 def test_get_rankings_custom_page_size(mock_session_class: MagicMock) -> None:
     """Test custom page size parameter."""
     mock_session = MagicMock()
@@ -360,7 +360,7 @@ def test_get_rankings_custom_page_size(mock_session_class: MagicMock) -> None:
     mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.Session")
+@patch("psa_squash_rankings.api_scraper.requests.Session")
 def test_get_rankings_pagination_url_format(mock_session_class: MagicMock) -> None:
     """Test that pagination URLs are formatted correctly."""
     mock_session = MagicMock()
@@ -412,7 +412,7 @@ def test_get_rankings_pagination_url_format(mock_session_class: MagicMock) -> No
     mock_session.close.assert_called_once()
 
 
-@patch("api_scraper.requests.Session")
+@patch("psa_squash_rankings.api_scraper.requests.Session")
 def test_get_rankings_returns_api_player_record_type(
     mock_session_class: MagicMock,
 ) -> None:

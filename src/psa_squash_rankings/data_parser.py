@@ -6,13 +6,13 @@ and prevent silent data corruption.
 """
 
 import re
-from logger import get_logger
-from typing import Any
-from validator import validate_api_schema
-from schema import ApiPlayerRecord
+from psa_squash_rankings.logger import get_logger
+from typing import Any, Optional
+from psa_squash_rankings.validator import validate_api_schema
+from psa_squash_rankings.schema import ApiPlayerRecord
 
 
-def parse_measure(value: Any, unit_label: str) -> int | None:
+def parse_measure(value: Any, unit_label: str) -> Optional[int]:
     """
     Parses height/weight from various formats into an integer (Metric).
     Handles: "185cm", "185 cm", "185", "6' 1\"", "72in".
