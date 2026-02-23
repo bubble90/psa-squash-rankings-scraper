@@ -10,7 +10,7 @@ import json
 import itertools
 import requests
 import pandas as pd
-from typing import Literal, Any, Union, Optional
+from typing import Literal, Any, Optional
 from psa_squash_rankings.data_parser import parse_api_player
 from psa_squash_rankings.logger import get_logger
 from psa_squash_rankings.schema import ApiPlayerRecord

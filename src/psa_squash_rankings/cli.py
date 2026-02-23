@@ -21,8 +21,7 @@ def main() -> int:
     Returns exit code (0 for success, 1 for failure).
     """
     parser = argparse.ArgumentParser(
-        prog="psa-scrape",
-        description="PSA Squash Rankings Scraper"
+        prog="psa-scrape", description="PSA Squash Rankings Scraper"
     )
     parser.add_argument(
         "--gender",
@@ -43,9 +42,7 @@ def main() -> int:
         help="Maximum number of pages to fetch (default: all)",
     )
     parser.add_argument(
-        "--no-resume",
-        action="store_true",
-        help="Start fresh, ignore checkpoints"
+        "--no-resume", action="store_true", help="Start fresh, ignore checkpoints"
     )
     parser.add_argument(
         "--log-level",
@@ -53,11 +50,7 @@ def main() -> int:
         default="INFO",
         help="Set logging level (default: INFO)",
     )
-    parser.add_argument(
-        "--version",
-        action="version",
-        version="%(prog)s 1.0.0"
-    )
+    parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
 
     args = parser.parse_args()
 

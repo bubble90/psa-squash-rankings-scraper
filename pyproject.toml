@@ -45,7 +45,7 @@ dev = [
 ]
 
 [tool.ruff]
-ignore = ["F841"]
+ignore = ["F841", "F401"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

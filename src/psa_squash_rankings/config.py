@@ -18,11 +18,13 @@ API_TIMEOUT = 10
 HTML_BASE_URL = "https://www.psasquashtour.com/rankings/"
 HTML_TIMEOUT = 15
 
+
 # Use current working directory for output (not package location)
 # This allows users to control where files are written
 def get_data_dir() -> Path:
     """Get the data directory, defaulting to current working directory."""
     return Path(os.getenv("PSA_DATA_DIR", Path.cwd()))
+
 
 CHECKPOINT_DIR = get_data_dir() / "checkpoints"
 LOG_DIR = get_data_dir() / "logs"

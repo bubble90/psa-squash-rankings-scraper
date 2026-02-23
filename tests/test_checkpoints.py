@@ -5,7 +5,11 @@ Test suite for checkpoint functionality in PSA Squash scraper.
 import json
 import pytest
 from pathlib import Path
-from psa_squash_rankings.api_scraper import save_checkpoint, load_checkpoint, clear_checkpoint
+from psa_squash_rankings.api_scraper import (
+    save_checkpoint,
+    load_checkpoint,
+    clear_checkpoint,
+)
 from psa_squash_rankings.schema import ApiPlayerRecord
 
 

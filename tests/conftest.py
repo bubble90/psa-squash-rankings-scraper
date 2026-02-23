@@ -5,5 +5,5 @@ Adds the parent directory to sys.path so that test files can import
 the scraper modules directly without needing package installation.
 """
 
-import sys
+import pytest
 from pathlib import Path
