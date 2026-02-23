@@ -12,6 +12,7 @@ __pycache__/
 # Virtual environments
 venv/
 .venv/
+.DS_Store
 
 # Testing/Coverage
 .pytest_cache/
