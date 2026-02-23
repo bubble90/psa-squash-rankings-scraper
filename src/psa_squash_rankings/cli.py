@@ -5,6 +5,7 @@ Command-line interface for PSA Squash Rankings Scraper.
 import sys
 import argparse
 import logging
+from typing import Literal, cast
 
 from psa_squash_rankings.api_scraper import get_rankings
 from psa_squash_rankings.html_scraper import scrape_rankings_html
@@ -70,7 +71,8 @@ def main() -> int:
         f"max_pages={args.max_pages}, resume={not args.no_resume}"
     )
 
-    genders = ["male", "female"] if args.gender == "both" else [args.gender]
+    gender_arg = cast(Literal["male", "female", "both"], args.gender)
+    genders = ["male", "female"] if gender_arg == "both" else [gender_arg]
 
     success_count = 0
     failure_count = 0
@@ -82,8 +84,9 @@ def main() -> int:
         logger.info("=" * 60)
 
         try:
+            gender_literal = cast(Literal["male", "female"], gender)
             result = get_rankings(
-                gender=gender,
+                gender=gender_literal,
                 page_size=args.page_size,
                 max_pages=args.max_pages,
                 resume=not args.no_resume,
