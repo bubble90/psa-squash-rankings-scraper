@@ -86,29 +86,29 @@ class HtmlPlayerRecord(TypedDict):
 
 ```bash
 # Scrape both male and female rankings
-uv run run_scraper.py
+python -m psa_squash_rankings.cli --gender both
 
-# Scrape only male rankings
-uv run run_scraper.py --gender male
+# Scrape only top 100 male players with debug logging
+python -m psa_squash_rankings.cli --gender male --page-size 100 --max-pages 1 --log-level DEBUG
 
-# Scrape only female rankings
-uv run run_scraper.py --gender female
+# Disable checkpointing (start fresh)
+python -m psa_squash_rankings.cli --no-resume
 ```
 
 ### Advanced Options
 
 ```bash
 # Custom page size
-uv run run_scraper.py --gender male --page-size 50
+python -m psa_squash_rankings.cli --gender male --page-size 50
 
 # Limit number of pages
-uv run run_scraper.py --gender male --max-pages 5
+python -m psa_squash_rankings.cli --gender male --max-pages 5
 
 # Start fresh (ignore checkpoints)
-uv run run_scraper.py --gender male --no-resume
+python -m psa_squash_rankings.cli --gender male --no-resume
 
 # Enable debug logging
-uv run run_scraper.py --gender male --log-level DEBUG
+python -m psa_squash_rankings.cli --gender male --log-level DEBUG
 ```
 
 ### Programmatic Usage with Type Safety
