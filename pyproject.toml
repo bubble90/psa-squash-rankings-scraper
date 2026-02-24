@@ -3,7 +3,7 @@ name = "psa-squash-rankings"
 version = "1.0.0"
 description = "A Python library for fetching PSA Squash Tour rankings"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [{ name = "Your Name", email = "you@example.com" }]
 keywords = ["squash", "psa", "scraper", "rankings", "sports", "web-scraping"]

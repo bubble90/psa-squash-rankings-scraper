@@ -16,7 +16,7 @@ A robust Python-based web scraper for fetching professional squash player rankin
 
 ## Requirements
 
-- Python 3.12+
+- Python 3.9+
 - uv
 
 ## Installation
