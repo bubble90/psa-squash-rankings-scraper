@@ -1,4 +1,4 @@
-name: publish
+name: Publish to PyPI
 
 on:
   push:
@@ -23,6 +23,12 @@ jobs:
       - name: Install dependencies
         run: uv sync --all-extras
 
+      - name: Create required directories
+        run: mkdir -p checkpoints
+
+      - name: Run tests
+        run: uv run pytest
+
       - name: Build package
         run: uv build
 
@@ -37,8 +43,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-test
     environment: release
-    permissions:
-      id-token: write
 
     steps:
       - name: Download build artifacts
@@ -49,3 +53,5 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
