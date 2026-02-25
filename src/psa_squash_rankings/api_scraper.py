@@ -37,12 +37,21 @@ def save_checkpoint(gender: str, page: int, data: list[ApiPlayerRecord]) -> None
     logger = get_logger(__name__)
 
     checkpoint_file = CHECKPOINT_DIR / f"{gender}_checkpoint.json"
-    checkpoint_dir = os.path.dirname(checkpoint_file)
-    if checkpoint_dir:
-        os.makedirs(checkpoint_dir, exist_ok=True)
-    with open(checkpoint_file, "w", encoding="utf-8") as f:
-        json.dump(data, f)
-    logger.info(f"Checkpoint saved: {len(data)} players, page {page}")
+
+    checkpoint_data = {
+        "gender": gender,
+        "last_page": page,
+        "total_players": len(data),
+        "players": data,
+    }
+
+    try:
+        with open(checkpoint_file, "w") as f:
+            json.dump(checkpoint_data, f, indent=2)
+        logger.info(f"Checkpoint saved: {len(data)} players, page {page}")
+    except Exception as e:
+        logger.error(f"Failed to save checkpoint: {e}")
+        raise
 
 
 def load_checkpoint(gender: str) -> Optional[dict[str, Any]]:
