@@ -172,6 +172,7 @@ psa-squash-rankings/
 ├── .github/
 │   └── workflows/
 │       └── CI.yml
+│       └── publish.yml
 ├── pyproject.toml
 ├── README.md
 ├── LICENSE
