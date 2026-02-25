@@ -9,6 +9,7 @@ import logging
 import sys
 from datetime import datetime
 from psa_squash_rankings.config import LOG_DIR
+import os
 
 
 def setup_logger(name: str, level: int = logging.INFO) -> logging.Logger:
@@ -29,6 +30,10 @@ def setup_logger(name: str, level: int = logging.INFO) -> logging.Logger:
         return logger
 
     log_file = LOG_DIR / f"psa_scraper_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+
+    log_dir = os.path.dirname(log_file)
+    if log_dir:
+        os.makedirs(log_dir, exist_ok=True)
 
     formatter = logging.Formatter(
         fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
