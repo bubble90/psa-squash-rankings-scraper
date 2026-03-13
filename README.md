@@ -58,6 +58,8 @@ class ApiPlayerRecord(TypedDict):
     weight_kg: Optional[int]     # ✓ Biographical data
     birthdate: Optional[str]     # ✓ Biographical data
     country: Optional[str]       # ✓ Biographical data
+    picture_url: Optional[str]   # ✓ Full player photo URL
+    mugshot_url: Optional[str]   # ✓ Headshot photo URL
     source: Literal["api"]       # ✓ Data quality indicator
 ```
 
@@ -71,6 +73,7 @@ class HtmlPlayerRecord(TypedDict):
     player: str
     tournaments: int
     points: int
+    mugshot_url: Optional[str]   # ✓ Headshot photo URL (if present in HTML)
     source: Literal["html"]      # ⚠ Degraded data indicator
     # ✗ NO player ID
     # ✗ NO biographical data
@@ -194,14 +197,14 @@ Successfully scraped data is exported to the output/ directory with clear naming
 
 **API Data CSV** (complete):
 ```csv
-rank,player,id,tournaments,points,height_cm,weight_kg,birthdate,country,source
-1,Ali Farag,123,15,2500,180,75,1992-01-01,Egypt,api
+rank,player,id,tournaments,points,height_cm,weight_kg,birthdate,country,picture_url,mugshot_url,source
+1,Ali Farag,123,15,2500,180,75,1992-01-01,Egypt,https://...players/123.jpg,https://...,api
 ```
 
 **HTML Fallback CSV** (degraded):
 ```csv
-rank,player,tournaments,points,source
-1,Ali Farag,15,2500,html
+rank,player,tournaments,points,mugshot_url,source
+1,Ali Farag,15,2500,https://...,html
 ```
 
 Note the `source` column indicates data quality.
