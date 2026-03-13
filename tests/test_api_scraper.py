@@ -451,5 +451,7 @@ def test_get_rankings_returns_api_player_record_type(
     assert "weight_kg" in record
     assert "birthdate" in record
     assert "country" in record
+    assert "picture_url" in record
+    assert "mugshot_url" in record
     assert "source" in record
     assert record["source"] == "api"

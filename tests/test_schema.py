@@ -22,6 +22,8 @@ def test_api_player_record_structure() -> None:
         "weight_kg": 75,
         "birthdate": "1990-01-01",
         "country": "Egypt",
+        "picture_url": "https://example.com/players/12345.jpg",
+        "mugshot_url": "https://example.com/mugshots/12345.jpg",
         "source": "api",
     }
 
@@ -34,6 +36,8 @@ def test_api_player_record_structure() -> None:
     assert record["weight_kg"] == 75
     assert record["birthdate"] == "1990-01-01"
     assert record["country"] == "Egypt"
+    assert record["picture_url"] == "https://example.com/players/12345.jpg"
+    assert record["mugshot_url"] == "https://example.com/mugshots/12345.jpg"
     assert record["source"] == "api"
 
 
@@ -49,6 +53,8 @@ def test_api_player_record_with_none_optionals() -> None:
         "weight_kg": None,
         "birthdate": None,
         "country": None,
+        "picture_url": None,
+        "mugshot_url": None,
         "source": "api",
     }
 
@@ -56,6 +62,8 @@ def test_api_player_record_with_none_optionals() -> None:
     assert record["weight_kg"] is None
     assert record["birthdate"] is None
     assert record["country"] is None
+    assert record["picture_url"] is None
+    assert record["mugshot_url"] is None
 
 
 def test_html_player_record_structure() -> None:
@@ -65,6 +73,7 @@ def test_html_player_record_structure() -> None:
         "player": "Test Player",
         "tournaments": 10,
         "points": 5000,
+        "mugshot_url": "https://example.com/mugshots/player.jpg",
         "source": "html",
     }
 
@@ -72,6 +81,7 @@ def test_html_player_record_structure() -> None:
     assert record["player"] == "Test Player"
     assert record["tournaments"] == 10
     assert record["points"] == 5000
+    assert record["mugshot_url"] == "https://example.com/mugshots/player.jpg"
     assert record["source"] == "html"
 
 
@@ -82,6 +92,7 @@ def test_html_player_record_missing_fields() -> None:
         "player": "Test Player",
         "tournaments": 10,
         "points": 5000,
+        "mugshot_url": None,
         "source": "html",
     }
 
@@ -105,6 +116,8 @@ def test_is_api_result_with_api_data() -> None:
             "weight_kg": None,
             "birthdate": None,
             "country": None,
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         }
     ]
@@ -120,6 +133,7 @@ def test_is_api_result_with_html_data() -> None:
             "player": "Test",
             "tournaments": 5,
             "points": 1000,
+            "mugshot_url": None,
             "source": "html",
         }
     ]
@@ -142,6 +156,7 @@ def test_is_html_result_with_html_data() -> None:
             "player": "Test",
             "tournaments": 5,
             "points": 1000,
+            "mugshot_url": None,
             "source": "html",
         }
     ]
@@ -162,6 +177,8 @@ def test_is_html_result_with_api_data() -> None:
             "weight_kg": None,
             "birthdate": None,
             "country": None,
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         }
     ]
@@ -189,6 +206,8 @@ def test_type_guards_are_mutually_exclusive() -> None:
             "weight_kg": None,
             "birthdate": None,
             "country": None,
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         }
     ]
@@ -199,6 +218,7 @@ def test_type_guards_are_mutually_exclusive() -> None:
             "player": "Test",
             "tournaments": 5,
             "points": 1000,
+            "mugshot_url": None,
             "source": "html",
         }
     ]
@@ -222,6 +242,8 @@ def test_api_record_source_literal() -> None:
         "weight_kg": None,
         "birthdate": None,
         "country": None,
+        "picture_url": None,
+        "mugshot_url": None,
         "source": "api",
     }
 
@@ -235,6 +257,7 @@ def test_html_record_source_literal() -> None:
         "player": "Test",
         "tournaments": 5,
         "points": 1000,
+        "mugshot_url": None,
         "source": "html",
     }
 
@@ -253,6 +276,8 @@ def test_api_record_optional_fields_can_be_none() -> None:
         "weight_kg": None,
         "birthdate": None,
         "country": None,
+        "picture_url": None,
+        "mugshot_url": None,
         "source": "api",
     }
 
@@ -260,6 +285,8 @@ def test_api_record_optional_fields_can_be_none() -> None:
     assert record["weight_kg"] is None
     assert record["birthdate"] is None
     assert record["country"] is None
+    assert record["picture_url"] is None
+    assert record["mugshot_url"] is None
 
 
 def test_api_record_optional_fields_can_have_values() -> None:
@@ -274,6 +301,8 @@ def test_api_record_optional_fields_can_have_values() -> None:
         "weight_kg": 75,
         "birthdate": "1990-01-01",
         "country": "Egypt",
+        "picture_url": "https://example.com/players/1.jpg",
+        "mugshot_url": "https://example.com/mugshots/1.jpg",
         "source": "api",
     }
 
@@ -281,6 +310,8 @@ def test_api_record_optional_fields_can_have_values() -> None:
     assert record["weight_kg"] == 75
     assert record["birthdate"] == "1990-01-01"
     assert record["country"] == "Egypt"
+    assert record["picture_url"] == "https://example.com/players/1.jpg"
+    assert record["mugshot_url"] == "https://example.com/mugshots/1.jpg"
 
 
 def test_multiple_api_records() -> None:
@@ -296,6 +327,8 @@ def test_multiple_api_records() -> None:
             "weight_kg": None,
             "birthdate": None,
             "country": None,
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         }
         for i in range(1, 6)
@@ -313,6 +346,7 @@ def test_multiple_html_records() -> None:
             "player": f"Player {i}",
             "tournaments": 5,
             "points": 1000,
+            "mugshot_url": None,
             "source": "html",
         }
         for i in range(1, 6)

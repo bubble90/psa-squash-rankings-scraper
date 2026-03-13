@@ -47,6 +47,8 @@ def test_parse_api_player_transformation() -> None:
     assert parsed["height_cm"] is None
     assert parsed["weight_kg"] is None
     assert parsed["country"] is None
+    assert parsed["picture_url"] is None
+    assert parsed["mugshot_url"] is None
     assert parsed["source"] == "api"
 
 
@@ -62,6 +64,8 @@ def test_parse_api_player_with_all_optional_fields() -> None:
         "Height": "180cm",
         "Weight": "75kg",
         "Country": "Egypt",
+        "Picture": "https://example.com/players/12345.jpg",
+        "Mugshot": "https://example.com/mugshots/12345.jpg",
     }
     parsed = parse_api_player(raw_data)
 
@@ -74,6 +78,8 @@ def test_parse_api_player_with_all_optional_fields() -> None:
     assert parsed["height_cm"] == 180
     assert parsed["weight_kg"] == 75
     assert parsed["country"] == "Egypt"
+    assert parsed["picture_url"] == "https://example.com/players/12345.jpg"
+    assert parsed["mugshot_url"] == "https://example.com/mugshots/12345.jpg"
     assert parsed["source"] == "api"
 
 
@@ -142,4 +148,6 @@ def test_parse_api_player_missing_optional_fields() -> None:
     assert parsed["height_cm"] is None
     assert parsed["weight_kg"] is None
     assert parsed["country"] is None
+    assert parsed["picture_url"] is None
+    assert parsed["mugshot_url"] is None
     assert parsed["source"] == "api"

@@ -28,6 +28,8 @@ def test_save_checkpoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
             "weight_kg": 75,
             "birthdate": "1992-01-01",
             "country": "Egypt",
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         },
         {
@@ -40,6 +42,8 @@ def test_save_checkpoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
             "weight_kg": 80,
             "birthdate": "1992-06-14",
             "country": "New Zealand",
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         },
     ]
@@ -75,6 +79,8 @@ def test_load_checkpoint_exists(
             "weight_kg": None,
             "birthdate": None,
             "country": None,
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         },
         {
@@ -87,6 +93,8 @@ def test_load_checkpoint_exists(
             "weight_kg": None,
             "birthdate": None,
             "country": None,
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         },
     ]
@@ -126,6 +134,8 @@ def test_clear_checkpoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> No
             "weight_kg": None,
             "birthdate": None,
             "country": None,
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         }
     ]
@@ -164,6 +174,8 @@ def test_save_checkpoint_female(
             "weight_kg": None,
             "birthdate": None,
             "country": None,
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         }
     ]
@@ -196,6 +208,8 @@ def test_checkpoint_overwrites_existing(
             "weight_kg": None,
             "birthdate": None,
             "country": None,
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         }
     ]
@@ -212,6 +226,8 @@ def test_checkpoint_overwrites_existing(
             "weight_kg": None,
             "birthdate": None,
             "country": None,
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         },
         {
@@ -224,6 +240,8 @@ def test_checkpoint_overwrites_existing(
             "weight_kg": None,
             "birthdate": None,
             "country": None,
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         },
     ]
@@ -264,6 +282,8 @@ def test_checkpoint_large_dataset(
             "weight_kg": None,
             "birthdate": None,
             "country": None,
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         }
         for i in range(1, 501)

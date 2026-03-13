@@ -23,6 +23,8 @@ def sample_api_data() -> list[ApiPlayerRecord]:
             "height_cm": 180,
             "weight_kg": 75,
             "country": "Egypt",
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         },
         {
@@ -35,6 +37,8 @@ def sample_api_data() -> list[ApiPlayerRecord]:
             "height_cm": 185,
             "weight_kg": 80,
             "country": "New Zealand",
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         },
         {
@@ -47,6 +51,8 @@ def sample_api_data() -> list[ApiPlayerRecord]:
             "height_cm": 175,
             "weight_kg": 70,
             "country": "Peru",
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         },
     ]
@@ -61,6 +67,7 @@ def sample_html_data() -> list[HtmlPlayerRecord]:
             "player": "Ali Farag",
             "tournaments": 12,
             "points": 20000,
+            "mugshot_url": None,
             "source": "html",
         },
         {
@@ -68,6 +75,7 @@ def sample_html_data() -> list[HtmlPlayerRecord]:
             "player": "Paul Coll",
             "tournaments": 10,
             "points": 18000,
+            "mugshot_url": None,
             "source": "html",
         },
     ]
@@ -185,6 +193,8 @@ def test_export_to_csv_overwrites_existing(
             "weight_kg": None,
             "birthdate": None,
             "country": None,
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         }
     ]
@@ -236,6 +246,8 @@ def test_export_to_csv_large_dataset(
             "weight_kg": None,
             "birthdate": None,
             "country": None,
+            "picture_url": None,
+            "mugshot_url": None,
             "source": "api",
         }
         for i in range(1, 1001)
