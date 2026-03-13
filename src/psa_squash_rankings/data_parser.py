@@ -76,6 +76,8 @@ def parse_api_player(player: dict[str, Any]) -> ApiPlayerRecord:
         "weight_kg": None,
         "birthdate": None,
         "country": None,
+        "picture_url": player.get("Picture") or None,
+        "mugshot_url": player.get("Mugshot") or None,
         "source": "api",
     }
 

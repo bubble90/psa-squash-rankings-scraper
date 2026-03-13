@@ -127,6 +127,8 @@ def validate_scraped_data(gender: Literal["male", "female"] = "male") -> None:
                 "weight_kg",
                 "birthdate",
                 "country",
+                "picture_url",
+                "mugshot_url",
                 "source",
             }
             missing_cols = expected_cols - set(api_df.columns)

@@ -114,11 +114,15 @@ def scrape_rankings_html() -> list[HtmlPlayerRecord]:
                 logger.warning(f"Skipping row with invalid data: {e}")
                 continue
 
+            mugshot_img = row.find("img", class_="mugshot")
+            mugshot_url = mugshot_img.get("src") if mugshot_img else None
+
             record: HtmlPlayerRecord = {
                 "rank": rank,
                 "player": player,
                 "tournaments": tournaments,
                 "points": points,
+                "mugshot_url": mugshot_url,
                 "source": "html",
             }
 

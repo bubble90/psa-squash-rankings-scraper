@@ -25,6 +25,8 @@ class ApiPlayerRecord(TypedDict):
     weight_kg: Optional[int]
     birthdate: Optional[str]
     country: Optional[str]
+    picture_url: Optional[str]
+    mugshot_url: Optional[str]
     source: Literal["api"]
 
 
@@ -43,6 +45,7 @@ class HtmlPlayerRecord(TypedDict):
     player: str
     tournaments: int
     points: int
+    mugshot_url: Optional[str]
     source: Literal["html"]
 
 
