@@ -94,7 +94,7 @@ def _run_tournaments(args) -> int:
         pd.DataFrame(tournaments).to_csv(output_path, index=False)
 
         logger.info(f"Fetched {len(tournaments)} tournaments")
-        logger.info(f"Data exported to: squashinfo_tournaments.csv")
+        logger.info("Data exported to: squashinfo_tournaments.csv")
         return 0
 
     except Exception as e:
@@ -113,7 +113,6 @@ def _run_matches(args) -> int:
         if not matches:
             logger.warning(f"No matches found for event {args.event_id}")
             return 1
-
 
         output_path = OUTPUT_DIR / f"squashinfo_matches_{args.event_id}.csv"
         pd.DataFrame(matches).to_csv(output_path, index=False)
