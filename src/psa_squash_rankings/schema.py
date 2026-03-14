@@ -52,6 +52,48 @@ class HtmlPlayerRecord(TypedDict):
 ScraperResult = Union[list[ApiPlayerRecord], list[HtmlPlayerRecord]]
 
 
+class TournamentRecord(TypedDict):
+    """
+    Tournament record from squashinfo.com.
+
+    Contains metadata for a PSA squash tournament.
+    """
+
+    id: int
+    name: str
+    gender: Optional[str]  # "M", "W", or None
+    tier: str
+    location: str
+    date: str
+    url: str
+    source: Literal["squashinfo"]
+
+
+class MatchRecord(TypedDict):
+    """
+    Match record from squashinfo.com.
+
+    Contains player info, scores, and result for a single match.
+    """
+
+    match_id: int
+    tournament_id: int
+    tournament_name: str
+    round: str
+    player1_name: str
+    player1_id: Optional[int]
+    player1_country: Optional[str]
+    player1_seeding: Optional[str]
+    player2_name: str
+    player2_id: Optional[int]
+    player2_country: Optional[str]
+    player2_seeding: Optional[str]
+    winner: Optional[str]  # player1_name if completed, None if not yet played
+    scores: Optional[str]  # e.g., "11-5, 11-4, 11-5"
+    duration_minutes: Optional[int]
+    source: Literal["squashinfo"]
+
+
 def is_api_result(result: ScraperResult) -> bool:
     """
     Type guard to check if result is from API scraper.

@@ -18,6 +18,9 @@ API_TIMEOUT = 10
 HTML_BASE_URL = "https://www.psasquashtour.com/rankings/"
 HTML_TIMEOUT = 15
 
+SQUASHINFO_BASE_URL = "https://www.squashinfo.com"
+SQUASHINFO_TIMEOUT = 15
+
 
 # Use current working directory for output (not package location)
 # This allows users to control where files are written

@@ -1,12 +1,14 @@
 # PSA Squash Rankings Scraper
 
-A robust Python-based web scraper for fetching professional squash player rankings from the PSA World Tour. Features **explicit typing** with distinct schemas for API and HTML fallback data, ensuring consumers are always aware when working with degraded data.
+A robust Python-based web scraper for fetching professional squash player rankings from the PSA World Tour, as well as tournament listings and match results from squashinfo.com. Features **explicit typing** with distinct schemas for API and HTML fallback data, ensuring consumers are always aware when working with degraded data.
 
 ## Features
 
 - **Explicit Fallback Typing**: Distinct `ApiPlayerRecord` and `HtmlPlayerRecord` types make data quality visible
 - **Type-Safe Data Handling**: Type guards and union types prevent silent schema mismatches
 - **API-First Approach**: Primary API scraper with automatic HTML fallback
+- **Tournament Scraping**: Fetch recent PSA tournament listings from squashinfo.com
+- **Match Result Scraping**: Fetch full draw and match results for any tournament event
 - **Resumable Scraping**: Checkpoint system allows recovery from interruptions
 - **Pagination**: Efficiently handles large datasets with configurable page sizes
 - **User Agent Rotation**: Both scrapers use systematic rotation to avoid rate limiting
@@ -83,38 +85,104 @@ class HtmlPlayerRecord(TypedDict):
 
 **Cannot be used for**: Joining datasets, player tracking, biographical analysis
 
+### TournamentRecord (squashinfo.com)
+
+```python
+class TournamentRecord(TypedDict):
+    id: int                          # Numeric event ID
+    name: str                        # Tournament name
+    gender: Optional[str]            # "M", "W", or None
+    tier: str                        # e.g. "PSA Platinum"
+    location: str
+    date: str
+    url: str                         # Full squashinfo.com event URL
+    source: Literal["squashinfo"]
+```
+
+### MatchRecord (squashinfo.com)
+
+```python
+class MatchRecord(TypedDict):
+    match_id: int
+    tournament_id: int
+    tournament_name: str
+    round: str                       # e.g. "Semi-finals", "Final"
+    player1_name: str
+    player1_id: Optional[int]
+    player1_country: Optional[str]   # 3-letter country code
+    player1_seeding: Optional[str]
+    player2_name: str
+    player2_id: Optional[int]
+    player2_country: Optional[str]
+    player2_seeding: Optional[str]
+    winner: Optional[str]            # player1_name if completed, None if upcoming
+    scores: Optional[str]            # e.g. "11-5, 11-4, 11-5"
+    duration_minutes: Optional[int]
+    source: Literal["squashinfo"]
+```
+
 ## Usage
 
-### Basic Usage
+The CLI uses subcommands: `rankings`, `tournaments`, and `matches`.
+
+### Rankings
 
 ```bash
-# Scrape both male and female rankings
-python -m psa_squash_rankings.cli --gender both
+# Scrape both male and female rankings (default)
+psa-scrape rankings --gender both
 
 # Scrape only top 100 male players with debug logging
-python -m psa_squash_rankings.cli --gender male --page-size 100 --max-pages 1 --log-level DEBUG
+psa-scrape rankings --gender male --page-size 100 --max-pages 1 --log-level DEBUG
 
 # Disable checkpointing (start fresh)
-python -m psa_squash_rankings.cli --no-resume
+psa-scrape rankings --gender male --no-resume
 ```
 
-### Advanced Options
+### Tournaments
+
+Fetch recent PSA tournament listings from squashinfo.com (~20 tournaments per page).
 
 ```bash
-# Custom page size
-python -m psa_squash_rankings.cli --gender male --page-size 50
+# Fetch the most recent ~20 tournaments (default: 1 page)
+psa-scrape tournaments
 
-# Limit number of pages
-python -m psa_squash_rankings.cli --gender male --max-pages 5
-
-# Start fresh (ignore checkpoints)
-python -m psa_squash_rankings.cli --gender male --no-resume
-
-# Enable debug logging
-python -m psa_squash_rankings.cli --gender male --log-level DEBUG
+# Fetch more history (e.g. 5 pages ≈ 100 tournaments)
+psa-scrape tournaments --max-pages 5
 ```
 
-### Programmatic Usage with Type Safety
+Output: `output/squashinfo_tournaments.csv`
+
+### Matches
+
+Fetch the full draw and match results for a specific tournament. You need the event ID and URL slug, both of which appear in the tournament listing output.
+
+```bash
+# Fetch matches for a tournament by event ID and slug
+psa-scrape matches --event-id 11593 --slug mens-australian-open-2026
+```
+
+Output: `output/squashinfo_matches_11593.csv`
+
+Upcoming matches are included with `winner=None` and `scores=None`. Completed matches include scores (e.g. `11-5, 11-4, 11-5`) and duration in minutes.
+
+### Programmatic Usage — Tournaments & Matches
+
+```python
+from psa_squash_rankings.squashinfo_scraper import get_recent_tournaments, get_tournament_matches
+
+# Fetch recent tournaments (last ~20)
+tournaments = get_recent_tournaments(max_pages=1)
+for t in tournaments:
+    print(f"{t['date']}  [{t['tier']}]  {t['name']} ({t['gender']})  — {t['location']}")
+
+# Fetch match results for a specific event
+matches = get_tournament_matches(event_id=11593, slug="mens-australian-open-2026")
+for m in matches:
+    result = f"{m['winner']} bt opponent" if m['winner'] else "upcoming"
+    print(f"{m['round']:20s}  {m['player1_name']} vs {m['player2_name']}  {result}")
+```
+
+### Programmatic Usage — Rankings (Type Safety)
 
 ```python
 from api_scraper import get_rankings
@@ -157,6 +225,7 @@ psa-squash-rankings/
 │       ├── py.typed
 │       ├── api_scraper.py
 │       ├── html_scraper.py
+│       ├── squashinfo_scraper.py
 │       ├── data_parser.py
 │       ├── schema.py
 │       ├── config.py
@@ -168,6 +237,7 @@ psa-squash-rankings/
 │   ├── conftest.py
 │   ├── test_api_scraper.py
 │   ├── test_html_scraper.py
+│   ├── test_squashinfo_scraper.py
 │   ├── test_parser.py
 │   ├── test_checkpoints.py
 │   ├── test_exporter.py
@@ -187,11 +257,16 @@ psa-squash-rankings/
 
 ### CSV Files
 
-Successfully scraped data is exported to the output/ directory with clear naming:
+Successfully scraped data is exported to the `output/` directory with clear naming:
 
-- `output/psa_rankings_male.csv` - Male rankings (complete API data)
-- `output/psa_rankings_female.csv` - Female rankings (complete API data)
-- `output/psa_rankings_male_fallback.csv` - Male fallback (degraded HTML data)
+**Rankings:**
+- `output/psa_rankings_male.csv` — Male rankings (complete API data)
+- `output/psa_rankings_female.csv` — Female rankings (complete API data)
+- `output/psa_rankings_male_fallback.csv` — Male fallback (degraded HTML data)
+
+**squashinfo.com:**
+- `output/squashinfo_tournaments.csv` — Recent tournament listings
+- `output/squashinfo_matches_{event_id}.csv` — Match results for a tournament
 
 ### CSV Format
 
@@ -207,7 +282,19 @@ rank,player,tournaments,points,mugshot_url,source
 1,Ali Farag,15,2500,https://...,html
 ```
 
-Note the `source` column indicates data quality.
+**Tournament CSV:**
+```csv
+id,name,gender,tier,location,date,url,source
+11593,Mens Australian Open 2026,M,PSA Platinum,Sydney,Jan 2026,https://squashinfo.com/events/11593-...,squashinfo
+```
+
+**Matches CSV:**
+```csv
+match_id,tournament_id,tournament_name,round,player1_name,player1_id,player1_country,player1_seeding,player2_name,player2_id,player2_country,player2_seeding,winner,scores,duration_minutes,source
+98765,11593,Mens Australian Open 2026,Final,Ali Farag,42,EGY,1,Paul Coll,57,NZL,2,Ali Farag,"11-5, 11-4, 11-5",42,squashinfo
+```
+
+The `source` column indicates the data origin (`api`, `html`, or `squashinfo`).
 
 ## How It Works
 
