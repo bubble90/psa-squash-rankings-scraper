@@ -1,4 +1,4 @@
-"""
+j"""
 Validator for PSA Squash rankings scrapers.
 
 Compares HTML and API scraper outputs to validate completeness.
@@ -16,6 +16,8 @@ OUTPUT_DIR = Path("output")
 print("What is this project?")
 
 
+
+print("MY PRINT")
 def validate_scraped_data(gender="male"):
     """
     Validate scraped data for a specific gender.
