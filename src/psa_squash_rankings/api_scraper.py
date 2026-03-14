@@ -9,7 +9,6 @@ import os
 import json
 import itertools
 import requests
-import pandas as pd
 from typing import Literal, Any, Optional
 from psa_squash_rankings.data_parser import parse_api_player
 from psa_squash_rankings.logger import get_logger
@@ -258,6 +257,8 @@ def get_rankings(
 
 
 if __name__ == "__main__":
+    import pandas as pd
+
     logger = get_logger(__name__)
     try:
         result = get_rankings("male", page_size=50, resume=True)

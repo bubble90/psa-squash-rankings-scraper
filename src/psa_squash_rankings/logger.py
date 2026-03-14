@@ -6,10 +6,11 @@ log levels, and file output.
 """
 
 import logging
+import os
 import sys
 from datetime import datetime
+
 from psa_squash_rankings.config import LOG_DIR
-import os
 
 
 def setup_logger(name: str, level: int = logging.INFO) -> logging.Logger:

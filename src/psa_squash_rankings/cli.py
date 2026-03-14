@@ -91,8 +91,6 @@ def _run_tournaments(args) -> int:
             logger.warning("No tournaments found")
             return 1
 
-        import pandas as pd
-
         output_path = OUTPUT_DIR / "squashinfo_tournaments.csv"
         pd.DataFrame(tournaments).to_csv(output_path, index=False)
 
