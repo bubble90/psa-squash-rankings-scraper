@@ -5,6 +5,8 @@ Test suite for schema types and type guards.
 from psa_squash_rankings.schema import (
     ApiPlayerRecord,
     HtmlPlayerRecord,
+    TournamentRecord,
+    MatchRecord,
     is_api_result,
     is_html_result,
 )
@@ -354,3 +356,233 @@ def test_multiple_html_records() -> None:
 
     assert is_html_result(html_data) is True
     assert len(html_data) == 5
+
+
+# ---------------------------------------------------------------------------
+# TournamentRecord
+# ---------------------------------------------------------------------------
+
+
+def test_tournament_record_structure() -> None:
+    """Test that TournamentRecord has correct structure."""
+    record: TournamentRecord = {
+        "id": 11593,
+        "name": "Mens Australian Open 2026",
+        "gender": "M",
+        "tier": "PSA Platinum",
+        "location": "Sydney, Australia",
+        "date": "Jan 2026",
+        "url": "https://squashinfo.com/events/11593-mens-australian-open-2026",
+        "source": "squashinfo",
+    }
+
+    assert record["id"] == 11593
+    assert record["name"] == "Mens Australian Open 2026"
+    assert record["gender"] == "M"
+    assert record["tier"] == "PSA Platinum"
+    assert record["location"] == "Sydney, Australia"
+    assert record["date"] == "Jan 2026"
+    assert (
+        record["url"] == "https://squashinfo.com/events/11593-mens-australian-open-2026"
+    )
+    assert record["source"] == "squashinfo"
+
+
+def test_tournament_record_gender_none() -> None:
+    """Test that TournamentRecord allows None for gender."""
+    record: TournamentRecord = {
+        "id": 999,
+        "name": "Some Open",
+        "gender": None,
+        "tier": "PSA Gold",
+        "location": "Cairo, Egypt",
+        "date": "Feb 2026",
+        "url": "https://squashinfo.com/events/999-some-open",
+        "source": "squashinfo",
+    }
+
+    assert record["gender"] is None
+
+
+def test_tournament_record_gender_values() -> None:
+    """Test that TournamentRecord gender accepts M and W."""
+    male: TournamentRecord = {
+        "id": 1,
+        "name": "Mens Event",
+        "gender": "M",
+        "tier": "PSA Gold",
+        "location": "London",
+        "date": "Mar 2026",
+        "url": "https://squashinfo.com/events/1-mens-event",
+        "source": "squashinfo",
+    }
+    female: TournamentRecord = {
+        "id": 2,
+        "name": "Womens Event",
+        "gender": "W",
+        "tier": "PSA Gold",
+        "location": "London",
+        "date": "Mar 2026",
+        "url": "https://squashinfo.com/events/2-womens-event",
+        "source": "squashinfo",
+    }
+
+    assert male["gender"] == "M"
+    assert female["gender"] == "W"
+
+
+def test_tournament_record_source_literal() -> None:
+    """Test that TournamentRecord source is 'squashinfo'."""
+    record: TournamentRecord = {
+        "id": 1,
+        "name": "Test Event",
+        "gender": None,
+        "tier": "PSA Silver",
+        "location": "Paris",
+        "date": "Apr 2026",
+        "url": "https://squashinfo.com/events/1-test-event",
+        "source": "squashinfo",
+    }
+
+    assert record["source"] == "squashinfo"
+
+
+def test_match_record_completed() -> None:
+    """Test MatchRecord with a completed match."""
+    record: MatchRecord = {
+        "match_id": 98765,
+        "tournament_id": 11593,
+        "tournament_name": "Mens Australian Open 2026",
+        "round": "Final",
+        "player1_name": "Ali Farag",
+        "player1_id": 42,
+        "player1_country": "EGY",
+        "player1_seeding": "1",
+        "player2_name": "Paul Coll",
+        "player2_id": 57,
+        "player2_country": "NZL",
+        "player2_seeding": "2",
+        "winner": "Ali Farag",
+        "scores": "11-5, 11-4, 11-5",
+        "duration_minutes": 42,
+        "source": "squashinfo",
+    }
+
+    assert record["match_id"] == 98765
+    assert record["tournament_id"] == 11593
+    assert record["round"] == "Final"
+    assert record["player1_name"] == "Ali Farag"
+    assert record["player1_id"] == 42
+    assert record["player1_country"] == "EGY"
+    assert record["player1_seeding"] == "1"
+    assert record["player2_name"] == "Paul Coll"
+    assert record["player2_id"] == 57
+    assert record["player2_country"] == "NZL"
+    assert record["player2_seeding"] == "2"
+    assert record["winner"] == "Ali Farag"
+    assert record["scores"] == "11-5, 11-4, 11-5"
+    assert record["duration_minutes"] == 42
+    assert record["source"] == "squashinfo"
+
+
+def test_match_record_upcoming() -> None:
+    """Test MatchRecord for a match not yet played."""
+    record: MatchRecord = {
+        "match_id": 11111,
+        "tournament_id": 11593,
+        "tournament_name": "Mens Australian Open 2026",
+        "round": "Semi-finals",
+        "player1_name": "Ali Farag",
+        "player1_id": 42,
+        "player1_country": "EGY",
+        "player1_seeding": "1",
+        "player2_name": "Paul Coll",
+        "player2_id": 57,
+        "player2_country": "NZL",
+        "player2_seeding": "2",
+        "winner": None,
+        "scores": None,
+        "duration_minutes": None,
+        "source": "squashinfo",
+    }
+
+    assert record["winner"] is None
+    assert record["scores"] is None
+    assert record["duration_minutes"] is None
+
+
+def test_match_record_optional_player_fields() -> None:
+    """Test MatchRecord allows None for optional player fields."""
+    record: MatchRecord = {
+        "match_id": 22222,
+        "tournament_id": 11593,
+        "tournament_name": "Mens Australian Open 2026",
+        "round": "Quarter-finals",
+        "player1_name": "Unknown Player",
+        "player1_id": None,
+        "player1_country": None,
+        "player1_seeding": None,
+        "player2_name": "Another Player",
+        "player2_id": None,
+        "player2_country": None,
+        "player2_seeding": None,
+        "winner": None,
+        "scores": None,
+        "duration_minutes": None,
+        "source": "squashinfo",
+    }
+
+    assert record["player1_id"] is None
+    assert record["player1_country"] is None
+    assert record["player1_seeding"] is None
+    assert record["player2_id"] is None
+    assert record["player2_country"] is None
+    assert record["player2_seeding"] is None
+
+
+def test_match_record_source_literal() -> None:
+    """Test that MatchRecord source is 'squashinfo'."""
+    record: MatchRecord = {
+        "match_id": 1,
+        "tournament_id": 1,
+        "tournament_name": "Test Tournament",
+        "round": "Final",
+        "player1_name": "Player A",
+        "player1_id": None,
+        "player1_country": None,
+        "player1_seeding": None,
+        "player2_name": "Player B",
+        "player2_id": None,
+        "player2_country": None,
+        "player2_seeding": None,
+        "winner": None,
+        "scores": None,
+        "duration_minutes": None,
+        "source": "squashinfo",
+    }
+
+    assert record["source"] == "squashinfo"
+
+
+def test_match_record_winner_is_player_name() -> None:
+    """Test that winner field contains player1_name when player1 wins."""
+    record: MatchRecord = {
+        "match_id": 33333,
+        "tournament_id": 11593,
+        "tournament_name": "Mens Australian Open 2026",
+        "round": "Final",
+        "player1_name": "Ali Farag",
+        "player1_id": 42,
+        "player1_country": "EGY",
+        "player1_seeding": "1",
+        "player2_name": "Paul Coll",
+        "player2_id": 57,
+        "player2_country": "NZL",
+        "player2_seeding": "2",
+        "winner": "Ali Farag",
+        "scores": "11-9, 9-11, 11-7, 11-8",
+        "duration_minutes": 68,
+        "source": "squashinfo",
+    }
+
+    assert record["winner"] == record["player1_name"]

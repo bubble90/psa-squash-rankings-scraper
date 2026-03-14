@@ -354,11 +354,15 @@ if __name__ == "__main__":
         validate_tournaments()
     elif command == "matches":
         if len(sys.argv) < 3:
-            logger.error("Usage: python -m psa_squash_rankings.validator matches <event_id>")
+            logger.error(
+                "Usage: python -m psa_squash_rankings.validator matches <event_id>"
+            )
         else:
             validate_matches(int(sys.argv[2]))
     else:
         logger.error(f"Unknown command: {command}")
-        logger.info("Usage: python -m psa_squash_rankings.validator [male|female|both|tournaments|matches <event_id>]")
+        logger.info(
+            "Usage: python -m psa_squash_rankings.validator [male|female|both|tournaments|matches <event_id>]"
+        )
 
     logger.info("=" * 60)
