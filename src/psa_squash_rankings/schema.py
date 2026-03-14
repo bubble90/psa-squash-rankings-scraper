@@ -94,6 +94,46 @@ class MatchRecord(TypedDict):
     source: Literal["squashinfo"]
 
 
+class PlayerRecentMatchRecord(TypedDict):
+    """
+    A single match from a player's recent match history on squashinfo.com.
+
+    Scraped from the player profile page (/player/{id}-{slug}).
+    Each row includes tournament context, round, opponent, and result.
+    """
+
+    player_id: int
+    tournament_id: Optional[int]
+    tournament_name: str
+    round: str
+    opponent_name: str
+    opponent_id: Optional[int]
+    opponent_country: Optional[str]
+    result: str  # "W", "L", or "" for upcoming/incomplete
+    scores: Optional[str]
+    duration_minutes: Optional[int]
+    date: Optional[str]
+    source: Literal["squashinfo"]
+
+
+class PlayerRecentTournamentRecord(TypedDict):
+    """
+    A tournament entry from a player's recent tournament history on squashinfo.com.
+
+    Scraped from the player profile page (/player/{id}-{slug}).
+    Shows the deepest round reached at each event.
+    """
+
+    player_id: int
+    tournament_id: Optional[int]
+    tournament_name: str
+    tier: Optional[str]
+    location: Optional[str]
+    date: Optional[str]
+    round_reached: str
+    source: Literal["squashinfo"]
+
+
 def is_api_result(result: ScraperResult) -> bool:
     """
     Type guard to check if result is from API scraper.

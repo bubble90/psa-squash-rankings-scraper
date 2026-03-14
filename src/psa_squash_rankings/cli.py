@@ -13,6 +13,8 @@ from psa_squash_rankings.html_scraper import scrape_rankings_html
 from psa_squash_rankings.squashinfo_scraper import (
     get_recent_tournaments,
     get_tournament_matches,
+    get_player_recent_matches,
+    get_player_recent_tournaments,
 )
 from psa_squash_rankings.exporter import export_to_csv
 from psa_squash_rankings.logger import get_logger
@@ -126,6 +128,43 @@ def _run_matches(args) -> int:
         return 1
 
 
+def _run_player_history(args) -> int:
+    """Scrape a player's recent matches and tournaments from squashinfo.com."""
+    logger.info("=" * 60)
+    logger.info(f"Fetching player history for player {args.player_id} ({args.slug})")
+    logger.info("=" * 60)
+
+    exit_code = 0
+
+    try:
+        matches = get_player_recent_matches(args.player_id, args.slug)
+        if matches:
+            output_path = OUTPUT_DIR / f"squashinfo_player_{args.player_id}_matches.csv"
+            pd.DataFrame(matches).to_csv(output_path, index=False)
+            logger.info(f"Fetched {len(matches)} recent matches")
+            logger.info(f"Data exported to: squashinfo_player_{args.player_id}_matches.csv")
+        else:
+            logger.warning("No recent matches found")
+    except Exception as e:
+        logger.exception(f"Failed to fetch recent matches: {e}")
+        exit_code = 1
+
+    try:
+        tournaments = get_player_recent_tournaments(args.player_id, args.slug)
+        if tournaments:
+            output_path = OUTPUT_DIR / f"squashinfo_player_{args.player_id}_tournaments.csv"
+            pd.DataFrame(tournaments).to_csv(output_path, index=False)
+            logger.info(f"Fetched {len(tournaments)} recent tournaments")
+            logger.info(f"Data exported to: squashinfo_player_{args.player_id}_tournaments.csv")
+        else:
+            logger.warning("No recent tournaments found")
+    except Exception as e:
+        logger.exception(f"Failed to fetch recent tournaments: {e}")
+        exit_code = 1
+
+    return exit_code
+
+
 def main() -> int:
     """
     Main entry point with subcommand support.
@@ -203,6 +242,23 @@ def main() -> int:
         help="Tournament URL slug (e.g. mens-australian-open-2026)",
     )
 
+    # player-history subcommand
+    player_parser = subparsers.add_parser(
+        "player-history",
+        help="Scrape a player's recent matches and tournaments from squashinfo.com",
+    )
+    player_parser.add_argument(
+        "--player-id",
+        type=int,
+        required=True,
+        help="Player ID (e.g. 5974)",
+    )
+    player_parser.add_argument(
+        "--slug",
+        required=True,
+        help="Player URL slug (e.g. paul-coll)",
+    )
+
     args = parser.parse_args()
 
     # Default to rankings when no subcommand given (backwards compat)
@@ -230,6 +286,8 @@ def main() -> int:
         return _run_tournaments(args)
     elif args.command == "matches":
         return _run_matches(args)
+    elif args.command == "player-history":
+        return _run_player_history(args)
 
     return 1
 

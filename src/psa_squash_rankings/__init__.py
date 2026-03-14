@@ -23,6 +23,13 @@ from psa_squash_rankings.exporter import export_to_csv
 from psa_squash_rankings.squashinfo_scraper import (
     get_recent_tournaments,
     get_tournament_matches,
+    get_player_recent_matches,
+    get_player_recent_tournaments,
+)
+from psa_squash_rankings.validator import (
+    validate_player_match_record,
+    validate_player_tournament_record,
+    validate_player_data,
 )
 from psa_squash_rankings.schema import (
     ApiPlayerRecord,
@@ -30,6 +37,8 @@ from psa_squash_rankings.schema import (
     ScraperResult,
     TournamentRecord,
     MatchRecord,
+    PlayerRecentMatchRecord,
+    PlayerRecentTournamentRecord,
     is_api_result,
     is_html_result,
 )
@@ -41,12 +50,19 @@ __all__ = [
     "export_to_csv",
     "get_recent_tournaments",
     "get_tournament_matches",
+    "get_player_recent_matches",
+    "get_player_recent_tournaments",
     "ApiPlayerRecord",
     "HtmlPlayerRecord",
     "ScraperResult",
     "TournamentRecord",
     "MatchRecord",
+    "PlayerRecentMatchRecord",
+    "PlayerRecentTournamentRecord",
     "is_api_result",
     "is_html_result",
+    "validate_player_match_record",
+    "validate_player_tournament_record",
+    "validate_player_data",
     "__version__",
 ]
