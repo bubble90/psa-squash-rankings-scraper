@@ -13,6 +13,8 @@ logger = get_logger(__name__)
 
 OUTPUT_DIR = Path("output")
 
+print("What is this project?")
+
 
 def validate_scraped_data(gender="male"):
     """
@@ -30,7 +32,8 @@ def validate_scraped_data(gender="male"):
     html_exists = Path(HTML_FILE).exists()
 
     if not api_exists and not html_exists:
-        logger.error(f"No data files found for {gender}. Run the scraper first:")
+        logger.error(f"No data files found for {
+                     gender}. Run the scraper first:")
         logger.error(f"  python run_scraper.py --gender {gender}")
         return
 
@@ -48,14 +51,16 @@ def validate_scraped_data(gender="male"):
     if html_exists:
         try:
             html_df = pd.read_csv(HTML_FILE)
-            logger.info(f"Loaded HTML file: {len(html_df)} rows from {HTML_FILE}")
+            logger.info(f"Loaded HTML file: {
+                        len(html_df)} rows from {HTML_FILE}")
         except EmptyDataError:
             logger.warning("HTML file is empty")
         except Exception as e:
             logger.error(f"Failed to load HTML file: {e}")
     else:
         logger.info(
-            f"HTML fallback file not found: {HTML_FILE} (this is normal if API scraping succeeded)"
+            f"HTML fallback file not found: {
+                HTML_FILE} (this is normal if API scraping succeeded)"
         )
 
     logger.info("-" * 60)
@@ -63,11 +68,13 @@ def validate_scraped_data(gender="male"):
     logger.info(f"API scraper rows: {len(api_df)}")
 
     if len(api_df) > 0:
-        logger.info(f"API scraper successfully returned {len(api_df)} {gender} players")
+        logger.info(f"API scraper successfully returned {
+                    len(api_df)} {gender} players")
 
         logger.info(f"\nTop 5 {gender} players:")
         for idx, row in api_df.head(5).iterrows():
-            logger.info(f"  {row['rank']}. {row['player']} - {row['points']} points")
+            logger.info(f"  {row['rank']}. {
+                        row['player']} - {row['points']} points")
     else:
         logger.warning("API scraper returned no data")
 
@@ -110,7 +117,8 @@ if __name__ == "__main__":
     elif gender in ["male", "female"]:
         validate_scraped_data(gender)
     else:
-        logger.error(f"Invalid gender: {gender}. Use 'male', 'female', or 'both'")
+        logger.error(f"Invalid gender: {
+                     gender}. Use 'male', 'female', or 'both'")
         logger.info("Usage: python validator.py [male|female|both]")
 
     logger.info("=" * 60)
