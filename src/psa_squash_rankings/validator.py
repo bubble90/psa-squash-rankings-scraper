@@ -431,13 +431,28 @@ def validate_player_data(player_id: int) -> None:
     tournaments_file = OUTPUT_DIR / f"squashinfo_player_{player_id}_tournaments.csv"
 
     expected_match_cols = {
-        "player_id", "tournament_id", "tournament_name", "round",
-        "opponent_name", "opponent_id", "opponent_country",
-        "result", "scores", "duration_minutes", "date", "source",
+        "player_id",
+        "tournament_id",
+        "tournament_name",
+        "round",
+        "opponent_name",
+        "opponent_id",
+        "opponent_country",
+        "result",
+        "scores",
+        "duration_minutes",
+        "date",
+        "source",
     }
     expected_tournament_cols = {
-        "player_id", "tournament_id", "tournament_name",
-        "tier", "location", "date", "round_reached", "source",
+        "player_id",
+        "tournament_id",
+        "tournament_name",
+        "tier",
+        "location",
+        "date",
+        "round_reached",
+        "source",
     }
 
     logger.info("-" * 60)
@@ -463,7 +478,9 @@ def validate_player_data(player_id: int) -> None:
                 upcoming = (df["result"] == "").sum()
                 logger.info(f"Results: {wins}W / {losses}L / {upcoming} upcoming")
 
-                invalid_results = df[~df["result"].isin(["W", "L", ""])]["result"].unique()
+                invalid_results = df[~df["result"].isin(["W", "L", ""])][
+                    "result"
+                ].unique()
                 if len(invalid_results):
                     logger.error(f"Invalid result values: {invalid_results}")
 
@@ -492,7 +509,9 @@ def validate_player_data(player_id: int) -> None:
                 logger.info("Schema complete")
 
             if len(df) > 0:
-                logger.info(f"Most recent: {df.iloc[0]['tournament_name']} — {df.iloc[0]['round_reached']}")
+                logger.info(
+                    f"Most recent: {df.iloc[0]['tournament_name']} — {df.iloc[0]['round_reached']}"
+                )
 
                 missing_round = df["round_reached"].isna().sum()
                 if missing_round:

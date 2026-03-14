@@ -14,7 +14,6 @@ from psa_squash_rankings.validator import (
 )
 
 
-
 VALID_MATCH = {
     "player_id": 5974,
     "tournament_id": 11593,
@@ -40,7 +39,6 @@ VALID_TOURNAMENT = {
     "round_reached": "Quarter-finals",
     "source": "squashinfo",
 }
-
 
 
 class TestValidatePlayerMatchRecord:
@@ -155,10 +153,14 @@ class TestValidatePlayerTournamentRecord:
 
 class TestValidatePlayerData:
     def _write_matches(self, path: Path, rows: list[dict]) -> None:
-        pd.DataFrame(rows).to_csv(path / "squashinfo_player_5974_matches.csv", index=False)
+        pd.DataFrame(rows).to_csv(
+            path / "squashinfo_player_5974_matches.csv", index=False
+        )
 
     def _write_tournaments(self, path: Path, rows: list[dict]) -> None:
-        pd.DataFrame(rows).to_csv(path / "squashinfo_player_5974_tournaments.csv", index=False)
+        pd.DataFrame(rows).to_csv(
+            path / "squashinfo_player_5974_tournaments.csv", index=False
+        )
 
     def test_valid_files_run_without_error(self, tmp_path, monkeypatch):
         monkeypatch.setattr("psa_squash_rankings.validator.OUTPUT_DIR", tmp_path)
@@ -171,12 +173,16 @@ class TestValidatePlayerData:
         # Neither file exists — should complete without raising
         validate_player_data(5974)
 
-    def test_missing_matches_file_still_validates_tournaments(self, tmp_path, monkeypatch):
+    def test_missing_matches_file_still_validates_tournaments(
+        self, tmp_path, monkeypatch
+    ):
         monkeypatch.setattr("psa_squash_rankings.validator.OUTPUT_DIR", tmp_path)
         self._write_tournaments(tmp_path, [VALID_TOURNAMENT])
         validate_player_data(5974)  # should not raise
 
-    def test_missing_tournaments_file_still_validates_matches(self, tmp_path, monkeypatch):
+    def test_missing_tournaments_file_still_validates_matches(
+        self, tmp_path, monkeypatch
+    ):
         monkeypatch.setattr("psa_squash_rankings.validator.OUTPUT_DIR", tmp_path)
         self._write_matches(tmp_path, [VALID_MATCH])
         validate_player_data(5974)  # should not raise

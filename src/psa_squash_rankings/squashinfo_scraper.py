@@ -363,11 +363,17 @@ def _parse_player_recent_match_row(tr) -> Optional[PlayerRecentMatchRecord]:
     # tds[5] = round abbreviation; title attr holds full name
     rnd_td = tds[5]
     abbr = rnd_td.find("abbr")
-    round_name = (abbr.get("title") or abbr.get_text(strip=True)) if abbr else rnd_td.get_text(strip=True)
+    round_name = (
+        (abbr.get("title") or abbr.get_text(strip=True))
+        if abbr
+        else rnd_td.get_text(strip=True)
+    )
 
     score_raw = tds[6].get_text(strip=True)
     duration_match = re.search(r"\((\d+)m\)", score_raw)
-    duration_minutes: Optional[int] = int(duration_match.group(1)) if duration_match else None
+    duration_minutes: Optional[int] = (
+        int(duration_match.group(1)) if duration_match else None
+    )
     scores: Optional[str] = re.sub(r"\s*\(\d+m\)", "", score_raw).strip() or None
 
     return PlayerRecentMatchRecord(
@@ -416,7 +422,9 @@ def _parse_player_tournament_rows(
         tournament_name = link.get_text(strip=True)
 
         location = tds[3].get_text(strip=True) or None  # country code
-        tier = tds[4].get_text(strip=True) or None       # "PSA Tour", "PSA World Series", etc.
+        tier = (
+            tds[4].get_text(strip=True) or None
+        )  # "PSA Tour", "PSA World Series", etc.
         round_reached = tds[5].get_text(strip=True)
 
         results.append(

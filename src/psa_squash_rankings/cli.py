@@ -142,7 +142,9 @@ def _run_player_history(args) -> int:
             output_path = OUTPUT_DIR / f"squashinfo_player_{args.player_id}_matches.csv"
             pd.DataFrame(matches).to_csv(output_path, index=False)
             logger.info(f"Fetched {len(matches)} recent matches")
-            logger.info(f"Data exported to: squashinfo_player_{args.player_id}_matches.csv")
+            logger.info(
+                f"Data exported to: squashinfo_player_{args.player_id}_matches.csv"
+            )
         else:
             logger.warning("No recent matches found")
     except Exception as e:
@@ -152,10 +154,14 @@ def _run_player_history(args) -> int:
     try:
         tournaments = get_player_recent_tournaments(args.player_id, args.slug)
         if tournaments:
-            output_path = OUTPUT_DIR / f"squashinfo_player_{args.player_id}_tournaments.csv"
+            output_path = (
+                OUTPUT_DIR / f"squashinfo_player_{args.player_id}_tournaments.csv"
+            )
             pd.DataFrame(tournaments).to_csv(output_path, index=False)
             logger.info(f"Fetched {len(tournaments)} recent tournaments")
-            logger.info(f"Data exported to: squashinfo_player_{args.player_id}_tournaments.csv")
+            logger.info(
+                f"Data exported to: squashinfo_player_{args.player_id}_tournaments.csv"
+            )
         else:
             logger.warning("No recent tournaments found")
     except Exception as e:

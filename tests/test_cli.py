@@ -107,13 +107,17 @@ SAMPLE_API_PLAYER = {
 
 class TestRankingsCommand:
     def test_creates_male_csv(self, tmp_path, monkeypatch):
-        with patch("psa_squash_rankings.cli.get_rankings", return_value=[SAMPLE_API_PLAYER]):
+        with patch(
+            "psa_squash_rankings.cli.get_rankings", return_value=[SAMPLE_API_PLAYER]
+        ):
             with patch("psa_squash_rankings.cli.export_to_csv"):
                 code = _run(["rankings", "--gender", "male"], tmp_path, monkeypatch)
         assert code == 0
 
     def test_creates_female_csv(self, tmp_path, monkeypatch):
-        with patch("psa_squash_rankings.cli.get_rankings", return_value=[SAMPLE_API_PLAYER]):
+        with patch(
+            "psa_squash_rankings.cli.get_rankings", return_value=[SAMPLE_API_PLAYER]
+        ):
             with patch("psa_squash_rankings.cli.export_to_csv") as mock_export:
                 code = _run(["rankings", "--gender", "female"], tmp_path, monkeypatch)
         assert code == 0
@@ -121,30 +125,48 @@ class TestRankingsCommand:
         assert any("female" in f for f in filenames)
 
     def test_both_genders_calls_get_rankings_twice(self, tmp_path, monkeypatch):
-        with patch("psa_squash_rankings.cli.get_rankings", return_value=[SAMPLE_API_PLAYER]) as mock_get:
+        with patch(
+            "psa_squash_rankings.cli.get_rankings", return_value=[SAMPLE_API_PLAYER]
+        ) as mock_get:
             with patch("psa_squash_rankings.cli.export_to_csv"):
                 _run(["rankings", "--gender", "both"], tmp_path, monkeypatch)
         assert mock_get.call_count == 2
 
     def test_api_failure_falls_back_to_html(self, tmp_path, monkeypatch):
         html_player = {
-            "rank": 1, "player": "Paul Coll", "tournaments": 10,
-            "points": 18000, "mugshot_url": None, "source": "html",
+            "rank": 1,
+            "player": "Paul Coll",
+            "tournaments": 10,
+            "points": 18000,
+            "mugshot_url": None,
+            "source": "html",
         }
-        with patch("psa_squash_rankings.cli.get_rankings", side_effect=Exception("API down")):
-            with patch("psa_squash_rankings.cli.scrape_rankings_html", return_value=[html_player]):
+        with patch(
+            "psa_squash_rankings.cli.get_rankings", side_effect=Exception("API down")
+        ):
+            with patch(
+                "psa_squash_rankings.cli.scrape_rankings_html",
+                return_value=[html_player],
+            ):
                 with patch("psa_squash_rankings.cli.export_to_csv"):
                     code = _run(["rankings", "--gender", "male"], tmp_path, monkeypatch)
         assert code == 0
 
     def test_both_sources_fail_returns_1(self, tmp_path, monkeypatch):
-        with patch("psa_squash_rankings.cli.get_rankings", side_effect=Exception("API down")):
-            with patch("psa_squash_rankings.cli.scrape_rankings_html", side_effect=Exception("HTML down")):
+        with patch(
+            "psa_squash_rankings.cli.get_rankings", side_effect=Exception("API down")
+        ):
+            with patch(
+                "psa_squash_rankings.cli.scrape_rankings_html",
+                side_effect=Exception("HTML down"),
+            ):
                 code = _run(["rankings", "--gender", "male"], tmp_path, monkeypatch)
         assert code == 1
 
     def test_default_command_is_rankings(self, tmp_path, monkeypatch):
-        with patch("psa_squash_rankings.cli.get_rankings", return_value=[SAMPLE_API_PLAYER]) as mock_get:
+        with patch(
+            "psa_squash_rankings.cli.get_rankings", return_value=[SAMPLE_API_PLAYER]
+        ) as mock_get:
             with patch("psa_squash_rankings.cli.export_to_csv"):
                 _run([], tmp_path, monkeypatch)
         assert mock_get.called
@@ -201,7 +223,6 @@ class TestTournamentsCommand:
         assert code == 1
 
 
-
 class TestMatchesCommand:
     def test_creates_csv(self, tmp_path, monkeypatch):
         with patch(
@@ -209,7 +230,13 @@ class TestMatchesCommand:
             return_value=[SAMPLE_MATCH],
         ):
             code = _run(
-                ["matches", "--event-id", "11593", "--slug", "mens-australian-open-2026"],
+                [
+                    "matches",
+                    "--event-id",
+                    "11593",
+                    "--slug",
+                    "mens-australian-open-2026",
+                ],
                 tmp_path,
                 monkeypatch,
             )
@@ -223,7 +250,13 @@ class TestMatchesCommand:
             return_value=[SAMPLE_MATCH],
         ):
             _run(
-                ["matches", "--event-id", "11593", "--slug", "mens-australian-open-2026"],
+                [
+                    "matches",
+                    "--event-id",
+                    "11593",
+                    "--slug",
+                    "mens-australian-open-2026",
+                ],
                 tmp_path,
                 monkeypatch,
             )
@@ -239,7 +272,13 @@ class TestMatchesCommand:
             return_value=[SAMPLE_MATCH],
         ) as mock_get:
             _run(
-                ["matches", "--event-id", "11593", "--slug", "mens-australian-open-2026"],
+                [
+                    "matches",
+                    "--event-id",
+                    "11593",
+                    "--slug",
+                    "mens-australian-open-2026",
+                ],
                 tmp_path,
                 monkeypatch,
             )
@@ -352,8 +391,12 @@ class TestPlayerHistoryCommand:
         mock_matches.assert_called_once_with(5974, "paul-coll")
         mock_tournaments.assert_called_once_with(5974, "paul-coll")
 
-    def test_no_matches_found_still_succeeds_if_tournaments_ok(self, tmp_path, monkeypatch):
-        with patch("psa_squash_rankings.cli.get_player_recent_matches", return_value=[]):
+    def test_no_matches_found_still_succeeds_if_tournaments_ok(
+        self, tmp_path, monkeypatch
+    ):
+        with patch(
+            "psa_squash_rankings.cli.get_player_recent_matches", return_value=[]
+        ):
             with patch(
                 "psa_squash_rankings.cli.get_player_recent_tournaments",
                 return_value=[SAMPLE_PLAYER_TOURNAMENT],
@@ -368,7 +411,9 @@ class TestPlayerHistoryCommand:
         assert not (tmp_path / "squashinfo_player_5974_matches.csv").exists()
         assert (tmp_path / "squashinfo_player_5974_tournaments.csv").exists()
 
-    def test_matches_exception_returns_1_but_tournaments_still_run(self, tmp_path, monkeypatch):
+    def test_matches_exception_returns_1_but_tournaments_still_run(
+        self, tmp_path, monkeypatch
+    ):
         with patch(
             "psa_squash_rankings.cli.get_player_recent_matches",
             side_effect=Exception("timeout"),
@@ -386,7 +431,9 @@ class TestPlayerHistoryCommand:
         assert code == 1
         assert (tmp_path / "squashinfo_player_5974_tournaments.csv").exists()
 
-    def test_tournaments_exception_returns_1_but_matches_still_written(self, tmp_path, monkeypatch):
+    def test_tournaments_exception_returns_1_but_matches_still_written(
+        self, tmp_path, monkeypatch
+    ):
         with patch(
             "psa_squash_rankings.cli.get_player_recent_matches",
             return_value=[SAMPLE_PLAYER_MATCH],
@@ -405,8 +452,12 @@ class TestPlayerHistoryCommand:
         assert (tmp_path / "squashinfo_player_5974_matches.csv").exists()
 
     def test_both_empty_returns_0(self, tmp_path, monkeypatch):
-        with patch("psa_squash_rankings.cli.get_player_recent_matches", return_value=[]):
-            with patch("psa_squash_rankings.cli.get_player_recent_tournaments", return_value=[]):
+        with patch(
+            "psa_squash_rankings.cli.get_player_recent_matches", return_value=[]
+        ):
+            with patch(
+                "psa_squash_rankings.cli.get_player_recent_tournaments", return_value=[]
+            ):
                 code = _run(
                     ["player-history", "--player-id", "5974", "--slug", "paul-coll"],
                     tmp_path,

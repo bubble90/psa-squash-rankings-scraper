@@ -964,8 +964,8 @@ class TestGetPlayerRecentTournaments:
             "psa_squash_rankings.squashinfo_scraper.requests.Session"
         ) as MockSession:
             MockSession.return_value = MockSession.return_value
-            MockSession.return_value.get.side_effect = requests.exceptions.ConnectionError(
-                "down"
+            MockSession.return_value.get.side_effect = (
+                requests.exceptions.ConnectionError("down")
             )
             with pytest.raises(requests.exceptions.ConnectionError):
                 get_player_recent_tournaments(5974, "paul-coll")
