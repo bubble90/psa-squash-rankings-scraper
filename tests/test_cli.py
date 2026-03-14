@@ -464,3 +464,87 @@ class TestPlayerHistoryCommand:
                     monkeypatch,
                 )
         assert code == 0
+
+
+SAMPLE_BIOGRAPHY = {
+    "player_id": 5974,
+    "name": "Paul Coll",
+    "nationality": "New Zealand",
+    "date_of_birth": "4 Aug 1992",
+    "height": "185cm",
+    "ranking": 4,
+    "ranking_points": 3680,
+    "coach": "David Campion",
+    "turned_professional": "2010",
+    "source": "squashinfo",
+}
+
+
+class TestPlayerBioCommand:
+    def test_creates_biography_csv(self, tmp_path, monkeypatch):
+        with patch(
+            "psa_squash_rankings.cli.get_player_biography",
+            return_value=SAMPLE_BIOGRAPHY,
+        ):
+            code = _run(
+                ["player-bio", "--player-id", "5974", "--slug", "paul-coll"],
+                tmp_path,
+                monkeypatch,
+            )
+
+        assert code == 0
+        assert (tmp_path / "squashinfo_player_5974_biography.csv").exists()
+
+    def test_csv_content(self, tmp_path, monkeypatch):
+        with patch(
+            "psa_squash_rankings.cli.get_player_biography",
+            return_value=SAMPLE_BIOGRAPHY,
+        ):
+            _run(
+                ["player-bio", "--player-id", "5974", "--slug", "paul-coll"],
+                tmp_path,
+                monkeypatch,
+            )
+
+        df = pd.read_csv(tmp_path / "squashinfo_player_5974_biography.csv")
+        assert len(df) == 1
+        assert df.iloc[0]["name"] == "Paul Coll"
+        assert df.iloc[0]["nationality"] == "New Zealand"
+        assert df.iloc[0]["ranking"] == 4
+
+    def test_player_id_and_slug_passed_through(self, tmp_path, monkeypatch):
+        with patch(
+            "psa_squash_rankings.cli.get_player_biography",
+            return_value=SAMPLE_BIOGRAPHY,
+        ) as mock_bio:
+            _run(
+                ["player-bio", "--player-id", "5974", "--slug", "paul-coll"],
+                tmp_path,
+                monkeypatch,
+            )
+
+        mock_bio.assert_called_once_with(5974, "paul-coll")
+
+    def test_returns_1_when_biography_is_none(self, tmp_path, monkeypatch):
+        with patch("psa_squash_rankings.cli.get_player_biography", return_value=None):
+            code = _run(
+                ["player-bio", "--player-id", "5974", "--slug", "paul-coll"],
+                tmp_path,
+                monkeypatch,
+            )
+
+        assert code == 1
+        assert not (tmp_path / "squashinfo_player_5974_biography.csv").exists()
+
+    def test_exception_returns_1(self, tmp_path, monkeypatch):
+        with patch(
+            "psa_squash_rankings.cli.get_player_biography",
+            side_effect=Exception("network error"),
+        ):
+            code = _run(
+                ["player-bio", "--player-id", "5974", "--slug", "paul-coll"],
+                tmp_path,
+                monkeypatch,
+            )
+
+        assert code == 1

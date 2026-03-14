@@ -413,6 +413,101 @@ def validate_player_tournament_record(tournament: dict[str, Any]) -> None:
     )
 
 
+REQUIRED_PLAYER_BIOGRAPHY_FIELDS = {
+    "player_id",
+    "name",
+    "source",
+}
+
+
+def validate_player_biography_record(bio: dict[str, Any]) -> None:
+    """
+    Validate a single PlayerBiographyRecord.
+
+    Raises:
+        ValueError: if required fields are missing or values are invalid.
+    """
+    logger = get_logger(__name__)
+
+    missing = REQUIRED_PLAYER_BIOGRAPHY_FIELDS - bio.keys()
+    if missing:
+        raise ValueError(f"PlayerBiographyRecord missing fields: {missing}")
+
+    if bio.get("source") != "squashinfo":
+        raise ValueError(
+            f"PlayerBiographyRecord source must be 'squashinfo', got {bio.get('source')!r}"
+        )
+
+    if not isinstance(bio.get("player_id"), int) or bio["player_id"] <= 0:
+        raise ValueError(
+            f"PlayerBiographyRecord player_id must be a positive int, got {bio.get('player_id')!r}"
+        )
+
+    if not bio.get("name"):
+        raise ValueError("PlayerBiographyRecord name must be a non-empty string")
+
+    logger.debug(
+        f"Biography record validation passed: player {bio['player_id']} ({bio.get('name')})"
+    )
+
+
+def validate_player_biography(player_id: int) -> None:
+    """
+    Validate the scraped biography CSV for a given player ID.
+
+    Loads squashinfo_player_{player_id}_biography.csv from OUTPUT_DIR
+    and checks column completeness and field validity.
+
+    Parameters:
+    - player_id: numeric player ID (e.g. 5974)
+    """
+    logger = get_logger(__name__)
+    logger.info(f"Starting biography validation for player {player_id}")
+
+    bio_file = OUTPUT_DIR / f"squashinfo_player_{player_id}_biography.csv"
+
+    expected_cols = {
+        "player_id",
+        "name",
+        "nationality",
+        "date_of_birth",
+        "height",
+        "ranking",
+        "ranking_points",
+        "coach",
+        "turned_professional",
+        "source",
+    }
+
+    if not bio_file.exists():
+        logger.warning(f"Biography file not found: {bio_file}")
+        return
+
+    try:
+        df = pd.read_csv(bio_file)
+        logger.info(f"Loaded {len(df)} row(s) from {bio_file}")
+
+        missing_cols = expected_cols - set(df.columns)
+        if missing_cols:
+            logger.warning(f"Missing expected columns: {missing_cols}")
+        else:
+            logger.info("Schema complete")
+
+        if len(df) > 0:
+            row = df.iloc[0]
+            name = row.get("name", "")
+            nationality = row.get("nationality", "")
+            ranking = row.get("ranking", "")
+            logger.info(f"Player: {name} ({nationality})")
+            if pd.notna(ranking):
+                logger.info(f"World ranking: {ranking}")
+
+    except Exception as e:
+        logger.error(f"Failed to load biography file: {e}")
+
+    logger.info("-" * 60)
+
+
 def validate_player_data(player_id: int) -> None:
     """
     Validate scraped player history CSVs for a given player ID.

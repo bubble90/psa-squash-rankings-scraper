@@ -16,6 +16,7 @@ from psa_squash_rankings.schema import (
     MatchRecord,
     PlayerRecentMatchRecord,
     PlayerRecentTournamentRecord,
+    PlayerBiographyRecord,
 )
 from psa_squash_rankings.logger import get_logger
 from psa_squash_rankings.config import (
@@ -493,6 +494,121 @@ def get_player_recent_matches(
 
     logger.info(f"Fetched {len(matches)} recent matches for player {player_id}")
     return matches
+
+
+def _parse_player_biography(
+    soup: BeautifulSoup, player_id: int
+) -> Optional[PlayerBiographyRecord]:
+    """Parse player biography from a squashinfo.com player profile page.
+
+    Extracts name and nationality from the <h1> tag, then scans all tables
+    for 2-column key/value rows containing biographical fields.
+    """
+    h1 = soup.find("h1")
+    if not h1:
+        return None
+
+    h1_text = h1.get_text(strip=True)
+    name_match = re.match(r"^(.+?)\((.+?)\)\s*$", h1_text)
+    if name_match:
+        name = name_match.group(1).strip()
+        nationality: Optional[str] = name_match.group(2).strip()
+    else:
+        name = h1_text
+        nationality = None
+
+    bio: dict = {
+        "date_of_birth": None,
+        "height": None,
+        "ranking": None,
+        "ranking_points": None,
+        "coach": None,
+        "turned_professional": None,
+    }
+
+    for table in soup.find_all("table"):
+        for row in table.find_all("tr"):
+            tds = row.find_all("td")
+            if len(tds) != 2:
+                continue
+            key = tds[0].get_text(strip=True).lower()
+            value = tds[1].get_text(strip=True)
+            if not value:
+                continue
+            if "date of birth" in key:
+                bio["date_of_birth"] = value
+            elif "height" in key:
+                bio["height"] = value
+            elif "ranking points" in key:
+                try:
+                    bio["ranking_points"] = int(value.replace(",", ""))
+                except ValueError:
+                    bio["ranking_points"] = None
+            elif "ranking" in key:
+                try:
+                    bio["ranking"] = int(value)
+                except ValueError:
+                    bio["ranking"] = None
+            elif "coach" in key:
+                bio["coach"] = value
+            elif "turned pro" in key:
+                bio["turned_professional"] = value
+
+    return PlayerBiographyRecord(
+        player_id=player_id,
+        name=name,
+        nationality=nationality,
+        date_of_birth=bio["date_of_birth"],
+        height=bio["height"],
+        ranking=bio["ranking"],
+        ranking_points=bio["ranking_points"],
+        coach=bio["coach"],
+        turned_professional=bio["turned_professional"],
+        source="squashinfo",
+    )
+
+
+def get_player_biography(player_id: int, slug: str) -> Optional[PlayerBiographyRecord]:
+    """
+    Scrape a player's biography from their squashinfo.com profile page.
+
+    Parameters:
+    - player_id: numeric player ID (e.g. 5974)
+    - slug: URL slug (e.g. 'paul-coll')
+
+    Returns:
+    - PlayerBiographyRecord if the page could be parsed, None if the page
+      has no recognisable player heading.
+
+    Raises:
+    - requests.exceptions.RequestException: on network errors
+    """
+    logger = get_logger(__name__)
+    logger.info(f"Fetching biography for player {player_id} ({slug})")
+
+    url = f"{SQUASHINFO_BASE_URL}/player/{player_id}-{slug}"
+    session = _make_session()
+    session.headers["User-Agent"] = next(USER_AGENT_CYCLE)
+
+    try:
+        response = session.get(url, timeout=SQUASHINFO_TIMEOUT)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request failed for player {player_id}: {e}")
+        raise
+    finally:
+        session.close()
+        logger.debug("HTTP session closed")
+
+    soup = BeautifulSoup(response.text, "lxml")
+    biography = _parse_player_biography(soup, player_id)
+
+    if biography is None:
+        logger.warning(f"Could not parse biography for player {player_id}")
+    else:
+        logger.info(f"Fetched biography for {biography['name']}")
+
+    return biography
 
 
 def get_player_recent_tournaments(

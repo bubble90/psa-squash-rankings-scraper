@@ -25,11 +25,14 @@ from psa_squash_rankings.squashinfo_scraper import (
     get_tournament_matches,
     get_player_recent_matches,
     get_player_recent_tournaments,
+    get_player_biography,
 )
 from psa_squash_rankings.validator import (
     validate_player_match_record,
     validate_player_tournament_record,
     validate_player_data,
+    validate_player_biography_record,
+    validate_player_biography,
 )
 from psa_squash_rankings.schema import (
     ApiPlayerRecord,
@@ -39,6 +42,7 @@ from psa_squash_rankings.schema import (
     MatchRecord,
     PlayerRecentMatchRecord,
     PlayerRecentTournamentRecord,
+    PlayerBiographyRecord,
     is_api_result,
     is_html_result,
 )
@@ -52,6 +56,7 @@ __all__ = [
     "get_tournament_matches",
     "get_player_recent_matches",
     "get_player_recent_tournaments",
+    "get_player_biography",
     "ApiPlayerRecord",
     "HtmlPlayerRecord",
     "ScraperResult",
@@ -59,10 +64,13 @@ __all__ = [
     "MatchRecord",
     "PlayerRecentMatchRecord",
     "PlayerRecentTournamentRecord",
+    "PlayerBiographyRecord",
     "is_api_result",
     "is_html_result",
     "validate_player_match_record",
     "validate_player_tournament_record",
     "validate_player_data",
+    "validate_player_biography_record",
+    "validate_player_biography",
     "__version__",
 ]

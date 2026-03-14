@@ -134,6 +134,27 @@ class PlayerRecentTournamentRecord(TypedDict):
     source: Literal["squashinfo"]
 
 
+class PlayerBiographyRecord(TypedDict):
+    """
+    Player biography scraped from a squashinfo.com player profile page.
+
+    Contains identifying and biographical details for a single player.
+    All fields except player_id, name, and source are optional because
+    squashinfo.com does not always publish complete biographical info.
+    """
+
+    player_id: int
+    name: str
+    nationality: Optional[str]
+    date_of_birth: Optional[str]
+    height: Optional[str]
+    ranking: Optional[int]
+    ranking_points: Optional[int]
+    coach: Optional[str]
+    turned_professional: Optional[str]
+    source: Literal["squashinfo"]
+
+
 def is_api_result(result: ScraperResult) -> bool:
     """
     Type guard to check if result is from API scraper.

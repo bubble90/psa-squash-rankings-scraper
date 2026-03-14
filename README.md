@@ -9,6 +9,7 @@ A robust Python-based web scraper for fetching professional squash player rankin
 - **API-First Approach**: Primary API scraper with automatic HTML fallback
 - **Tournament Scraping**: Fetch recent PSA tournament listings from squashinfo.com
 - **Match Result Scraping**: Fetch full draw and match results for any tournament event
+- **Player Biography Scraping**: Fetch biographical details (DOB, height, ranking, coach) from squashinfo.com player profiles
 - **Resumable Scraping**: Checkpoint system allows recovery from interruptions
 - **Pagination**: Efficiently handles large datasets with configurable page sizes
 - **User Agent Rotation**: Both scrapers use systematic rotation to avoid rate limiting
@@ -121,9 +122,27 @@ class MatchRecord(TypedDict):
     source: Literal["squashinfo"]
 ```
 
+### PlayerBiographyRecord (squashinfo.com)
+
+```python
+class PlayerBiographyRecord(TypedDict):
+    player_id: int
+    name: str
+    nationality: Optional[str]           # e.g. "New Zealand"
+    date_of_birth: Optional[str]         # e.g. "4 Aug 1992"
+    height: Optional[str]                # e.g. "185cm"
+    ranking: Optional[int]               # Current world ranking
+    ranking_points: Optional[int]        # Current ranking points
+    coach: Optional[str]
+    turned_professional: Optional[str]   # e.g. "2010"
+    source: Literal["squashinfo"]
+```
+
+All fields except `player_id`, `name`, and `source` are optional — squashinfo.com does not always publish complete biographical data.
+
 ## Usage
 
-The CLI uses subcommands: `rankings`, `tournaments`, `matches`, and `player-history`.
+The CLI uses subcommands: `rankings`, `tournaments`, `matches`, `player-history`, and `player-bio`.
 
 ### Rankings
 
@@ -178,6 +197,18 @@ Output:
 - `output/squashinfo_player_5974_matches.csv`
 - `output/squashinfo_player_5974_tournaments.csv`
 
+### Player Biography
+
+Fetch biographical details for a player from their squashinfo.com profile. You need the player ID and URL slug (both are visible in the player's squashinfo.com URL, e.g. `squashinfo.com/player/5974-paul-coll`).
+
+```bash
+uv run psa-scrape player-bio --player-id 5974 --slug paul-coll
+```
+
+Output: `output/squashinfo_player_5974_biography.csv`
+
+Fields scraped: name, nationality, date of birth, height, current world ranking, ranking points, coach, and year turned professional.
+
 ### Programmatic Usage — Tournaments & Matches
 
 ```python
@@ -193,6 +224,19 @@ matches = get_tournament_matches(event_id=11593, slug="mens-australian-open-2026
 for m in matches:
     result = f"{m['winner']} bt opponent" if m['winner'] else "upcoming"
     print(f"{m['round']:20s}  {m['player1_name']} vs {m['player2_name']}  {result}")
+```
+
+### Programmatic Usage — Player Biography
+
+```python
+from psa_squash_rankings import get_player_biography
+
+bio = get_player_biography(player_id=5974, slug="paul-coll")
+if bio:
+    print(f"{bio['name']} ({bio['nationality']})")
+    print(f"DOB: {bio['date_of_birth']}, Height: {bio['height']}")
+    print(f"Ranking: #{bio['ranking']} — {bio['ranking_points']} pts")
+    print(f"Coach: {bio['coach']}, Pro since: {bio['turned_professional']}")
 ```
 
 ### Programmatic Usage — Rankings (Type Safety)
@@ -282,6 +326,9 @@ Successfully scraped data is exported to the `output/` directory with clear nami
 **squashinfo.com:**
 - `output/squashinfo_tournaments.csv` — Recent tournament listings
 - `output/squashinfo_matches_{event_id}.csv` — Match results for a tournament
+- `output/squashinfo_player_{id}_biography.csv` — Player biography (one row)
+- `output/squashinfo_player_{id}_matches.csv` — Player's recent match history
+- `output/squashinfo_player_{id}_tournaments.csv` — Player's recent tournament history
 
 ### CSV Format
 
@@ -307,6 +354,12 @@ id,name,gender,tier,location,date,url,source
 ```csv
 match_id,tournament_id,tournament_name,round,player1_name,player1_id,player1_country,player1_seeding,player2_name,player2_id,player2_country,player2_seeding,winner,scores,duration_minutes,source
 98765,11593,Mens Australian Open 2026,Final,Ali Farag,42,EGY,1,Paul Coll,57,NZL,2,Ali Farag,"11-5, 11-4, 11-5",42,squashinfo
+```
+
+**Biography CSV:**
+```csv
+player_id,name,nationality,date_of_birth,height,ranking,ranking_points,coach,turned_professional,source
+5974,Paul Coll,New Zealand,4 Aug 1992,185cm,4,3680,David Campion,2010,squashinfo
 ```
 
 The `source` column indicates the data origin (`api`, `html`, or `squashinfo`).

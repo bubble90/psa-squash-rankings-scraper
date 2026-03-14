@@ -11,8 +11,23 @@ from psa_squash_rankings.validator import (
     validate_player_match_record,
     validate_player_tournament_record,
     validate_player_data,
+    validate_player_biography_record,
+    validate_player_biography,
 )
 
+
+VALID_BIOGRAPHY = {
+    "player_id": 5974,
+    "name": "Paul Coll",
+    "nationality": "New Zealand",
+    "date_of_birth": "4 Aug 1992",
+    "height": "185cm",
+    "ranking": 4,
+    "ranking_points": 3680,
+    "coach": "David Campion",
+    "turned_professional": "2010",
+    "source": "squashinfo",
+}
 
 VALID_MATCH = {
     "player_id": 5974,
@@ -230,3 +245,84 @@ class TestValidatePlayerData:
 
         error_calls = " ".join(str(c) for c in mock_logger.error.call_args_list)
         assert "Invalid result" in error_calls
+
+
+class TestValidatePlayerBiographyRecord:
+    def test_valid_record(self):
+        validate_player_biography_record(VALID_BIOGRAPHY)  # should not raise
+
+    def test_optional_fields_can_be_none(self):
+        record = {
+            **VALID_BIOGRAPHY,
+            "nationality": None,
+            "date_of_birth": None,
+            "height": None,
+            "ranking": None,
+            "ranking_points": None,
+            "coach": None,
+            "turned_professional": None,
+        }
+        validate_player_biography_record(record)  # should not raise
+
+    def test_missing_player_id_raises(self):
+        record = {k: v for k, v in VALID_BIOGRAPHY.items() if k != "player_id"}
+        with pytest.raises(ValueError, match="missing fields"):
+            validate_player_biography_record(record)
+
+    def test_missing_name_raises(self):
+        record = {k: v for k, v in VALID_BIOGRAPHY.items() if k != "name"}
+        with pytest.raises(ValueError, match="missing fields"):
+            validate_player_biography_record(record)
+
+    def test_missing_source_raises(self):
+        record = {k: v for k, v in VALID_BIOGRAPHY.items() if k != "source"}
+        with pytest.raises(ValueError, match="missing fields"):
+            validate_player_biography_record(record)
+
+    def test_wrong_source_raises(self):
+        with pytest.raises(ValueError, match="source"):
+            validate_player_biography_record({**VALID_BIOGRAPHY, "source": "psa"})
+
+    def test_zero_player_id_raises(self):
+        with pytest.raises(ValueError, match="player_id"):
+            validate_player_biography_record({**VALID_BIOGRAPHY, "player_id": 0})
+
+    def test_negative_player_id_raises(self):
+        with pytest.raises(ValueError, match="player_id"):
+            validate_player_biography_record({**VALID_BIOGRAPHY, "player_id": -1})
+
+    def test_string_player_id_raises(self):
+        with pytest.raises(ValueError, match="player_id"):
+            validate_player_biography_record({**VALID_BIOGRAPHY, "player_id": "5974"})
+
+    def test_empty_name_raises(self):
+        with pytest.raises(ValueError, match="name"):
+            validate_player_biography_record({**VALID_BIOGRAPHY, "name": ""})
+
+
+class TestValidatePlayerBiography:
+    def _write_bio(self, path: Path, rows: list[dict]) -> None:
+        pd.DataFrame(rows).to_csv(
+            path / "squashinfo_player_5974_biography.csv", index=False
+        )
+
+    def test_valid_file_runs_without_error(self, tmp_path, monkeypatch):
+        monkeypatch.setattr("psa_squash_rankings.validator.OUTPUT_DIR", tmp_path)
+        self._write_bio(tmp_path, [VALID_BIOGRAPHY])
+        validate_player_biography(5974)  # should not raise
+
+    def test_missing_file_logs_warning(self, tmp_path, monkeypatch):
+        monkeypatch.setattr("psa_squash_rankings.validator.OUTPUT_DIR", tmp_path)
+        validate_player_biography(5974)  # should not raise
+
+    def test_missing_columns_logged_as_warning(self, tmp_path, monkeypatch):
+        monkeypatch.setattr("psa_squash_rankings.validator.OUTPUT_DIR", tmp_path)
+        incomplete = {k: v for k, v in VALID_BIOGRAPHY.items() if k != "coach"}
+        self._write_bio(tmp_path, [incomplete])
+
+        with patch("psa_squash_rankings.validator.get_logger") as mock_log:
+            mock_logger = mock_log.return_value
+            validate_player_biography(5974)
+
+        warning_calls = " ".join(str(c) for c in mock_logger.warning.call_args_list)
+        assert "coach" in warning_calls

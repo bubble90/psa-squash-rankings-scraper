@@ -15,6 +15,7 @@ from psa_squash_rankings.squashinfo_scraper import (
     get_tournament_matches,
     get_player_recent_matches,
     get_player_recent_tournaments,
+    get_player_biography,
 )
 from psa_squash_rankings.exporter import export_to_csv
 from psa_squash_rankings.logger import get_logger
@@ -171,6 +172,32 @@ def _run_player_history(args) -> int:
     return exit_code
 
 
+def _run_player_bio(args) -> int:
+    """Scrape a player's biography from squashinfo.com."""
+    logger.info("=" * 60)
+    logger.info(f"Fetching biography for player {args.player_id} ({args.slug})")
+    logger.info("=" * 60)
+
+    try:
+        bio = get_player_biography(args.player_id, args.slug)
+        if bio is None:
+            logger.warning(f"No biography found for player {args.player_id}")
+            return 1
+
+        output_path = OUTPUT_DIR / f"squashinfo_player_{args.player_id}_biography.csv"
+        pd.DataFrame([bio]).to_csv(output_path, index=False)
+
+        logger.info(f"Fetched biography for {bio['name']}")
+        logger.info(
+            f"Data exported to: squashinfo_player_{args.player_id}_biography.csv"
+        )
+        return 0
+
+    except Exception as e:
+        logger.exception(f"Failed to fetch biography: {e}")
+        return 1
+
+
 def main() -> int:
     """
     Main entry point with subcommand support.
@@ -265,6 +292,23 @@ def main() -> int:
         help="Player URL slug (e.g. paul-coll)",
     )
 
+    # player-bio subcommand
+    bio_parser = subparsers.add_parser(
+        "player-bio",
+        help="Scrape a player's biography from squashinfo.com",
+    )
+    bio_parser.add_argument(
+        "--player-id",
+        type=int,
+        required=True,
+        help="Player ID (e.g. 5974)",
+    )
+    bio_parser.add_argument(
+        "--slug",
+        required=True,
+        help="Player URL slug (e.g. paul-coll)",
+    )
+
     args = parser.parse_args()
 
     # Default to rankings when no subcommand given (backwards compat)
@@ -294,6 +338,8 @@ def main() -> int:
         return _run_matches(args)
     elif args.command == "player-history":
         return _run_player_history(args)
+    elif args.command == "player-bio":
+        return _run_player_bio(args)
 
     return 1
 
