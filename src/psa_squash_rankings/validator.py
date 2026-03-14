@@ -334,6 +334,176 @@ def validate_matches(event_id: int) -> None:
     logger.info("\n  ✓ Match validation complete")
 
 
+REQUIRED_PLAYER_MATCH_FIELDS = {
+    "player_id",
+    "tournament_name",
+    "round",
+    "opponent_name",
+    "result",
+    "source",
+}
+
+REQUIRED_PLAYER_TOURNAMENT_FIELDS = {
+    "player_id",
+    "tournament_name",
+    "round_reached",
+    "source",
+}
+
+
+def validate_player_match_record(match: dict[str, Any]) -> None:
+    """
+    Validate a single PlayerRecentMatchRecord.
+
+    Raises:
+        ValueError: if required fields are missing or values are invalid.
+    """
+    logger = get_logger(__name__)
+
+    missing = REQUIRED_PLAYER_MATCH_FIELDS - match.keys()
+    if missing:
+        raise ValueError(f"PlayerRecentMatchRecord missing fields: {missing}")
+
+    if match.get("source") != "squashinfo":
+        raise ValueError(
+            f"PlayerRecentMatchRecord source must be 'squashinfo', got {match.get('source')!r}"
+        )
+
+    result = match.get("result")
+    if result not in ("W", "L", ""):
+        raise ValueError(
+            f"PlayerRecentMatchRecord result must be 'W', 'L', or '', got {result!r}"
+        )
+
+    if not isinstance(match.get("player_id"), int) or match["player_id"] <= 0:
+        raise ValueError(
+            f"PlayerRecentMatchRecord player_id must be a positive int, got {match.get('player_id')!r}"
+        )
+
+    logger.debug(
+        f"Match record validation passed: player {match['player_id']} vs {match.get('opponent_name')}"
+    )
+
+
+def validate_player_tournament_record(tournament: dict[str, Any]) -> None:
+    """
+    Validate a single PlayerRecentTournamentRecord.
+
+    Raises:
+        ValueError: if required fields are missing or values are invalid.
+    """
+    logger = get_logger(__name__)
+
+    missing = REQUIRED_PLAYER_TOURNAMENT_FIELDS - tournament.keys()
+    if missing:
+        raise ValueError(f"PlayerRecentTournamentRecord missing fields: {missing}")
+
+    if tournament.get("source") != "squashinfo":
+        raise ValueError(
+            f"PlayerRecentTournamentRecord source must be 'squashinfo', got {tournament.get('source')!r}"
+        )
+
+    if not isinstance(tournament.get("player_id"), int) or tournament["player_id"] <= 0:
+        raise ValueError(
+            f"PlayerRecentTournamentRecord player_id must be a positive int, got {tournament.get('player_id')!r}"
+        )
+
+    logger.debug(
+        f"Tournament record validation passed: player {tournament['player_id']} at {tournament.get('tournament_name')}"
+    )
+
+
+def validate_player_data(player_id: int) -> None:
+    """
+    Validate scraped player history CSVs for a given player ID.
+
+    Loads squashinfo_player_{player_id}_matches.csv and
+    squashinfo_player_{player_id}_tournaments.csv from OUTPUT_DIR,
+    checks column completeness, and reports data quality stats.
+
+    Parameters:
+    - player_id: numeric player ID (e.g. 5974)
+    """
+    logger = get_logger(__name__)
+    logger.info(f"Starting validation for player {player_id}")
+
+    matches_file = OUTPUT_DIR / f"squashinfo_player_{player_id}_matches.csv"
+    tournaments_file = OUTPUT_DIR / f"squashinfo_player_{player_id}_tournaments.csv"
+
+    expected_match_cols = {
+        "player_id", "tournament_id", "tournament_name", "round",
+        "opponent_name", "opponent_id", "opponent_country",
+        "result", "scores", "duration_minutes", "date", "source",
+    }
+    expected_tournament_cols = {
+        "player_id", "tournament_id", "tournament_name",
+        "tier", "location", "date", "round_reached", "source",
+    }
+
+    logger.info("-" * 60)
+    logger.info("Matches:")
+    logger.info("-" * 60)
+
+    if not matches_file.exists():
+        logger.warning(f"Matches file not found: {matches_file}")
+    else:
+        try:
+            df = pd.read_csv(matches_file)
+            logger.info(f"Loaded {len(df)} matches from {matches_file}")
+
+            missing_cols = expected_match_cols - set(df.columns)
+            if missing_cols:
+                logger.warning(f"Missing expected columns: {missing_cols}")
+            else:
+                logger.info("Schema complete")
+
+            if len(df) > 0:
+                wins = (df["result"] == "W").sum()
+                losses = (df["result"] == "L").sum()
+                upcoming = (df["result"] == "").sum()
+                logger.info(f"Results: {wins}W / {losses}L / {upcoming} upcoming")
+
+                invalid_results = df[~df["result"].isin(["W", "L", ""])]["result"].unique()
+                if len(invalid_results):
+                    logger.error(f"Invalid result values: {invalid_results}")
+
+                missing_opponent = df["opponent_name"].isna().sum()
+                if missing_opponent:
+                    logger.warning(f"{missing_opponent} rows missing opponent_name")
+
+        except Exception as e:
+            logger.error(f"Failed to load matches file: {e}")
+
+    logger.info("-" * 60)
+    logger.info("Tournaments:")
+    logger.info("-" * 60)
+
+    if not tournaments_file.exists():
+        logger.warning(f"Tournaments file not found: {tournaments_file}")
+    else:
+        try:
+            df = pd.read_csv(tournaments_file)
+            logger.info(f"Loaded {len(df)} tournaments from {tournaments_file}")
+
+            missing_cols = expected_tournament_cols - set(df.columns)
+            if missing_cols:
+                logger.warning(f"Missing expected columns: {missing_cols}")
+            else:
+                logger.info("Schema complete")
+
+            if len(df) > 0:
+                logger.info(f"Most recent: {df.iloc[0]['tournament_name']} — {df.iloc[0]['round_reached']}")
+
+                missing_round = df["round_reached"].isna().sum()
+                if missing_round:
+                    logger.warning(f"{missing_round} rows missing round_reached")
+
+        except Exception as e:
+            logger.error(f"Failed to load tournaments file: {e}")
+
+    logger.info("-" * 60)
+
+
 if __name__ == "__main__":
     logger = get_logger(__name__)
 
