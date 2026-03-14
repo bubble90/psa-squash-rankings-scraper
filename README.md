@@ -123,7 +123,7 @@ class MatchRecord(TypedDict):
 
 ## Usage
 
-The CLI uses subcommands: `rankings`, `tournaments`, and `matches`.
+The CLI uses subcommands: `rankings`, `tournaments`, `matches`, and `player-history`.
 
 ### Rankings
 
@@ -165,6 +165,19 @@ Output: `output/squashinfo_matches_11593.csv`
 
 Upcoming matches are included with `winner=None` and `scores=None`. Completed matches include scores (e.g. `11-5, 11-4, 11-5`) and duration in minutes.
 
+### Player History
+
+Fetch a player's recent matches and tournaments from squashinfo.com. You need the player ID and URL slug.
+
+```bash
+# Fetch recent history for a player
+psa-scrape player-history --player-id 5974 --slug paul-coll
+```
+
+Output:
+- `output/squashinfo_player_5974_matches.csv`
+- `output/squashinfo_player_5974_tournaments.csv`
+
 ### Programmatic Usage — Tournaments & Matches
 
 ```python
@@ -185,9 +198,9 @@ for m in matches:
 ### Programmatic Usage — Rankings (Type Safety)
 
 ```python
-from api_scraper import get_rankings
-from html_scraper import scrape_rankings_html
-from schema import is_api_result, is_html_result, ScraperResult
+from psa_squash_rankings.api_scraper import get_rankings
+from psa_squash_rankings.html_scraper import scrape_rankings_html
+from psa_squash_rankings.schema import is_api_result, is_html_result, ScraperResult
 
 # Try API first
 try:
@@ -241,7 +254,9 @@ psa-squash-rankings/
 │   ├── test_parser.py
 │   ├── test_checkpoints.py
 │   ├── test_exporter.py
-│   └── test_schema.py
+│   ├── test_schema.py
+│   ├── test_cli.py
+│   └── test_validator.py
 ├── .github/
 │   └── workflows/
 │       └── CI.yml
@@ -345,13 +360,19 @@ Validate scraped data with type-aware checks:
 
 ```bash
 # Validate male rankings
-uv validator.py male
+uv run python -m psa_squash_rankings.validator male
 
 # Validate female rankings
-uv validator.py female
+uv run python -m psa_squash_rankings.validator female
 
 # Validate both
-uv validator.py both
+uv run python -m psa_squash_rankings.validator both
+
+# Validate tournaments output
+uv run python -m psa_squash_rankings.validator tournaments
+
+# Validate matches output for a specific event
+uv run python -m psa_squash_rankings.validator matches 11593
 ```
 
 The validator displays:
@@ -475,7 +496,7 @@ Make sure your IDE is using Python 3.12+ and has type checking enabled. The expl
 **Solution:**
 Check logs for API error details:
 ```bash
-uv run run_scraper.py --log-level DEBUG
+psa-scrape rankings --log-level DEBUG
 ```
 
 Common causes:
@@ -498,8 +519,8 @@ If `source=html`, the scraper fell back to degraded data. Check logs to see why 
 ### Example 1: Type-Safe Data Processing
 
 ```python
-from api_scraper import get_rankings
-from schema import is_api_result
+from psa_squash_rankings.api_scraper import get_rankings
+from psa_squash_rankings.schema import is_api_result
 import pandas as pd
 
 # Fetch data
@@ -522,19 +543,21 @@ else:
 ### Example 2: Handling Fallback Explicitly
 
 ```python
-from run_scraper import scrape_gender
-from schema import is_html_result
+from psa_squash_rankings.api_scraper import get_rankings
+from psa_squash_rankings.html_scraper import scrape_rankings_html
+from psa_squash_rankings.schema import is_api_result, is_html_result
 
-# Scrape with explicit fallback handling
-data, is_fallback = scrape_gender("male", page_size=100, max_pages=None, resume=True)
-
-if is_fallback:
-    print("⚠ Using degraded HTML data")
-    print("⚠ Cannot track players across time (no IDs)")
-    print("⚠ Use for display purposes only")
-else:
-    print("✓ Complete API data available")
-    print("✓ Safe for production use")
+try:
+    data = get_rankings("male", page_size=100, max_pages=None, resume=True)
+    if is_api_result(data):
+        print("✓ Complete API data available")
+        print("✓ Safe for production use")
+except Exception:
+    data = scrape_rankings_html()
+    if is_html_result(data):
+        print("⚠ Using degraded HTML data")
+        print("⚠ Cannot track players across time (no IDs)")
+        print("⚠ Use for display purposes only")
 ```
 
 ## Contributing
