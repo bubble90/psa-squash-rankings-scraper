@@ -211,25 +211,154 @@ def validate_scraped_data(gender: Literal["male", "female"] = "male") -> None:
     logger.info("-" * 60)
 
 
+def validate_tournaments() -> None:
+    """
+    Validate the squashinfo tournaments CSV.
+
+    Checks that required columns are present, key fields are non-null,
+    and prints a summary of tiers and gender breakdown.
+    """
+    logger = get_logger(__name__)
+
+    path = OUTPUT_DIR / "squashinfo_tournaments.csv"
+    if not path.exists():
+        logger.error(f"No tournaments file found: {path}")
+        logger.error("Run:  psa-scrape tournaments")
+        return
+
+    try:
+        df = pd.read_csv(path)
+    except Exception as e:
+        logger.error(f"Failed to load tournaments file: {e}")
+        return
+
+    logger.info(f"Loaded {len(df)} tournaments from {path}")
+
+    required_cols = {"id", "name", "tier", "location", "date", "url", "source"}
+    missing_cols = required_cols - set(df.columns)
+    if missing_cols:
+        logger.error(f"  ✗ Missing columns: {missing_cols}")
+    else:
+        logger.info("  ✓ All required columns present")
+
+    for col in ("id", "name", "tier", "date", "url"):
+        if col in df.columns:
+            null_count = df[col].isna().sum()
+            if null_count:
+                logger.warning(f"  ⚠ '{col}' has {null_count} null value(s)")
+
+    if "tier" in df.columns:
+        logger.info("\n  Tier breakdown:")
+        for tier, count in df["tier"].value_counts().items():
+            logger.info(f"    {tier}: {count}")
+
+    if "gender" in df.columns:
+        logger.info("\n  Gender breakdown:")
+        for gender, count in df["gender"].value_counts(dropna=False).items():
+            label = gender if pd.notna(gender) else "unknown"
+            logger.info(f"    {label}: {count}")
+
+    if "source" in df.columns:
+        sources = df["source"].unique().tolist()
+        logger.info(f"\n  Sources: {sources}")
+
+    logger.info("\n  ✓ Tournament validation complete")
+
+
+def validate_matches(event_id: int) -> None:
+    """
+    Validate the squashinfo matches CSV for a given event ID.
+
+    Checks required columns, null rates on key fields, and prints
+    a summary of rounds and completed vs upcoming matches.
+
+    Parameters:
+    - event_id: numeric tournament event ID
+    """
+    logger = get_logger(__name__)
+
+    path = OUTPUT_DIR / f"squashinfo_matches_{event_id}.csv"
+    if not path.exists():
+        logger.error(f"No matches file found: {path}")
+        logger.error(f"Run:  psa-scrape matches --event-id {event_id} --slug <slug>")
+        return
+
+    try:
+        df = pd.read_csv(path)
+    except Exception as e:
+        logger.error(f"Failed to load matches file: {e}")
+        return
+
+    logger.info(f"Loaded {len(df)} matches from {path}")
+
+    required_cols = {
+        "match_id",
+        "tournament_id",
+        "tournament_name",
+        "round",
+        "player1_name",
+        "player2_name",
+        "winner",
+        "scores",
+        "source",
+    }
+    missing_cols = required_cols - set(df.columns)
+    if missing_cols:
+        logger.error(f"  ✗ Missing columns: {missing_cols}")
+    else:
+        logger.info("  ✓ All required columns present")
+
+    for col in ("match_id", "player1_name", "player2_name", "round"):
+        if col in df.columns:
+            null_count = df[col].isna().sum()
+            if null_count:
+                logger.warning(f"  ⚠ '{col}' has {null_count} null value(s)")
+
+    if "winner" in df.columns:
+        completed = df["winner"].notna().sum()
+        upcoming = df["winner"].isna().sum()
+        logger.info(f"\n  Completed matches: {completed}")
+        logger.info(f"  Upcoming matches:  {upcoming}")
+
+    if "round" in df.columns:
+        logger.info("\n  Round breakdown:")
+        for round_name, count in df["round"].value_counts().items():
+            logger.info(f"    {round_name}: {count} match(es)")
+
+    if "duration_minutes" in df.columns:
+        completed_df = df[df["duration_minutes"].notna()]
+        if len(completed_df) > 0:
+            avg = completed_df["duration_minutes"].mean()
+            logger.info(f"\n  Avg match duration: {avg:.0f} min")
+
+    logger.info("\n  ✓ Match validation complete")
+
+
 if __name__ == "__main__":
     logger = get_logger(__name__)
 
     import sys
 
     logger.info("=" * 60)
-    logger.info("PSA Rankings Data Validator")
+    logger.info("PSA Squash Data Validator")
     logger.info("=" * 60)
 
-    gender = sys.argv[1] if len(sys.argv) > 1 else "both"
+    command = sys.argv[1] if len(sys.argv) > 1 else "both"
 
-    if gender == "both":
-        validate_scraped_data("male")
-        print()
-        validate_scraped_data("female")
-    elif gender in ["male", "female"]:
-        validate_scraped_data(gender)  # type: ignore
+    if command in ("male", "female", "both"):
+        genders = ["male", "female"] if command == "both" else [command]
+        for g in genders:
+            validate_scraped_data(g)  # type: ignore
+            print()
+    elif command == "tournaments":
+        validate_tournaments()
+    elif command == "matches":
+        if len(sys.argv) < 3:
+            logger.error("Usage: python -m psa_squash_rankings.validator matches <event_id>")
+        else:
+            validate_matches(int(sys.argv[2]))
     else:
-        logger.error(f"Invalid gender: {gender}. Use 'male', 'female', or 'both'")
-        logger.info("Usage: python validator.py [male|female|both]")
+        logger.error(f"Unknown command: {command}")
+        logger.info("Usage: python -m psa_squash_rankings.validator [male|female|both|tournaments|matches <event_id>]")
 
     logger.info("=" * 60)
