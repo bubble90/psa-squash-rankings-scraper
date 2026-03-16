@@ -3,8 +3,9 @@ Test suite for API scraper functionality in PSA Squash scraper.
 """
 
 import pytest
+import requests
 from unittest.mock import Mock, patch, MagicMock
-from psa_squash_rankings.api_scraper import get_rankings
+from psa_squash_rankings.api_scraper import get_rankings, get_player_bio
 
 
 @patch("psa_squash_rankings.api_scraper.requests.Session")
@@ -455,3 +456,168 @@ def test_get_rankings_returns_api_player_record_type(
     assert "mugshot_url" in record
     assert "source" in record
     assert record["source"] == "api"
+
+
+# ---------------------------------------------------------------------------
+# Tests for get_player_bio
+# ---------------------------------------------------------------------------
+
+SAMPLE_PSA_PLAYER_API_RESPONSE = {
+    "Id": "11942",
+    "Name": "Mostafa Asal",
+    "Country": "EGY",
+    "Flag": "https://dd34e8y1ttmkb.cloudfront.net/images/flags/80x40/EGY.png",
+    "Birthdate": "09-05-2001",
+    "Birthplace": "Egypt",
+    "Height": "189cm",
+    "Weight": "80kg",
+    "Coach": "James Willstrop",
+    "Residence": "Cairo, Egypt",
+    "Bio": "<p>Mostafa Asal is World No.1.</p>",
+    "Picture": "https://dd34e8y1ttmkb.cloudfront.net/images/players/11942.jpg",
+    "Mugshot": "https://example.com/mugshot.jpg",
+    "Twitter": "https://twitter.com/mostafasal_",
+    "Facebook": "https://www.facebook.com/mostafasal_",
+}
+
+
+@patch("psa_squash_rankings.api_scraper.requests.Session")
+def test_get_player_bio_returns_record(mock_session_class: MagicMock) -> None:
+    """Test that get_player_bio returns a PsaPlayerBioRecord on success."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
+    mock_response = Mock()
+    mock_response.json.return_value = SAMPLE_PSA_PLAYER_API_RESPONSE
+    mock_response.raise_for_status = Mock()
+    mock_session.get.return_value = mock_response
+
+    result = get_player_bio(11942)
+
+    assert result is not None
+    assert result["player_id"] == 11942
+    assert result["name"] == "Mostafa Asal"
+    assert result["country"] == "EGY"
+    assert result["birthdate"] == "09-05-2001"
+    assert result["birthplace"] == "Egypt"
+    assert result["height_cm"] == 189
+    assert result["weight_kg"] == 80
+    assert result["coach"] == "James Willstrop"
+    assert result["residence"] == "Cairo, Egypt"
+    assert result["bio"] == "Mostafa Asal is World No.1."
+    assert result["picture_url"] == "https://dd34e8y1ttmkb.cloudfront.net/images/players/11942.jpg"
+    assert result["twitter"] == "https://twitter.com/mostafasal_"
+    assert result["facebook"] == "https://www.facebook.com/mostafasal_"
+    assert result["source"] == "api"
+    mock_session.close.assert_called_once()
+
+
+@patch("psa_squash_rankings.api_scraper.requests.Session")
+def test_get_player_bio_hits_correct_url(mock_session_class: MagicMock) -> None:
+    """Test that the correct player URL is called."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
+    mock_response = Mock()
+    mock_response.json.return_value = SAMPLE_PSA_PLAYER_API_RESPONSE
+    mock_response.raise_for_status = Mock()
+    mock_session.get.return_value = mock_response
+
+    get_player_bio(11942)
+
+    called_url = mock_session.get.call_args[0][0]
+    assert "player/11942" in called_url
+
+
+@patch("psa_squash_rankings.api_scraper.requests.Session")
+def test_get_player_bio_returns_none_on_empty_response(mock_session_class: MagicMock) -> None:
+    """Test that None is returned when the API returns an empty response."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
+    mock_response = Mock()
+    mock_response.json.return_value = []
+    mock_response.raise_for_status = Mock()
+    mock_session.get.return_value = mock_response
+
+    result = get_player_bio(99999)
+
+    assert result is None
+    mock_session.close.assert_called_once()
+
+
+@patch("psa_squash_rankings.api_scraper.requests.Session")
+def test_get_player_bio_optional_fields_none(mock_session_class: MagicMock) -> None:
+    """Test that optional fields default to None when absent."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
+    mock_response = Mock()
+    mock_response.json.return_value = {
+        "Id": "123",
+        "Name": "Unknown Player",
+    }
+    mock_response.raise_for_status = Mock()
+    mock_session.get.return_value = mock_response
+
+    result = get_player_bio(123)
+
+    assert result is not None
+    assert result["country"] is None
+    assert result["birthdate"] is None
+    assert result["height_cm"] is None
+    assert result["weight_kg"] is None
+    assert result["bio"] is None
+    assert result["twitter"] is None
+    assert result["source"] == "api"
+
+
+@patch("psa_squash_rankings.api_scraper.requests.Session")
+def test_get_player_bio_strips_html_from_bio(mock_session_class: MagicMock) -> None:
+    """Test that HTML tags are stripped from the bio field."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
+    mock_response = Mock()
+    mock_response.json.return_value = {
+        **SAMPLE_PSA_PLAYER_API_RESPONSE,
+        "Bio": "<p>First para.</p>\r\n<p>Second&nbsp;para.</p>",
+    }
+    mock_response.raise_for_status = Mock()
+    mock_session.get.return_value = mock_response
+
+    result = get_player_bio(11942)
+
+    assert result is not None
+    assert "<p>" not in result["bio"]
+    assert "First para." in result["bio"]
+    assert "Second" in result["bio"]
+
+
+@patch("psa_squash_rankings.api_scraper.requests.Session")
+def test_get_player_bio_network_error_propagates(mock_session_class: MagicMock) -> None:
+    """Test that network errors are propagated."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+    mock_session.get.side_effect = requests.exceptions.ConnectionError("down")
+
+    with pytest.raises(requests.exceptions.ConnectionError):
+        get_player_bio(11942)
+
+    mock_session.close.assert_called_once()
+
+
+@patch("psa_squash_rankings.api_scraper.requests.Session")
+def test_get_player_bio_http_error_propagates(mock_session_class: MagicMock) -> None:
+    """Test that HTTP errors are propagated."""
+    mock_session = MagicMock()
+    mock_session_class.return_value = mock_session
+
+    mock_response = Mock()
+    mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError("404")
+    mock_session.get.return_value = mock_response
+
+    with pytest.raises(requests.exceptions.HTTPError):
+        get_player_bio(11942)
+
+    mock_session.close.assert_called_once()

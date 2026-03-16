@@ -17,7 +17,7 @@ Example:
     matches = get_tournament_matches(11593, "mens-australian-open-2026")
 """
 
-from psa_squash_rankings.api_scraper import get_rankings
+from psa_squash_rankings.api_scraper import get_rankings, get_player_bio
 from psa_squash_rankings.html_scraper import scrape_rankings_html
 from psa_squash_rankings.exporter import export_to_csv
 from psa_squash_rankings.squashinfo_scraper import (
@@ -25,14 +25,13 @@ from psa_squash_rankings.squashinfo_scraper import (
     get_tournament_matches,
     get_player_recent_matches,
     get_player_recent_tournaments,
-    get_player_biography,
 )
 from psa_squash_rankings.validator import (
     validate_player_match_record,
     validate_player_tournament_record,
     validate_player_data,
-    validate_player_biography_record,
-    validate_player_biography,
+    validate_psa_player_bio_record,
+    validate_psa_player_bio,
 )
 from psa_squash_rankings.schema import (
     ApiPlayerRecord,
@@ -42,7 +41,7 @@ from psa_squash_rankings.schema import (
     MatchRecord,
     PlayerRecentMatchRecord,
     PlayerRecentTournamentRecord,
-    PlayerBiographyRecord,
+    PsaPlayerBioRecord,
     is_api_result,
     is_html_result,
 )
@@ -50,13 +49,13 @@ from psa_squash_rankings.schema import (
 __version__ = "1.0.0"
 __all__ = [
     "get_rankings",
+    "get_player_bio",
     "scrape_rankings_html",
     "export_to_csv",
     "get_recent_tournaments",
     "get_tournament_matches",
     "get_player_recent_matches",
     "get_player_recent_tournaments",
-    "get_player_biography",
     "ApiPlayerRecord",
     "HtmlPlayerRecord",
     "ScraperResult",
@@ -64,13 +63,13 @@ __all__ = [
     "MatchRecord",
     "PlayerRecentMatchRecord",
     "PlayerRecentTournamentRecord",
-    "PlayerBiographyRecord",
+    "PsaPlayerBioRecord",
     "is_api_result",
     "is_html_result",
     "validate_player_match_record",
     "validate_player_tournament_record",
     "validate_player_data",
-    "validate_player_biography_record",
-    "validate_player_biography",
+    "validate_psa_player_bio_record",
+    "validate_psa_player_bio",
     "__version__",
 ]

@@ -8,14 +8,13 @@ import logging
 import pandas as pd
 from typing import Literal, cast
 
-from psa_squash_rankings.api_scraper import get_rankings
+from psa_squash_rankings.api_scraper import get_rankings, get_player_bio
 from psa_squash_rankings.html_scraper import scrape_rankings_html
 from psa_squash_rankings.squashinfo_scraper import (
     get_recent_tournaments,
     get_tournament_matches,
     get_player_recent_matches,
     get_player_recent_tournaments,
-    get_player_biography,
 )
 from psa_squash_rankings.exporter import export_to_csv
 from psa_squash_rankings.logger import get_logger
@@ -170,25 +169,24 @@ def _run_player_history(args) -> int:
     return exit_code
 
 
+
 def _run_player_bio(args) -> int:
-    """Scrape a player's biography from squashinfo.com."""
+    """Fetch a player's biography from the PSA API."""
     logger.info("=" * 60)
-    logger.info(f"Fetching biography for player {args.player_id} ({args.slug})")
+    logger.info(f"Fetching PSA biography for player {args.player_id}")
     logger.info("=" * 60)
 
     try:
-        bio = get_player_biography(args.player_id, args.slug)
+        bio = get_player_bio(args.player_id)
         if bio is None:
             logger.warning(f"No biography found for player {args.player_id}")
             return 1
 
-        output_path = OUTPUT_DIR / f"squashinfo_player_{args.player_id}_biography.csv"
+        output_path = OUTPUT_DIR / f"psa_player_{args.player_id}_bio.csv"
         pd.DataFrame([bio]).to_csv(output_path, index=False)
 
         logger.info(f"Fetched biography for {bio['name']}")
-        logger.info(
-            f"Data exported to: squashinfo_player_{args.player_id}_biography.csv"
-        )
+        logger.info(f"Data exported to: psa_player_{args.player_id}_bio.csv")
         return 0
 
     except Exception as e:
@@ -293,18 +291,13 @@ def main() -> int:
     # player-bio subcommand
     bio_parser = subparsers.add_parser(
         "player-bio",
-        help="Scrape a player's biography from squashinfo.com",
+        help="Fetch a player's biography from the PSA API",
     )
     bio_parser.add_argument(
         "--player-id",
         type=int,
         required=True,
-        help="Player ID (e.g. 5974)",
-    )
-    bio_parser.add_argument(
-        "--slug",
-        required=True,
-        help="Player URL slug (e.g. paul-coll)",
+        help="PSA player ID (e.g. 11942)",
     )
 
     args = parser.parse_args()

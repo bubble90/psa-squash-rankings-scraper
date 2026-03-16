@@ -6,15 +6,18 @@ Returns ApiPlayerRecord objects with complete player information.
 """
 
 import os
+import re
+import html
 import json
 import itertools
 import requests
 from typing import Literal, Any, Optional
-from psa_squash_rankings.data_parser import parse_api_player
+from psa_squash_rankings.data_parser import parse_api_player, parse_measure
 from psa_squash_rankings.logger import get_logger
-from psa_squash_rankings.schema import ApiPlayerRecord
+from psa_squash_rankings.schema import ApiPlayerRecord, PsaPlayerBioRecord
 from psa_squash_rankings.config import (
     API_BASE_URL,
+    PSA_PLAYER_URL,
     API_TIMEOUT,
     USER_AGENTS,
     CHECKPOINT_DIR,
@@ -254,6 +257,93 @@ def get_rankings(
 
     logger.info(f"Successfully scraped {len(all_players)} {gender} players")
     return all_players
+
+
+def _strip_html(html_str: str) -> str:
+    """Strip HTML tags and decode entities from a string."""
+    text = re.sub(r"<[^>]+>", " ", html_str)
+    text = html.unescape(text)
+    return re.sub(r" {2,}", " ", text).strip()
+
+
+def get_player_bio(player_id: int) -> Optional[PsaPlayerBioRecord]:
+    """
+    Fetch a player's full biography from the PSA API.
+
+    Parameters:
+    - player_id: numeric player ID (e.g. 11942)
+
+    Returns:
+    - PsaPlayerBioRecord if the player was found, None if not found (empty response).
+
+    Raises:
+    - requests.exceptions.RequestException: on network or HTTP errors
+    """
+    logger = get_logger(__name__)
+    logger.info(f"Fetching PSA biography for player {player_id}")
+
+    url = f"{PSA_PLAYER_URL}/{player_id}"
+
+    session = requests.Session()
+    session.headers.update({
+        "Accept": "application/json",
+        "User-Agent": next(USER_AGENT_CYCLE),
+    })
+
+    try:
+        response = session.get(url, timeout=API_TIMEOUT)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request failed for player {player_id}: {e}")
+        raise
+    finally:
+        session.close()
+        logger.debug("HTTP session closed")
+
+    raw = response.json()
+
+    if not raw:
+        logger.warning(f"No data returned for player {player_id}")
+        return None
+
+    height_cm: Optional[int] = None
+    weight_kg: Optional[int] = None
+
+    if raw.get("Height"):
+        try:
+            height_cm = parse_measure(raw["Height"], "Height")
+        except ValueError as e:
+            logger.warning(f"Skipping height for player {player_id}: {e}")
+
+    if raw.get("Weight"):
+        try:
+            weight_kg = parse_measure(raw["Weight"], "Weight")
+        except ValueError as e:
+            logger.warning(f"Skipping weight for player {player_id}: {e}")
+
+    bio_text = _strip_html(raw["Bio"]) if raw.get("Bio") else None
+
+    record: PsaPlayerBioRecord = {
+        "player_id": player_id,
+        "name": raw.get("Name", ""),
+        "country": raw.get("Country") or None,
+        "flag_url": raw.get("Flag") or None,
+        "birthdate": raw.get("Birthdate") or None,
+        "birthplace": raw.get("Birthplace") or None,
+        "height_cm": height_cm,
+        "weight_kg": weight_kg,
+        "coach": raw.get("Coach") or None,
+        "residence": raw.get("Residence") or None,
+        "bio": bio_text,
+        "picture_url": raw.get("Picture") or None,
+        "mugshot_url": raw.get("Mugshot") or None,
+        "twitter": raw.get("Twitter") or None,
+        "facebook": raw.get("Facebook") or None,
+        "source": "api",
+    }
+
+    logger.info(f"Fetched biography for {record['name']}")
+    return record
 
 
 if __name__ == "__main__":

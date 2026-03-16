@@ -13,14 +13,12 @@ from psa_squash_rankings.squashinfo_scraper import (
     get_tournament_matches,
     get_player_recent_matches,
     get_player_recent_tournaments,
-    get_player_biography,
     _parse_tournament_rows,
     _parse_player_info,
     _parse_match_row,
     _parse_tournament_name,
     _parse_player_recent_match_row,
     _parse_player_tournament_rows,
-    _parse_player_biography,
     _find_table_by_headers,
 )
 from psa_squash_rankings.schema import (
@@ -28,7 +26,6 @@ from psa_squash_rankings.schema import (
     MatchRecord,
     PlayerRecentMatchRecord,
     PlayerRecentTournamentRecord,
-    PlayerBiographyRecord,
 )
 from bs4 import BeautifulSoup
 
@@ -973,178 +970,3 @@ class TestGetPlayerRecentTournaments:
             with pytest.raises(requests.exceptions.ConnectionError):
                 get_player_recent_tournaments(5974, "paul-coll")
 
-
-# ---------------------------------------------------------------------------
-# HTML fixtures: player biography page
-# ---------------------------------------------------------------------------
-
-PLAYER_BIO_PAGE_HTML = """
-<html><body>
-  <h1>Paul Coll(New Zealand)</h1>
-  <table>
-    <tr><td>Date of Birth</td><td>4 Aug 1992</td></tr>
-    <tr><td>Height</td><td>185cm</td></tr>
-    <tr><td>Ranking</td><td>4</td></tr>
-    <tr><td>Ranking Points</td><td>3,680</td></tr>
-    <tr><td>Coach</td><td>David Campion</td></tr>
-    <tr><td>Turned Professional</td><td>2010</td></tr>
-  </table>
-  <table>
-    <tr>
-      <th>Date</th><th>Opponent</th><th>W/L</th><th>Event</th>
-      <th>Ctry</th><th>Rnd</th><th>Score</th><th>PSA</th>
-    </tr>
-    <tr class="darkline">
-      <td>Mar 2026</td>
-      <td><a href="/player/5701-auguste-dussourd">Auguste Dussourd</a></td>
-      <td>W</td>
-      <td><a href="/events/11593-mens-australian-open-2026">Australian Open</a></td>
-      <td>AUS</td>
-      <td><abbr title="Quarter-finals">qf</abbr></td>
-      <td>11-5, 11-4, 11-5 (40m)</td>
-      <td>Y</td>
-    </tr>
-  </table>
-</body></html>
-"""
-
-PLAYER_BIO_NO_H1_HTML = """
-<html><body>
-  <p>Player not found.</p>
-</body></html>
-"""
-
-PLAYER_BIO_MINIMAL_HTML = """
-<html><body>
-  <h1>Unknown Player</h1>
-</body></html>
-"""
-
-PLAYER_BIO_NO_NATIONALITY_HTML = """
-<html><body>
-  <h1>Anonymous Player</h1>
-  <table>
-    <tr><td>Height</td><td>170cm</td></tr>
-  </table>
-</body></html>
-"""
-
-
-# ---------------------------------------------------------------------------
-# Unit tests: _parse_player_biography
-# ---------------------------------------------------------------------------
-
-
-class TestParsePlayerBiography:
-    def test_full_biography(self):
-        soup = BeautifulSoup(PLAYER_BIO_PAGE_HTML, "lxml")
-        bio = _parse_player_biography(soup, 5974)
-        assert bio is not None
-        assert bio["player_id"] == 5974
-        assert bio["name"] == "Paul Coll"
-        assert bio["nationality"] == "New Zealand"
-        assert bio["date_of_birth"] == "4 Aug 1992"
-        assert bio["height"] == "185cm"
-        assert bio["ranking"] == 4
-        assert bio["ranking_points"] == 3680
-        assert bio["coach"] == "David Campion"
-        assert bio["turned_professional"] == "2010"
-        assert bio["source"] == "squashinfo"
-
-    def test_no_h1_returns_none(self):
-        soup = BeautifulSoup(PLAYER_BIO_NO_H1_HTML, "lxml")
-        assert _parse_player_biography(soup, 5974) is None
-
-    def test_minimal_page_returns_record_with_nones(self):
-        soup = BeautifulSoup(PLAYER_BIO_MINIMAL_HTML, "lxml")
-        bio = _parse_player_biography(soup, 1)
-        assert bio is not None
-        assert bio["name"] == "Unknown Player"
-        assert bio["nationality"] is None
-        assert bio["date_of_birth"] is None
-        assert bio["ranking"] is None
-
-    def test_no_nationality_in_h1(self):
-        soup = BeautifulSoup(PLAYER_BIO_NO_NATIONALITY_HTML, "lxml")
-        bio = _parse_player_biography(soup, 99)
-        assert bio is not None
-        assert bio["name"] == "Anonymous Player"
-        assert bio["nationality"] is None
-        assert bio["height"] == "170cm"
-
-    def test_ranking_points_comma_stripped(self):
-        soup = BeautifulSoup(PLAYER_BIO_PAGE_HTML, "lxml")
-        bio = _parse_player_biography(soup, 5974)
-        assert bio is not None
-        assert bio["ranking_points"] == 3680
-
-    def test_source_is_squashinfo(self):
-        soup = BeautifulSoup(PLAYER_BIO_PAGE_HTML, "lxml")
-        bio = _parse_player_biography(soup, 5974)
-        assert bio is not None
-        assert bio["source"] == "squashinfo"
-
-
-# ---------------------------------------------------------------------------
-# Integration tests: get_player_biography (mocked HTTP)
-# ---------------------------------------------------------------------------
-
-
-class TestGetPlayerBiography:
-    def _mock_response(self, html: str, status_code: int = 200):
-        mock = MagicMock()
-        mock.status_code = status_code
-        mock.text = html
-        mock.raise_for_status = MagicMock()
-        return mock
-
-    def test_returns_biography_record(self):
-        with patch(
-            "psa_squash_rankings.squashinfo_scraper.requests.Session"
-        ) as MockSession:
-            MockSession.return_value = MockSession.return_value
-            MockSession.return_value.get.return_value = self._mock_response(
-                PLAYER_BIO_PAGE_HTML
-            )
-            bio = get_player_biography(5974, "paul-coll")
-
-        assert bio is not None
-        assert bio["player_id"] == 5974
-        assert bio["name"] == "Paul Coll"
-        assert bio["source"] == "squashinfo"
-
-    def test_returns_none_when_no_h1(self):
-        with patch(
-            "psa_squash_rankings.squashinfo_scraper.requests.Session"
-        ) as MockSession:
-            MockSession.return_value = MockSession.return_value
-            MockSession.return_value.get.return_value = self._mock_response(
-                PLAYER_BIO_NO_H1_HTML
-            )
-            bio = get_player_biography(5974, "paul-coll")
-
-        assert bio is None
-
-    def test_network_error_propagates(self):
-        with patch(
-            "psa_squash_rankings.squashinfo_scraper.requests.Session"
-        ) as MockSession:
-            MockSession.return_value = MockSession.return_value
-            MockSession.return_value.get.side_effect = requests.exceptions.Timeout(
-                "timed out"
-            )
-            with pytest.raises(requests.exceptions.Timeout):
-                get_player_biography(5974, "paul-coll")
-
-    def test_http_error_propagates(self):
-        with patch(
-            "psa_squash_rankings.squashinfo_scraper.requests.Session"
-        ) as MockSession:
-            MockSession.return_value = MockSession.return_value
-            mock_response = self._mock_response("", 404)
-            mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
-                "404"
-            )
-            MockSession.return_value.get.return_value = mock_response
-            with pytest.raises(requests.exceptions.HTTPError):
-                get_player_biography(5974, "paul-coll")

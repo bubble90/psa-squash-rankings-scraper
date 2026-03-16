@@ -11,23 +11,9 @@ from psa_squash_rankings.validator import (
     validate_player_match_record,
     validate_player_tournament_record,
     validate_player_data,
-    validate_player_biography_record,
-    validate_player_biography,
+    validate_psa_player_bio_record,
+    validate_psa_player_bio,
 )
-
-
-VALID_BIOGRAPHY = {
-    "player_id": 5974,
-    "name": "Paul Coll",
-    "nationality": "New Zealand",
-    "date_of_birth": "4 Aug 1992",
-    "height": "185cm",
-    "ranking": 4,
-    "ranking_points": 3680,
-    "coach": "David Campion",
-    "turned_professional": "2010",
-    "source": "squashinfo",
-}
 
 VALID_MATCH = {
     "player_id": 5974,
@@ -247,82 +233,110 @@ class TestValidatePlayerData:
         assert "Invalid result" in error_calls
 
 
-class TestValidatePlayerBiographyRecord:
+# ---------------------------------------------------------------------------
+# PSA player bio validation
+# ---------------------------------------------------------------------------
+
+VALID_PSA_BIO = {
+    "player_id": 11942,
+    "name": "Mostafa Asal",
+    "country": "EGY",
+    "flag_url": "https://example.com/flag.png",
+    "birthdate": "09-05-2001",
+    "birthplace": "Egypt",
+    "height_cm": 189,
+    "weight_kg": 80,
+    "coach": "James Willstrop",
+    "residence": "Cairo, Egypt",
+    "bio": "Mostafa Asal is World No.1.",
+    "picture_url": "https://example.com/11942.jpg",
+    "mugshot_url": "https://example.com/mugshot.jpg",
+    "twitter": "https://twitter.com/mostafasal_",
+    "facebook": "https://www.facebook.com/mostafasal_",
+    "source": "api",
+}
+
+
+class TestValidatePsaPlayerBioRecord:
     def test_valid_record(self):
-        validate_player_biography_record(VALID_BIOGRAPHY)  # should not raise
+        validate_psa_player_bio_record(VALID_PSA_BIO)  # should not raise
 
     def test_optional_fields_can_be_none(self):
         record = {
-            **VALID_BIOGRAPHY,
-            "nationality": None,
-            "date_of_birth": None,
-            "height": None,
-            "ranking": None,
-            "ranking_points": None,
+            **VALID_PSA_BIO,
+            "country": None,
+            "flag_url": None,
+            "birthdate": None,
+            "birthplace": None,
+            "height_cm": None,
+            "weight_kg": None,
             "coach": None,
-            "turned_professional": None,
+            "residence": None,
+            "bio": None,
+            "picture_url": None,
+            "mugshot_url": None,
+            "twitter": None,
+            "facebook": None,
         }
-        validate_player_biography_record(record)  # should not raise
+        validate_psa_player_bio_record(record)  # should not raise
 
     def test_missing_player_id_raises(self):
-        record = {k: v for k, v in VALID_BIOGRAPHY.items() if k != "player_id"}
+        record = {k: v for k, v in VALID_PSA_BIO.items() if k != "player_id"}
         with pytest.raises(ValueError, match="missing fields"):
-            validate_player_biography_record(record)
+            validate_psa_player_bio_record(record)
 
     def test_missing_name_raises(self):
-        record = {k: v for k, v in VALID_BIOGRAPHY.items() if k != "name"}
+        record = {k: v for k, v in VALID_PSA_BIO.items() if k != "name"}
         with pytest.raises(ValueError, match="missing fields"):
-            validate_player_biography_record(record)
+            validate_psa_player_bio_record(record)
 
     def test_missing_source_raises(self):
-        record = {k: v for k, v in VALID_BIOGRAPHY.items() if k != "source"}
+        record = {k: v for k, v in VALID_PSA_BIO.items() if k != "source"}
         with pytest.raises(ValueError, match="missing fields"):
-            validate_player_biography_record(record)
+            validate_psa_player_bio_record(record)
 
     def test_wrong_source_raises(self):
         with pytest.raises(ValueError, match="source"):
-            validate_player_biography_record({**VALID_BIOGRAPHY, "source": "psa"})
+            validate_psa_player_bio_record({**VALID_PSA_BIO, "source": "squashinfo"})
 
     def test_zero_player_id_raises(self):
         with pytest.raises(ValueError, match="player_id"):
-            validate_player_biography_record({**VALID_BIOGRAPHY, "player_id": 0})
+            validate_psa_player_bio_record({**VALID_PSA_BIO, "player_id": 0})
 
     def test_negative_player_id_raises(self):
         with pytest.raises(ValueError, match="player_id"):
-            validate_player_biography_record({**VALID_BIOGRAPHY, "player_id": -1})
+            validate_psa_player_bio_record({**VALID_PSA_BIO, "player_id": -1})
 
     def test_string_player_id_raises(self):
         with pytest.raises(ValueError, match="player_id"):
-            validate_player_biography_record({**VALID_BIOGRAPHY, "player_id": "5974"})
+            validate_psa_player_bio_record({**VALID_PSA_BIO, "player_id": "11942"})
 
     def test_empty_name_raises(self):
         with pytest.raises(ValueError, match="name"):
-            validate_player_biography_record({**VALID_BIOGRAPHY, "name": ""})
+            validate_psa_player_bio_record({**VALID_PSA_BIO, "name": ""})
 
 
-class TestValidatePlayerBiography:
+class TestValidatePsaPlayerBio:
     def _write_bio(self, path: Path, rows: list[dict]) -> None:
-        pd.DataFrame(rows).to_csv(
-            path / "squashinfo_player_5974_biography.csv", index=False
-        )
+        pd.DataFrame(rows).to_csv(path / "psa_player_11942_bio.csv", index=False)
 
     def test_valid_file_runs_without_error(self, tmp_path, monkeypatch):
         monkeypatch.setattr("psa_squash_rankings.validator.OUTPUT_DIR", tmp_path)
-        self._write_bio(tmp_path, [VALID_BIOGRAPHY])
-        validate_player_biography(5974)  # should not raise
+        self._write_bio(tmp_path, [VALID_PSA_BIO])
+        validate_psa_player_bio(11942)  # should not raise
 
     def test_missing_file_logs_warning(self, tmp_path, monkeypatch):
         monkeypatch.setattr("psa_squash_rankings.validator.OUTPUT_DIR", tmp_path)
-        validate_player_biography(5974)  # should not raise
+        validate_psa_player_bio(11942)  # should not raise
 
     def test_missing_columns_logged_as_warning(self, tmp_path, monkeypatch):
         monkeypatch.setattr("psa_squash_rankings.validator.OUTPUT_DIR", tmp_path)
-        incomplete = {k: v for k, v in VALID_BIOGRAPHY.items() if k != "coach"}
+        incomplete = {k: v for k, v in VALID_PSA_BIO.items() if k != "bio"}
         self._write_bio(tmp_path, [incomplete])
 
         with patch("psa_squash_rankings.validator.get_logger") as mock_log:
             mock_logger = mock_log.return_value
-            validate_player_biography(5974)
+            validate_psa_player_bio(11942)
 
         warning_calls = " ".join(str(c) for c in mock_logger.warning.call_args_list)
-        assert "coach" in warning_calls
+        assert "bio" in warning_calls

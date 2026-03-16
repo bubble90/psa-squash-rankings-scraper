@@ -13,6 +13,7 @@ USER_AGENTS = [
 ]
 
 API_BASE_URL = "https://psa-api.ptsportsuite.com/rankedplayers"
+PSA_PLAYER_URL = "https://psa-api.ptsportsuite.com/player"
 API_TIMEOUT = 10
 
 HTML_BASE_URL = "https://www.psasquashtour.com/rankings/"
