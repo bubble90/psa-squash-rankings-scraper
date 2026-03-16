@@ -969,4 +969,3 @@ class TestGetPlayerRecentTournaments:
             )
             with pytest.raises(requests.exceptions.ConnectionError):
                 get_player_recent_tournaments(5974, "paul-coll")
-

@@ -492,7 +492,9 @@ SAMPLE_PSA_BIO = {
 
 class TestPlayerBioCommand:
     def test_creates_bio_csv(self, tmp_path, monkeypatch):
-        with patch("psa_squash_rankings.cli.get_player_bio", return_value=SAMPLE_PSA_BIO):
+        with patch(
+            "psa_squash_rankings.cli.get_player_bio", return_value=SAMPLE_PSA_BIO
+        ):
             code = _run(
                 ["player-bio", "--player-id", "11942"],
                 tmp_path,
@@ -503,7 +505,9 @@ class TestPlayerBioCommand:
         assert (tmp_path / "psa_player_11942_bio.csv").exists()
 
     def test_csv_content(self, tmp_path, monkeypatch):
-        with patch("psa_squash_rankings.cli.get_player_bio", return_value=SAMPLE_PSA_BIO):
+        with patch(
+            "psa_squash_rankings.cli.get_player_bio", return_value=SAMPLE_PSA_BIO
+        ):
             _run(["player-bio", "--player-id", "11942"], tmp_path, monkeypatch)
 
         df = pd.read_csv(tmp_path / "psa_player_11942_bio.csv")
@@ -513,7 +517,9 @@ class TestPlayerBioCommand:
         assert df.iloc[0]["height_cm"] == 189
 
     def test_player_id_passed_through(self, tmp_path, monkeypatch):
-        with patch("psa_squash_rankings.cli.get_player_bio", return_value=SAMPLE_PSA_BIO) as mock_bio:
+        with patch(
+            "psa_squash_rankings.cli.get_player_bio", return_value=SAMPLE_PSA_BIO
+        ) as mock_bio:
             _run(["player-bio", "--player-id", "11942"], tmp_path, monkeypatch)
 
         mock_bio.assert_called_once_with(11942)

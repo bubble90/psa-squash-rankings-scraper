@@ -169,7 +169,6 @@ def _run_player_history(args) -> int:
     return exit_code
 
 
-
 def _run_player_bio(args) -> int:
     """Fetch a player's biography from the PSA API."""
     logger.info("=" * 60)

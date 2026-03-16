@@ -505,7 +505,10 @@ def test_get_player_bio_returns_record(mock_session_class: MagicMock) -> None:
     assert result["coach"] == "James Willstrop"
     assert result["residence"] == "Cairo, Egypt"
     assert result["bio"] == "Mostafa Asal is World No.1."
-    assert result["picture_url"] == "https://dd34e8y1ttmkb.cloudfront.net/images/players/11942.jpg"
+    assert (
+        result["picture_url"]
+        == "https://dd34e8y1ttmkb.cloudfront.net/images/players/11942.jpg"
+    )
     assert result["twitter"] == "https://twitter.com/mostafasal_"
     assert result["facebook"] == "https://www.facebook.com/mostafasal_"
     assert result["source"] == "api"
@@ -530,7 +533,9 @@ def test_get_player_bio_hits_correct_url(mock_session_class: MagicMock) -> None:
 
 
 @patch("psa_squash_rankings.api_scraper.requests.Session")
-def test_get_player_bio_returns_none_on_empty_response(mock_session_class: MagicMock) -> None:
+def test_get_player_bio_returns_none_on_empty_response(
+    mock_session_class: MagicMock,
+) -> None:
     """Test that None is returned when the API returns an empty response."""
     mock_session = MagicMock()
     mock_session_class.return_value = mock_session
@@ -589,9 +594,11 @@ def test_get_player_bio_strips_html_from_bio(mock_session_class: MagicMock) -> N
     result = get_player_bio(11942)
 
     assert result is not None
-    assert "<p>" not in result["bio"]
-    assert "First para." in result["bio"]
-    assert "Second" in result["bio"]
+    bio = result["bio"]
+    assert bio is not None
+    assert "<p>" not in bio
+    assert "First para." in bio
+    assert "Second" in bio
 
 
 @patch("psa_squash_rankings.api_scraper.requests.Session")

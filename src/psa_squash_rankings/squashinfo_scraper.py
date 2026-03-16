@@ -494,6 +494,7 @@ def get_player_recent_matches(
     logger.info(f"Fetched {len(matches)} recent matches for player {player_id}")
     return matches
 
+
 def get_player_recent_tournaments(
     player_id: int, slug: str
 ) -> list[PlayerRecentTournamentRecord]:

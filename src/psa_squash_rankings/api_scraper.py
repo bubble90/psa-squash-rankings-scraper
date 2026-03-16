@@ -285,10 +285,12 @@ def get_player_bio(player_id: int) -> Optional[PsaPlayerBioRecord]:
     url = f"{PSA_PLAYER_URL}/{player_id}"
 
     session = requests.Session()
-    session.headers.update({
-        "Accept": "application/json",
-        "User-Agent": next(USER_AGENT_CYCLE),
-    })
+    session.headers.update(
+        {
+            "Accept": "application/json",
+            "User-Agent": next(USER_AGENT_CYCLE),
+        }
+    )
 
     try:
         response = session.get(url, timeout=API_TIMEOUT)

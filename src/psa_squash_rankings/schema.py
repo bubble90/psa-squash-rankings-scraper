@@ -134,7 +134,6 @@ class PlayerRecentTournamentRecord(TypedDict):
     source: Literal["squashinfo"]
 
 
-
 class PsaPlayerBioRecord(TypedDict):
     """
     Player biography fetched from the PSA API (/player/{id}).
